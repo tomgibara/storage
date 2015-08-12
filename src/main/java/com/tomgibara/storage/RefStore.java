@@ -12,6 +12,7 @@ abstract class RefStore<V> implements Store<V> {
 	private int size;
 	
 	
+	@SuppressWarnings("unchecked")
 	RefStore(int capacity) {
 		refs = new Reference[capacity];
 		size = 0;
@@ -19,6 +20,7 @@ abstract class RefStore<V> implements Store<V> {
 	
 	@Override
 	//TODO this is pretty smelly
+	@SuppressWarnings("unchecked")
 	public Class<? extends V> valueType() {
 		return (Class<? extends V>) Object.class;
 	}
@@ -80,6 +82,7 @@ abstract class RefStore<V> implements Store<V> {
 	public Store<V> immutableCopy() {
 		flushQueue();
 		int capacity = refs.length;
+		@SuppressWarnings("unchecked")
 		V[] vs = (V[]) new Object[capacity];
 		int size = 0;
 		for (int i = 0; i < capacity; i++) {

@@ -14,8 +14,8 @@ class Stores {
 		return toArray(store, store.capacity());
 	}
 
-	@SuppressWarnings("unchecked")
 	static<V> V[] toArray(Store<V> store, int length) {
+		@SuppressWarnings("unchecked")
 		V[] vs = (V[]) Array.newInstance(store.valueType(), length);
 		return copyIntoArray(store, vs);
 	}
