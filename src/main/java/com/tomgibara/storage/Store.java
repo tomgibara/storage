@@ -27,7 +27,7 @@ public interface Store<V> extends Mutability<Store<V>> {
 	
 	@Override
 	default Store<V> mutableCopy() {
-		return new ArrayStore<>(Stores.toArray(this), size());
+		return withCapacity(capacity());
 	}
 
 	@Override

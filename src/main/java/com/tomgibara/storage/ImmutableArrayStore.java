@@ -12,6 +12,11 @@ final class ImmutableArrayStore<V> implements Store<V> {
 		this.size = size;
 	}
 
+	ImmutableArrayStore(V[] values) {
+		this.values = values;
+		size = Stores.countNonNulls(values);
+	}
+
 	@Override
 	public int capacity() {
 		return values.length;
