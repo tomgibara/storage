@@ -74,7 +74,4 @@ class ArrayStore<V> implements Store<V> {
 	@Override
 	public Store<V> mutableView() { return new ArrayStore<>(values, size); }
 	
-	@Override
-	public Store<V> immutableView() { return new ImmutableStore<>(this); }
-
 }

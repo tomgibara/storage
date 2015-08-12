@@ -94,11 +94,6 @@ abstract class RefStore<V> implements Store<V> {
 	}
 	
 	@Override
-	public Store<V> immutableView() {
-		return new ImmutableStore<>(this);
-	}
-	
-	@Override
 	public Store<V> mutableView() {
 		throw new UnsupportedOperationException();
 	}

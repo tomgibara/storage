@@ -121,11 +121,6 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		return duplicate(populated.immutableCopy(), true);
 	}
 	
-	@Override
-	public Store<V> immutableView() {
-		return new ImmutableStore<>(this);
-	}
-	
 	// inner classes
 
 	private final static class ByteStore extends PrimitiveStore<Byte> {

@@ -40,4 +40,9 @@ public interface Store<V> extends Mutability<Store<V>> {
 		return new ImmutableArrayStore<>(Stores.toArray(this), size());
 	}
 
+	@Override
+	default Store<V> immutableView() {
+		return new ImmutableStore<>(this);
+	}
+
 }
