@@ -1,6 +1,6 @@
 package com.tomgibara.storage;
 
-class ImmutableStore<V> implements Store<V> {
+final class ImmutableStore<V> implements Store<V> {
 
 	private Store<V> store;
 	

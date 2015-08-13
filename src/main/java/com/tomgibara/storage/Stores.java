@@ -2,7 +2,7 @@ package com.tomgibara.storage;
 
 import java.lang.reflect.Array;
 
-class Stores {
+final class Stores {
 
 	static <V> int countNonNulls(V[] vs) {
 		int sum = 0;
