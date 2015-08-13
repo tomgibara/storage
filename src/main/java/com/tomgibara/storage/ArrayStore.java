@@ -10,7 +10,11 @@ class ArrayStore<V> implements Store<V> {
 	
 	@SuppressWarnings("unchecked")
 	ArrayStore(Class<V> type, int capacity) {
-		values = (V[]) Array.newInstance(type, capacity);
+		try {
+			values = (V[]) Array.newInstance(type, capacity);
+		} catch (NegativeArraySizeException e) {
+			throw new IllegalArgumentException("negative capacity", e);
+		}
 		size = 0;
 	}
 	

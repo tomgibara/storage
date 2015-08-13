@@ -14,7 +14,11 @@ abstract class RefStore<V> implements Store<V> {
 	
 	@SuppressWarnings("unchecked")
 	RefStore(int capacity) {
-		refs = new Reference[capacity];
+		try {
+			refs = new Reference[capacity];
+		} catch (NegativeArraySizeException e) {
+			throw new IllegalArgumentException("negative capacity");
+		}
 		size = 0;
 	}
 	
