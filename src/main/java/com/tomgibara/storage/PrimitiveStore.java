@@ -111,12 +111,6 @@ abstract class PrimitiveStore<V> implements Store<V> {
 	}
 
 	@Override
-	public Store<V> mutableView() {
-		if (!isMutable()) throw new IllegalStateException("Cannot take mutable view of immutable store");
-		return duplicate(populated, false);
-	}
-	
-	@Override
 	public Store<V> immutableCopy() {
 		return duplicate(populated.immutableCopy(), true);
 	}

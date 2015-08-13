@@ -53,9 +53,4 @@ class ImmutableStore<V> implements Store<V> {
 		return new ImmutableStore<>(store);
 	}
 	
-	@Override
-	public Store<V> mutableView() {
-		throw new IllegalStateException("Cannot take mutable view of immutable store");
-	}
-
 }

@@ -96,11 +96,6 @@ abstract class RefStore<V> implements Store<V> {
 		return new ImmutableArrayStore<>(vs, size);
 	}
 	
-	@Override
-	public Store<V> mutableView() {
-		throw new UnsupportedOperationException();
-	}
-	
 	abstract Reference<V> newReference(V referent, ReferenceQueue<V> queue, int index);
 	
 	// should be overridden for efficiency

@@ -11,10 +11,6 @@ public interface Mutability<T> {
 	// creates a mutable copy
 	T mutableCopy();
 	
-	//TODO this is a PITA and mostly useless - remove
-	// creates a mutable view only if mutable
-	T mutableView();
-	
 	// creates a mutable view if not mutable
 	T immutable();
 	

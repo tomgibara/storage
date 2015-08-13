@@ -58,9 +58,6 @@ final class ImmutableArrayStore<V> implements Store<V> {
 	public Store<V> mutableCopy() { return new ArrayStore<>(values.clone(), size); }
 	
 	@Override
-	public Store<V> mutableView() { throw new IllegalStateException("Cannot take mutable view of immutable store"); }
-
-	@Override
 	public Store<V> immutableCopy() { return new ImmutableArrayStore<>(values.clone(), size); }
 	
 	@Override

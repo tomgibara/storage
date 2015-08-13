@@ -71,7 +71,4 @@ class ArrayStore<V> implements Store<V> {
 	@Override
 	public Store<V> immutableCopy() { return new ImmutableArrayStore<>(values.clone(), size); }
 	
-	@Override
-	public Store<V> mutableView() { return new ArrayStore<>(values, size); }
-	
 }
