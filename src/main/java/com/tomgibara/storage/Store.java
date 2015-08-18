@@ -20,6 +20,83 @@ package com.tomgibara.storage;
  */
 public interface Store<V> extends Mutability<Store<V>> {
 
+	// statics
+	
+	/**
+	 * Creates a mutable store that wraps an existing array.
+	 * 
+	 * @param values
+	 *            the values of the store
+	 * @return a store that mediates access to the array
+	 */
+	static <V> Store<V> newStore(V[] values) {
+		if (values == null) throw new IllegalArgumentException("null values");
+		return new ArrayStore<>(values);
+	}
+	
+	/**
+	 * Creates a mutable store that wraps an existing array. This method may be
+	 * used if the size (the number of non-null values) is already known.
+	 * Supplying an incorrect size is likely to cause malfunction.
+	 * 
+	 * @param values
+	 *            the values of the store
+	 * @param size
+	 *            the number of non-null values in the array
+	 * @return a store that mediates access to the array
+	 */
+	static <V> Store<V> newStore(V[] values, int size) {
+		if (values == null) throw new IllegalArgumentException("null values");
+		if (size < 0) throw new IllegalArgumentException("negative size");
+		return new ArrayStore<>(values, size);
+	}
+	
+	/**
+	 * Creates a mutable store that stores values of the specified type.
+	 * 
+	 * @param type
+	 *            the type of values to be stored
+	 * @param capacity
+	 *            the capacity of the store to be created
+	 * @return a new store with the specified capacity
+	 */
+	static <V> Store<V> newStore(Class<V> type, int capacity) {
+		if (type == null) throw new IllegalArgumentException("null type");
+		if (capacity < 0) throw new IllegalArgumentException("negative capacity");
+		return new ArrayStore<>(type, capacity);
+	}
+	
+	/**
+	 * Creates an immutable store that returns values from an existing array.
+	 * The supplied array is not copied and must not be modified.
+	 * 
+	 * @param values
+	 *            the values of the store
+	 * @return a store that returns values from array
+	 */
+	static <V> Store<V> newImmutableStore(V[] values) {
+		if (values == null) throw new IllegalArgumentException("null values");
+		return new ImmutableArrayStore<>(values);
+	}
+	
+	/**
+	 * Creates an immutable store that returns values from existing array. The
+	 * supplied array is not copied and must not be modified. This method may be
+	 * used if the size (the number of non-null values) is already known.
+	 * Supplying an incorrect size is likely to cause malfunction.
+	 * 
+	 * @param values
+	 *            the values of the store
+	 * @param size
+	 *            the number of non-null values in the array
+	 * @return a store that mediates access to the array
+	 */
+	static <V> Store<V> newImmutableStore(V[] values, int size) {
+		if (values == null) throw new IllegalArgumentException("null values");
+		if (size < 0) throw new IllegalArgumentException("negative size");
+		return new ImmutableArrayStore<>(values, size);
+	}
+	
 	// store methods
 
 	/**
