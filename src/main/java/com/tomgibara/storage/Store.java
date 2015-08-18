@@ -52,21 +52,6 @@ public interface Store<V> extends Mutability<Store<V>> {
 	}
 	
 	/**
-	 * Creates a mutable store that stores values of the specified type.
-	 * 
-	 * @param type
-	 *            the type of values to be stored
-	 * @param capacity
-	 *            the capacity of the store to be created
-	 * @return a new store with the specified capacity
-	 */
-	static <V> Store<V> newStore(Class<V> type, int capacity) {
-		if (type == null) throw new IllegalArgumentException("null type");
-		if (capacity < 0) throw new IllegalArgumentException("negative capacity");
-		return new ArrayStore<>(type, capacity);
-	}
-	
-	/**
 	 * Creates an immutable store that returns values from an existing array.
 	 * The supplied array is not copied and must not be modified.
 	 * 
