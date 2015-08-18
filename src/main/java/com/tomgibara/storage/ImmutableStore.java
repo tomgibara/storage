@@ -9,11 +9,6 @@ final class ImmutableStore<V> implements Store<V> {
 	}
 	
 	@Override
-	public boolean isMutable() {
-		return false;
-	}
-	
-	@Override
 	public int capacity() {
 		return store.capacity();
 	}
@@ -38,16 +33,6 @@ final class ImmutableStore<V> implements Store<V> {
 		return store.withCapacity(newCapacity);
 	}
 	
-	@Override
-	public V set(int index, V value) {
-		throw new IllegalStateException("immutable");
-	}
-	
-	@Override
-	public void clear() {
-		throw new IllegalStateException("immutable");
-	}
-
 	@Override
 	public Store<V> immutableView() {
 		return new ImmutableStore<>(store);

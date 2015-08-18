@@ -13,6 +13,13 @@ package com.tomgibara.storage;
  * distinct from removal; assigning a null value to an index at which a
  * previously non-null value was stored is to remove that value.
  * 
+ * <p>
+ * Due to the provision of default methods, only the methods
+ * {@link #valueType()}, {@link #capacity()}, {@link #size()} and
+ * {@link #get(int)} need to be implemented to provide an immutable store
+ * implementation. If a store is mutable, the methods {@link #set(int, Object)},
+ * {@link #clear()} and {@link #isMutable()} must also be implemented.
+ * 
  * @author Tom Gibara
  *
  * @param <V>
@@ -131,12 +138,16 @@ public interface Store<V> extends Mutability<Store<V>> {
 	 *            the value to store, or null to remove any previous value
 	 * @return the previously stored value, or null
 	 */
-	V set(int index, V value);
+	default V set(int index, V value) {
+		throw new IllegalStateException("immutable");
+	}
 
 	/**
 	 * Removes all stored values.
 	 */
-	void clear();
+	default void clear() {
+		throw new IllegalStateException("immutable");
+	}
 	
 	/**
 	 * A mutable detached copy of this store with the specified capacity.
@@ -155,6 +166,10 @@ public interface Store<V> extends Mutability<Store<V>> {
 	}
 
 	// mutability methods
+
+	default boolean isMutable() {
+		return false;
+	}
 	
 	@Override
 	default Store<V> mutable() {
