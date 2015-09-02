@@ -2,6 +2,7 @@ package com.tomgibara.storage;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.List;
 
 class ArrayStore<V> implements Store<V> {
 
@@ -63,7 +64,12 @@ class ArrayStore<V> implements Store<V> {
 		Arrays.fill(values, null);
 		size = 0;
 	}
-	
+
+	@Override
+	public List<V> asList() {
+		return Arrays.asList(values);
+	}
+
 	// mutability
 
 	@Override

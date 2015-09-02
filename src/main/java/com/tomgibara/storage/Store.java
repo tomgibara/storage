@@ -1,5 +1,8 @@
 package com.tomgibara.storage;
 
+import java.util.AbstractList;
+import java.util.List;
+
 /**
  * <p>
  * Provides array-like storage of values. Stores are intended to provide a basis
@@ -163,6 +166,45 @@ public interface Store<V> extends Mutability<Store<V>> {
 	 */
 	default Store<V> withCapacity(int newCapacity) {
 		return new ArrayStore<>(Stores.toArray(this, newCapacity), size());
+	}
+
+	/**
+	 * Exposes the store as a list. The size of the list is equal to the
+	 * capacity of the store with 'unset' elements exposed as null. The list
+	 * supports value mutation via <code>set</code>, but not appending via
+	 * <code>add()</code>.
+	 *
+	 * @return a list backed by the values in the store.
+	 */
+
+	default List<V> asList() {
+		return new AbstractList<V>() {
+
+			@Override
+			public V get(int index) {
+				return Store.this.get(index);
+			}
+
+			@Override
+			public V set(int index, V element) {
+				return Store.this.set(index, element);
+			}
+
+			@Override
+			public void clear() {
+				Store.this.clear();
+			}
+
+			@Override
+			public boolean add(V e) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public int size() {
+				return Store.this.size();
+			}
+		};
 	}
 
 	// mutability methods
