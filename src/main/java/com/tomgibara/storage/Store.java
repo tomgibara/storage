@@ -3,6 +3,8 @@ package com.tomgibara.storage;
 import java.util.AbstractList;
 import java.util.List;
 
+import com.tomgibara.fundament.Mutability;
+
 /**
  * <p>
  * Provides array-like storage of values. Stores are intended to provide a basis
