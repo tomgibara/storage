@@ -153,6 +153,21 @@ public interface Store<V> extends Mutability<Store<V>> {
 	}
 	
 	/**
+	 * Assigns every index the same value. Filling with null has the same effect
+	 * as calling {@link #clear()}.
+	 *
+	 * @param value the value to be assigned to every index
+	 */
+
+	default void fill(V value) {
+		if (!isMutable()) throw new IllegalStateException("immutable");
+		int capacity = capacity();
+		for (int i = 0; i < capacity; i++) {
+			set(i, value);
+		}
+	}
+	
+	/**
 	 * A mutable detached copy of this store with the specified capacity.
 	 * Detached means that changes to the returned store will not affect the
 	 * copied store. The new capacity may be smaller, larger or even the same as
@@ -187,11 +202,13 @@ public interface Store<V> extends Mutability<Store<V>> {
 
 			@Override
 			public V set(int index, V element) {
+				if (!isMutable()) throw new IllegalStateException("immutable");
 				return Store.this.set(index, element);
 			}
 
 			@Override
 			public void clear() {
+				if (!isMutable()) throw new IllegalStateException("immutable");
 				Store.this.clear();
 			}
 

@@ -15,7 +15,6 @@ abstract class PrimitiveStore<V> implements Store<V> {
 	private static final int DOUBLE  = 11;
 	private static final int BOOLEAN = 12;
 
-	
 	@SuppressWarnings("unchecked")
 	static <V> PrimitiveStore<V> newStore(Class<V> type, int capacity) {
 		switch((type.getName().hashCode() >> 8) & 0xf) {
@@ -62,6 +61,19 @@ abstract class PrimitiveStore<V> implements Store<V> {
 	}
 
 	@Override
+	public void fill(V value) {
+		if (value == null) { // simple case
+			clear();
+		} else { // more complex case
+			if (!populated.isMutable()) throw new IllegalStateException("immutable");
+			// do this first in case filling fails due to class error
+			fillImpl(value);
+			populated.set(true);
+			size = populated.size();
+		}
+	}
+
+	@Override
 	public V get(int index) {
 		return populated.getBit(index) ? getImpl(index) : null;
 	}
@@ -95,6 +107,8 @@ abstract class PrimitiveStore<V> implements Store<V> {
 	abstract protected V getImpl(int index);
 	
 	abstract protected void setImpl(int index, V value);
+	
+	abstract protected void fillImpl(V value);
 	
 	abstract protected Store<V> duplicate(BitVector populated, boolean copy);
 	
@@ -147,6 +161,11 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
+		protected void fillImpl(Byte value) {
+			Arrays.fill(values, value);
+		}
+
+		@Override
 		protected ByteStore duplicate(BitVector populated, boolean copy) {
 			if (!copy) return new ByteStore(populated, size, values);
 			int capacity = populated.size();
@@ -183,6 +202,11 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		@Override
 		protected void setImpl(int index, Float value) {
 			values[index] = value;
+		}
+
+		@Override
+		protected void fillImpl(Float value) {
+			Arrays.fill(values, value);
 		}
 
 		@Override
@@ -225,6 +249,11 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
+		protected void fillImpl(Character value) {
+			Arrays.fill(values, value);
+		}
+
+		@Override
 		protected CharacterStore duplicate(BitVector populated, boolean copy) {
 			if (!copy) return new CharacterStore(populated, size, values);
 			int capacity = populated.size();
@@ -261,6 +290,11 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		@Override
 		protected void setImpl(int index, Short value) {
 			values[index] = value;
+		}
+
+		@Override
+		protected void fillImpl(Short value) {
+			Arrays.fill(values, value);
 		}
 
 		@Override
@@ -303,6 +337,11 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
+		protected void fillImpl(Long value) {
+			Arrays.fill(values, value);
+		}
+
+		@Override
 		protected LongStore duplicate(BitVector populated, boolean copy) {
 			if (!copy) return new LongStore(populated, size, values);
 			int capacity = populated.size();
@@ -339,6 +378,11 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		@Override
 		protected void setImpl(int index, Integer value) {
 			values[index] = value;
+		}
+
+		@Override
+		protected void fillImpl(Integer value) {
+			Arrays.fill(values, value);
 		}
 
 		@Override
@@ -381,6 +425,11 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
+		protected void fillImpl(Double value) {
+			Arrays.fill(values, value);
+		}
+
+		@Override
 		protected DoubleStore duplicate(BitVector populated, boolean copy) {
 			if (!copy) return new DoubleStore(populated, size, values);
 			int capacity = populated.size();
@@ -417,6 +466,11 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		@Override
 		protected void setImpl(int index, Boolean value) {
 			values[index] = value;
+		}
+
+		@Override
+		protected void fillImpl(Boolean value) {
+			Arrays.fill(values, value);
 		}
 
 		@Override

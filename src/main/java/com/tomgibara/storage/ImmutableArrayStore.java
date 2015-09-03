@@ -1,8 +1,6 @@
 package com.tomgibara.storage;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 final class ImmutableArrayStore<V> implements Store<V> {
 
@@ -39,11 +37,6 @@ final class ImmutableArrayStore<V> implements Store<V> {
 	@Override
 	public Store<V> withCapacity(int newCapacity) {
 		return new ArrayStore<>(Arrays.copyOf(values, newCapacity), size);
-	}
-
-	@Override
-	public List<V> asList() {
-		return Collections.unmodifiableList(Arrays.asList(values));
 	}
 
 	// mutability
