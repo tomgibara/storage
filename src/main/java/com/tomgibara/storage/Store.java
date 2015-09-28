@@ -223,7 +223,7 @@ public interface Store<V> extends Mutability<Store<V>> {
 
 			@Override
 			public int size() {
-				return Store.this.size();
+				return Store.this.capacity();
 			}
 
 			@Override
