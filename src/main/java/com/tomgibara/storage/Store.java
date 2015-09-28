@@ -163,6 +163,7 @@ public interface Store<V> extends Mutability<Store<V>> {
 
 	default void fill(V value) {
 		if (!isMutable()) throw new IllegalStateException("immutable");
+		if (value == null) clear();
 		int capacity = capacity();
 		for (int i = 0; i < capacity; i++) {
 			set(i, value);
