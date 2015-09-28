@@ -2,6 +2,7 @@ package com.tomgibara.storage;
 
 import java.util.AbstractList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.tomgibara.fundament.Mutability;
 
@@ -223,6 +224,14 @@ public interface Store<V> extends Mutability<Store<V>> {
 			@Override
 			public int size() {
 				return Store.this.size();
+			}
+
+			@Override
+			public void forEach(Consumer<? super V> action) {
+				int capacity = capacity();
+				for (int i = 0; i < capacity; i++) {
+					action.accept(get(i));
+				}
 			}
 		};
 	}
