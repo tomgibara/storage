@@ -56,7 +56,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 	
 	@Override
 	public void clear() {
-		populated.set(false);
+		populated.clearWithZeros();
 		size = 0;
 	}
 
@@ -68,7 +68,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 			if (!populated.isMutable()) throw new IllegalStateException("immutable");
 			// do this first in case filling fails due to class error
 			fillImpl(value);
-			populated.set(true);
+			populated.clearWithOnes();
 			size = populated.size();
 		}
 	}
@@ -99,7 +99,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 	
 	@Override
 	public Store<V> withCapacity(int newCapacity) {
-		return duplicate(populated.resizedCopy(newCapacity), true);
+		return duplicate(populated.resizedCopy(newCapacity, false), true);
 	}
 
 	// for extension
