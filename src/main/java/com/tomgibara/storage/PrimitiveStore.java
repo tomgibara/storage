@@ -2,6 +2,7 @@ package com.tomgibara.storage;
 
 import java.util.Arrays;
 
+import com.tomgibara.bits.BitStore;
 import com.tomgibara.bits.BitVector;
 
 abstract class PrimitiveStore<V> implements Store<V> {
@@ -102,6 +103,11 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		return duplicate(populated.resizedCopy(newCapacity, false), true);
 	}
 
+	@Override
+	public BitStore population() {
+		return populated.immutable();
+	}
+
 	// for extension
 	
 	abstract protected V getImpl(int index);
@@ -131,13 +137,19 @@ abstract class PrimitiveStore<V> implements Store<V> {
 	
 	// inner classes
 
-	private final static class ByteStore extends PrimitiveStore<Byte> {
+	final static class ByteStore extends PrimitiveStore<Byte> {
 
 		private byte[] values;
 
 		ByteStore(int capacity) {
 			super(capacity);
 			this.values = new byte[capacity];
+		}
+
+		ByteStore(byte[] values) {
+			super(values.length);
+			populated.flip();
+			this.values = values;
 		}
 
 		private ByteStore(BitVector populated, int size, byte[] values) {
@@ -175,13 +187,19 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 	}
 
-	private final static class FloatStore extends PrimitiveStore<Float> {
+	final static class FloatStore extends PrimitiveStore<Float> {
 
 		private float[] values;
 
 		FloatStore(int capacity) {
 			super(capacity);
 			this.values = new float[capacity];
+		}
+
+		FloatStore(float[] values) {
+			super(values.length);
+			populated.flip();
+			this.values = values;
 		}
 
 		private FloatStore(BitVector populated, int size, float[] values) {
@@ -219,13 +237,19 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 	}
 
-	private final static class CharacterStore extends PrimitiveStore<Character> {
+	final static class CharacterStore extends PrimitiveStore<Character> {
 
 		private char[] values;
 
 		CharacterStore(int capacity) {
 			super(capacity);
 			this.values = new char[capacity];
+		}
+
+		CharacterStore(char[] values) {
+			super(values.length);
+			populated.flip();
+			this.values = values;
 		}
 
 		private CharacterStore(BitVector populated, int size, char[] values) {
@@ -263,9 +287,15 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 	}
 
-	private final static class ShortStore extends PrimitiveStore<Short> {
+	final static class ShortStore extends PrimitiveStore<Short> {
 
 		private short[] values;
+
+		ShortStore(short[] values) {
+			super(values.length);
+			populated.flip();
+			this.values = values;
+		}
 
 		ShortStore(int capacity) {
 			super(capacity);
@@ -307,9 +337,15 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 	}
 
-	private final static class LongStore extends PrimitiveStore<Long> {
+	final static class LongStore extends PrimitiveStore<Long> {
 
 		private long[] values;
+
+		LongStore(long[] values) {
+			super(values.length);
+			populated.flip();
+			this.values = values;
+		}
 
 		LongStore(int capacity) {
 			super(capacity);
@@ -351,9 +387,15 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 	}
 
-	private final static class IntegerStore extends PrimitiveStore<Integer> {
+	final static class IntegerStore extends PrimitiveStore<Integer> {
 
 		private int[] values;
+
+		IntegerStore(int[] values) {
+			super(values.length);
+			populated.flip();
+			this.values = values;
+		}
 
 		IntegerStore(int capacity) {
 			super(capacity);
@@ -395,9 +437,15 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 	}
 
-	private final static class DoubleStore extends PrimitiveStore<Double> {
+	final static class DoubleStore extends PrimitiveStore<Double> {
 
 		private double[] values;
+
+		DoubleStore(double[] values) {
+			super(values.length);
+			populated.flip();
+			this.values = values;
+		}
 
 		DoubleStore(int capacity) {
 			super(capacity);
@@ -439,9 +487,15 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 	}
 
-	private final static class BooleanStore extends PrimitiveStore<Boolean> {
+	final static class BooleanStore extends PrimitiveStore<Boolean> {
 
 		private boolean[] values;
+
+		BooleanStore(boolean[] values) {
+			super(values.length);
+			populated.flip();
+			this.values = values;
+		}
 
 		BooleanStore(int capacity) {
 			super(capacity);

@@ -6,6 +6,8 @@ import java.util.AbstractList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.tomgibara.bits.AbstractBitStore;
+import com.tomgibara.bits.BitStore;
 import com.tomgibara.fundament.Mutability;
 
 /**
@@ -23,7 +25,7 @@ import com.tomgibara.fundament.Mutability;
  * 
  * <p>
  * Due to the provision of default methods, only the methods
- * {@link #valueType()}, {@link #capacity()}, {@link #size()} and
+ * {@link #valueType()}, {@link #capacity()} and
  * {@link #get(int)} need to be implemented to provide an immutable store
  * implementation. If a store is mutable, the methods {@link #set(int, Object)},
  * {@link #clear()} and {@link #isMutable()} must also be implemented.
@@ -97,6 +99,46 @@ public interface Store<V> extends Mutability<Store<V>> {
 		return new ImmutableArrayStore<>(values, size);
 	}
 	
+	static Store<Byte> newStore(byte... values) {
+		checkValuesNotNull(values);
+		return new PrimitiveStore.ByteStore(values);
+	}
+
+	static Store<Short> newStore(short... values) {
+		checkValuesNotNull(values);
+		return new PrimitiveStore.ShortStore(values);
+	}
+
+	static Store<Integer> newStore(int... values) {
+		checkValuesNotNull(values);
+		return new PrimitiveStore.IntegerStore(values);
+	}
+
+	static Store<Long> newStore(long... values) {
+		checkValuesNotNull(values);
+		return new PrimitiveStore.LongStore(values);
+	}
+
+	static Store<Boolean> newStore(boolean... values) {
+		checkValuesNotNull(values);
+		return new PrimitiveStore.BooleanStore(values);
+	}
+
+	static Store<Character> newStore(char... values) {
+		checkValuesNotNull(values);
+		return new PrimitiveStore.CharacterStore(values);
+	}
+
+	static Store<Float> newStore(float... values) {
+		checkValuesNotNull(values);
+		return new PrimitiveStore.FloatStore(values);
+	}
+
+	static Store<Double> newStore(double... values) {
+		checkValuesNotNull(values);
+		return new PrimitiveStore.DoubleStore(values);
+	}
+
 	// store methods
 
 	/**
@@ -119,13 +161,6 @@ public interface Store<V> extends Mutability<Store<V>> {
 	 */
 	int capacity();
 
-	/**
-	 * The number of non-null values in the store.
-	 * 
-	 * @return the size of the store
-	 */
-	int size();
-	
 	/**
 	 * Retrieves a value held in the store. The method will return null if there
 	 * is no value associated with specified index.
@@ -187,6 +222,38 @@ public interface Store<V> extends Mutability<Store<V>> {
 	 */
 	default Store<V> withCapacity(int newCapacity) {
 		return new ArrayStore<>(Stores.toArray(this, newCapacity), size());
+	}
+
+	/**
+	 * The number of non-null values in the store.
+	 * 
+	 * @return the size of the store
+	 */
+	default int size() {
+		return population().ones().count();
+	}
+	
+	/**
+	 * Bits indicating which values are null. A zero at an index indicates that
+	 * there is no value stored at that index. The returned bits are immutable
+	 * but will change as values are added and removed from the store.
+	 * 
+	 * @return bits indicating the indices at which values are present
+	 */
+	default BitStore population() {
+		return new AbstractBitStore() {
+
+			@Override
+			public int size() {
+				return capacity();
+			}
+
+			@Override
+			public boolean getBit(int index) {
+				return get(index) != null;
+			}
+
+		};
 	}
 
 	/**

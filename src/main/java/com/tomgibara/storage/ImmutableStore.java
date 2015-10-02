@@ -1,5 +1,7 @@
 package com.tomgibara.storage;
 
+import com.tomgibara.bits.BitStore;
+
 final class ImmutableStore<V> implements Store<V> {
 
 	private Store<V> store;
@@ -37,5 +39,9 @@ final class ImmutableStore<V> implements Store<V> {
 	public Store<V> immutableView() {
 		return new ImmutableStore<>(store);
 	}
-	
+
+	@Override
+	public BitStore population() {
+		return store.population();
+	}
 }
