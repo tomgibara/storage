@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import com.tomgibara.bits.AbstractBitStore;
 import com.tomgibara.bits.BitStore;
 import com.tomgibara.fundament.Mutability;
+import com.tomgibara.fundament.Transposable;
 
 /**
  * <p>
@@ -35,7 +36,7 @@ import com.tomgibara.fundament.Mutability;
  * @param <V>
  *            the type of the values stored
  */
-public interface Store<V> extends Mutability<Store<V>> {
+public interface Store<V> extends Mutability<Store<V>>, Transposable {
 
 	// statics
 	
@@ -271,7 +272,7 @@ public interface Store<V> extends Mutability<Store<V>> {
 	default void clear() {
 		throw new IllegalStateException("immutable");
 	}
-	
+
 	/**
 	 * Assigns every index the same value. Filling with null has the same effect
 	 * as calling {@link #clear()}.
@@ -383,6 +384,15 @@ public interface Store<V> extends Mutability<Store<V>> {
 				}
 			}
 		};
+	}
+
+	// transposable methods
+	
+	default public void transpose(int i, int j) {
+		if (i == j) return;
+		V v = get(i);
+		set(i, get(j));
+		set(j, v);
 	}
 
 	// mutability methods
