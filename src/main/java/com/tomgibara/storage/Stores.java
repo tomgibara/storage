@@ -27,4 +27,8 @@ final class Stores {
 		}
 		return vs;
 	}
+	
+	static void checkValuesNotNull(Object values) {
+		if (values == null) throw new IllegalArgumentException("null values");
+	}
 }

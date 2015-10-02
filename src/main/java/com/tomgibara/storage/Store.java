@@ -1,5 +1,7 @@
 package com.tomgibara.storage;
 
+import static com.tomgibara.storage.Stores.checkValuesNotNull;
+
 import java.util.AbstractList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -43,10 +45,10 @@ public interface Store<V> extends Mutability<Store<V>> {
 	 * @return a store that mediates access to the array
 	 */
 	static <V> Store<V> newStore(V[] values) {
-		if (values == null) throw new IllegalArgumentException("null values");
+		checkValuesNotNull(values);
 		return new ArrayStore<>(values);
 	}
-	
+
 	/**
 	 * Creates a mutable store that wraps an existing array. This method may be
 	 * used if the size (the number of non-null values) is already known.
@@ -59,7 +61,7 @@ public interface Store<V> extends Mutability<Store<V>> {
 	 * @return a store that mediates access to the array
 	 */
 	static <V> Store<V> newStore(V[] values, int size) {
-		if (values == null) throw new IllegalArgumentException("null values");
+		checkValuesNotNull(values);
 		if (size < 0) throw new IllegalArgumentException("negative size");
 		return new ArrayStore<>(values, size);
 	}
@@ -73,7 +75,7 @@ public interface Store<V> extends Mutability<Store<V>> {
 	 * @return a store that returns values from array
 	 */
 	static <V> Store<V> newImmutableStore(V[] values) {
-		if (values == null) throw new IllegalArgumentException("null values");
+		checkValuesNotNull(values);
 		return new ImmutableArrayStore<>(values);
 	}
 	
@@ -90,7 +92,7 @@ public interface Store<V> extends Mutability<Store<V>> {
 	 * @return a store that mediates access to the array
 	 */
 	static <V> Store<V> newImmutableStore(V[] values, int size) {
-		if (values == null) throw new IllegalArgumentException("null values");
+		checkValuesNotNull(values);
 		if (size < 0) throw new IllegalArgumentException("negative size");
 		return new ImmutableArrayStore<>(values, size);
 	}
