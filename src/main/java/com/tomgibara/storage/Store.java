@@ -26,8 +26,8 @@ import com.tomgibara.fundament.Transposable;
  * Due to the provision of default methods, only the methods
  * {@link #valueType()}, {@link #capacity()} and
  * {@link #get(int)} need to be implemented to provide an immutable store
- * implementation. If a store is mutable, the methods {@link #set(int, Object)},
- * {@link #clear()} and {@link #isMutable()} must also be implemented.
+ * implementation. If a store is mutable, the methods {@link #set(int, Object)}
+ * and {@link #isMutable()} must also be implemented.
  * 
  * @author Tom Gibara
  *
@@ -86,7 +86,10 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	 * Removes all stored values.
 	 */
 	default void clear() {
-		throw new IllegalStateException("immutable");
+		int capacity = capacity();
+		for (int i = 0; i < capacity; i++) {
+			set(i, null);
+		}
 	}
 
 	/**
