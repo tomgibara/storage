@@ -3,6 +3,7 @@ package com.tomgibara.storage;
 import java.util.AbstractList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.tomgibara.bits.AbstractBitStore;
 import com.tomgibara.bits.BitStore;
@@ -202,6 +203,45 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 					action.accept(get(i));
 				}
 			}
+		};
+	}
+
+	default Store<V> transformedBy(Function<V, V> fn) {
+		return transformedBy(valueType(), fn);
+	}
+
+	default <W> Store<W> transformedBy(Class<W> type, Function<V, W> fn) {
+		return new Store<W>() {
+
+			@Override
+			public Class<W> valueType() {
+				return type;
+			}
+
+			@Override
+			public W get(int index) {
+				V v = Store.this.get(index);
+				if (v == null) return null;
+				W w = fn.apply(v);
+				if (w == null) throw new RuntimeException("mapping fn returned null");
+				return w;
+			}
+
+			@Override
+			public int capacity() {
+				return Store.this.capacity();
+			}
+
+			@Override
+			public int size() {
+				return Store.this.size();
+			}
+
+			@Override
+			public BitStore population() {
+				return Store.this.population();
+			}
+
 		};
 	}
 
