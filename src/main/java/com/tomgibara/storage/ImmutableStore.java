@@ -21,7 +21,7 @@ final class ImmutableStore<V> implements Store<V> {
 	}
 
 	@Override
-	public Class<? extends V> valueType() {
+	public Class<V> valueType() {
 		return store.valueType();
 	}
 

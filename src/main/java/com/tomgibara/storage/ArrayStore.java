@@ -30,8 +30,8 @@ class ArrayStore<V> implements Store<V> {
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public Class<? extends V> valueType() {
-		return (Class<? extends V>) values.getClass().getComponentType();
+	public Class<V> valueType() {
+		return (Class<V>) values.getClass().getComponentType();
 	}
 	
 	@Override

@@ -158,7 +158,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		public Class<? extends Byte> valueType() {
+		public Class<Byte> valueType() {
 			return byte.class;
 		}
 
@@ -208,7 +208,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		public Class<? extends Float> valueType() {
+		public Class<Float> valueType() {
 			return float.class;
 		}
 
@@ -258,7 +258,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		public Class<? extends Character> valueType() {
+		public Class<Character> valueType() {
 			return char.class;
 		}
 
@@ -308,7 +308,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		public Class<? extends Short> valueType() {
+		public Class<Short> valueType() {
 			return short.class;
 		}
 
@@ -358,7 +358,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		public Class<? extends Long> valueType() {
+		public Class<Long> valueType() {
 			return long.class;
 		}
 
@@ -408,7 +408,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		public Class<? extends Integer> valueType() {
+		public Class<Integer> valueType() {
 			return int.class;
 		}
 
@@ -458,7 +458,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		public Class<? extends Double> valueType() {
+		public Class<Double> valueType() {
 			return double.class;
 		}
 
@@ -508,7 +508,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		public Class<? extends Boolean> valueType() {
+		public Class<Boolean> valueType() {
 			return boolean.class;
 		}
 

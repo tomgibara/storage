@@ -47,7 +47,7 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	 * 
 	 * @return the value type
 	 */
-	Class<? extends V> valueType();
+	Class<V> valueType();
 
 	/**
 	 * The greatest number of values that the store can contain. Valid indices

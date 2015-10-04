@@ -25,8 +25,8 @@ abstract class RefStore<V> implements Store<V> {
 	@Override
 	//TODO this is pretty smelly
 	@SuppressWarnings("unchecked")
-	public Class<? extends V> valueType() {
-		return (Class<? extends V>) Object.class;
+	public Class<V> valueType() {
+		return (Class<V>) Object.class;
 	}
 	
 	@Override
