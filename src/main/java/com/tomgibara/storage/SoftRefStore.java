@@ -11,8 +11,8 @@ final class SoftRefStore<V> extends RefStore<V> {
 	}
 
 	@Override
-	public SoftRefStore<V> withCapacity(int newCapacity) {
-		SoftRefStore<V> that = new SoftRefStore<V>(newCapacity);
+	public SoftRefStore<V> resizedCopy(int newSize) {
+		SoftRefStore<V> that = new SoftRefStore<V>(newSize);
 		populate(that);
 		return that;
 	}

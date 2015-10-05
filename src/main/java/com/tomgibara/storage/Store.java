@@ -109,19 +109,19 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	}
 	
 	/**
-	 * A mutable detached copy of this store with the specified capacity.
+	 * A mutable detached copy of this store with the specified size.
 	 * Detached means that changes to the returned store will not affect the
-	 * copied store. The new capacity may be smaller, larger or even the same as
+	 * copied store. The new size may be smaller, larger or even the same as
 	 * the copied store. This is an analogue of the
 	 * <code>Arrays.copyOf(original, length)</code>.
 	 * 
-	 * @param newCapacity
-	 *            the capacity required in the new store
-	 * @return a copy of this store with the specified capacity
+	 * @param newSize
+	 *            the size required in the new store
+	 * @return a copy of this store with the specified size
 	 * @see #mutableCopy()
 	 */
-	default Store<V> withCapacity(int newCapacity) {
-		return new ArrayStore<>(Stores.toArray(this, newCapacity), count());
+	default Store<V> resizedCopy(int newSize) {
+		return new ArrayStore<>(Stores.toArray(this, newSize), count());
 	}
 
 	/**
@@ -266,7 +266,7 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	
 	@Override
 	default Store<V> mutableCopy() {
-		return withCapacity(size());
+		return resizedCopy(size());
 	}
 
 	@Override

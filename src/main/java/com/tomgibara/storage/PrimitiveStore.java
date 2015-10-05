@@ -99,8 +99,8 @@ abstract class PrimitiveStore<V> implements Store<V> {
 	}
 	
 	@Override
-	public Store<V> withCapacity(int newCapacity) {
-		return duplicate(Bits.resizedCopyOf(populated, newCapacity, false), true);
+	public Store<V> resizedCopy(int newSize) {
+		return duplicate(Bits.resizedCopyOf(populated, newSize, false), true);
 	}
 
 	@Override

@@ -35,8 +35,8 @@ final class ImmutableArrayStore<V> implements Store<V> {
 	public V get(int index) { return values[index]; }
 
 	@Override
-	public Store<V> withCapacity(int newCapacity) {
-		return new ArrayStore<>(Arrays.copyOf(values, newCapacity), size);
+	public Store<V> resizedCopy(int newSize) {
+		return new ArrayStore<>(Arrays.copyOf(values, newSize), size);
 	}
 
 	// mutability

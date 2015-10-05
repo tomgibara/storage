@@ -31,8 +31,8 @@ final class ImmutableStore<V> implements Store<V> {
 	}
 	
 	@Override
-	public Store<V> withCapacity(int newCapacity) {
-		return store.withCapacity(newCapacity);
+	public Store<V> resizedCopy(int newSize) {
+		return store.resizedCopy(newSize);
 	}
 	
 	@Override

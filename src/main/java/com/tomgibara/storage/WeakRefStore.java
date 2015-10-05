@@ -11,8 +11,8 @@ final class WeakRefStore<V> extends RefStore<V> {
 	}
 
 	@Override
-	public WeakRefStore<V> withCapacity(int newCapacity) {
-		WeakRefStore<V> that = new WeakRefStore<V>(newCapacity);
+	public WeakRefStore<V> resizedCopy(int newSize) {
+		WeakRefStore<V> that = new WeakRefStore<V>(newSize);
 		populate(that);
 		return that;
 	}
