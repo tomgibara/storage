@@ -18,7 +18,7 @@ final class ImmutableArrayStore<V> implements Store<V> {
 	}
 
 	@Override
-	public int capacity() {
+	public int size() {
 		return values.length;
 	}
 

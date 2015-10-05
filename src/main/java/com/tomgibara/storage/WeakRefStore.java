@@ -6,8 +6,8 @@ import java.lang.ref.WeakReference;
 
 final class WeakRefStore<V> extends RefStore<V> {
 
-	WeakRefStore(int capacity) {
-		super(capacity);
+	WeakRefStore(int size) {
+		super(size);
 	}
 
 	@Override

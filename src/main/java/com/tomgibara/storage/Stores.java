@@ -201,7 +201,7 @@ public final class Stores {
 	}
 	
 	static <V> V[] toArray(Store<V> store) {
-		return toArray(store, store.capacity());
+		return toArray(store, store.size());
 	}
 
 	static<V> V[] toArray(Store<V> store, int length) {
@@ -211,7 +211,7 @@ public final class Stores {
 	}
 
 	static<V> V[] copyIntoArray(Store<V> store, V[] vs) {
-		int limit = Math.min( store.capacity(), vs.length );
+		int limit = Math.min( store.size(), vs.length );
 		for (int i = 0; i < limit; i++) {
 			vs[i] = store.get(i);
 		}

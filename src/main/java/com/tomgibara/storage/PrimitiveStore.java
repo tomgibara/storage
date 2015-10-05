@@ -17,48 +17,48 @@ abstract class PrimitiveStore<V> implements Store<V> {
 	private static final int BOOLEAN = 12;
 
 	@SuppressWarnings("unchecked")
-	static <V> PrimitiveStore<V> newStore(Class<V> type, int capacity) {
+	static <V> PrimitiveStore<V> newStore(Class<V> type, int size) {
 		switch((type.getName().hashCode() >> 8) & 0xf) {
-		case BYTE:    return (PrimitiveStore<V>) new ByteStore     (capacity);
-		case FLOAT:   return (PrimitiveStore<V>) new FloatStore    (capacity);
-		case CHAR:    return (PrimitiveStore<V>) new CharacterStore(capacity);
-		case SHORT:   return (PrimitiveStore<V>) new ShortStore    (capacity);
-		case LONG:    return (PrimitiveStore<V>) new LongStore     (capacity);
-		case INT:     return (PrimitiveStore<V>) new IntegerStore  (capacity);
-		case DOUBLE:  return (PrimitiveStore<V>) new DoubleStore   (capacity);
-		case BOOLEAN: return (PrimitiveStore<V>) new BooleanStore  (capacity);
+		case BYTE:    return (PrimitiveStore<V>) new ByteStore     (size);
+		case FLOAT:   return (PrimitiveStore<V>) new FloatStore    (size);
+		case CHAR:    return (PrimitiveStore<V>) new CharacterStore(size);
+		case SHORT:   return (PrimitiveStore<V>) new ShortStore    (size);
+		case LONG:    return (PrimitiveStore<V>) new LongStore     (size);
+		case INT:     return (PrimitiveStore<V>) new IntegerStore  (size);
+		case DOUBLE:  return (PrimitiveStore<V>) new DoubleStore   (size);
+		case BOOLEAN: return (PrimitiveStore<V>) new BooleanStore  (size);
 		default: throw new IllegalArgumentException(type.getName());
 		}
 	}
 
-	int size;
+	int count;
 	BitStore populated;
 	
-	protected PrimitiveStore(BitStore populated, int size) {
+	protected PrimitiveStore(BitStore populated, int count) {
 		this.populated = populated;
-		this.size = size;
+		this.count = count;
 	}
 	
-	protected PrimitiveStore(int capacity) {
-		populated = Bits.newBitStore(capacity);
-		this.size = 0;
+	protected PrimitiveStore(int size) {
+		populated = Bits.newBitStore(size);
+		this.count = 0;
 	}
 
 	// store
 	
 	@Override
 	public int count() {
-		return size;
+		return count;
 	}
 	
-	public int capacity() {
+	public int size() {
 		return populated.size();
 	}
 	
 	@Override
 	public void clear() {
 		populated.clearWithZeros();
-		size = 0;
+		count = 0;
 	}
 
 	@Override
@@ -70,7 +70,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 			// do this first in case filling fails due to class error
 			fillImpl(value);
 			populated.clearWithOnes();
-			size = populated.size();
+			count = populated.size();
 		}
 	}
 
@@ -85,7 +85,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 			V previous = getImpl(index);
 			if (value == null) {
 				populated.setBit(index, false);
-				size --;
+				count --;
 			} else {
 				setImpl(index, value);
 			}
@@ -93,7 +93,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		} else if (value != null) {
 			setImpl(index, value);
 			populated.setBit(index, true);
-			size ++;
+			count ++;
 		}
 		return null;
 	}
@@ -141,9 +141,9 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 		private byte[] values;
 
-		ByteStore(int capacity) {
-			super(capacity);
-			this.values = new byte[capacity];
+		ByteStore(int size) {
+			super(size);
+			this.values = new byte[size];
 		}
 
 		ByteStore(byte[] values) {
@@ -179,10 +179,10 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 		@Override
 		protected ByteStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new ByteStore(populated, size, values);
-			int capacity = populated.size();
-			if (capacity == values.length) return new ByteStore(populated, size, values.clone());
-			return new ByteStore(populated, size, Arrays.copyOf(values, capacity));
+			if (!copy) return new ByteStore(populated, count, values);
+			int size = populated.size();
+			if (size == values.length) return new ByteStore(populated, count, values.clone());
+			return new ByteStore(populated, count, Arrays.copyOf(values, size));
 		}
 
 	}
@@ -191,9 +191,9 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 		private float[] values;
 
-		FloatStore(int capacity) {
-			super(capacity);
-			this.values = new float[capacity];
+		FloatStore(int size) {
+			super(size);
+			this.values = new float[size];
 		}
 
 		FloatStore(float[] values) {
@@ -229,10 +229,10 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 		@Override
 		protected FloatStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new FloatStore(populated, size, values);
-			int capacity = populated.size();
-			if (capacity == values.length) return new FloatStore(populated, size, values.clone());
-			return new FloatStore(populated, size, Arrays.copyOf(values, capacity));
+			if (!copy) return new FloatStore(populated, count, values);
+			int size = populated.size();
+			if (size == values.length) return new FloatStore(populated, count, values.clone());
+			return new FloatStore(populated, count, Arrays.copyOf(values, size));
 		}
 
 	}
@@ -241,9 +241,9 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 		private char[] values;
 
-		CharacterStore(int capacity) {
-			super(capacity);
-			this.values = new char[capacity];
+		CharacterStore(int size) {
+			super(size);
+			this.values = new char[size];
 		}
 
 		CharacterStore(char[] values) {
@@ -279,10 +279,10 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 		@Override
 		protected CharacterStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new CharacterStore(populated, size, values);
-			int capacity = populated.size();
-			if (capacity == values.length) return new CharacterStore(populated, size, values.clone());
-			return new CharacterStore(populated, size, Arrays.copyOf(values, capacity));
+			if (!copy) return new CharacterStore(populated, count, values);
+			int size = populated.size();
+			if (size == values.length) return new CharacterStore(populated, count, values.clone());
+			return new CharacterStore(populated, count, Arrays.copyOf(values, size));
 		}
 
 	}
@@ -297,9 +297,9 @@ abstract class PrimitiveStore<V> implements Store<V> {
 			this.values = values;
 		}
 
-		ShortStore(int capacity) {
-			super(capacity);
-			this.values = new short[capacity];
+		ShortStore(int size) {
+			super(size);
+			this.values = new short[size];
 		}
 
 		private ShortStore(BitStore populated, int size, short[] values) {
@@ -329,10 +329,10 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 		@Override
 		protected ShortStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new ShortStore(populated, size, values);
-			int capacity = populated.size();
-			if (capacity == values.length) return new ShortStore(populated, size, values.clone());
-			return new ShortStore(populated, size, Arrays.copyOf(values, capacity));
+			if (!copy) return new ShortStore(populated, count, values);
+			int size = populated.size();
+			if (size == values.length) return new ShortStore(populated, count, values.clone());
+			return new ShortStore(populated, count, Arrays.copyOf(values, size));
 		}
 
 	}
@@ -347,9 +347,9 @@ abstract class PrimitiveStore<V> implements Store<V> {
 			this.values = values;
 		}
 
-		LongStore(int capacity) {
-			super(capacity);
-			this.values = new long[capacity];
+		LongStore(int size) {
+			super(size);
+			this.values = new long[size];
 		}
 
 		private LongStore(BitStore populated, int size, long[] values) {
@@ -379,10 +379,10 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 		@Override
 		protected LongStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new LongStore(populated, size, values);
-			int capacity = populated.size();
-			if (capacity == values.length) return new LongStore(populated, size, values.clone());
-			return new LongStore(populated, size, Arrays.copyOf(values, capacity));
+			if (!copy) return new LongStore(populated, count, values);
+			int size = populated.size();
+			if (size == values.length) return new LongStore(populated, count, values.clone());
+			return new LongStore(populated, count, Arrays.copyOf(values, size));
 		}
 
 	}
@@ -397,9 +397,9 @@ abstract class PrimitiveStore<V> implements Store<V> {
 			this.values = values;
 		}
 
-		IntegerStore(int capacity) {
-			super(capacity);
-			this.values = new int[capacity];
+		IntegerStore(int size) {
+			super(size);
+			this.values = new int[size];
 		}
 
 		private IntegerStore(BitStore populated, int size, int[] values) {
@@ -429,10 +429,10 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 		@Override
 		protected IntegerStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new IntegerStore(populated, size, values);
-			int capacity = populated.size();
-			if (capacity == values.length) return new IntegerStore(populated, size, values.clone());
-			return new IntegerStore(populated, size, Arrays.copyOf(values, capacity));
+			if (!copy) return new IntegerStore(populated, count, values);
+			int size = populated.size();
+			if (size == values.length) return new IntegerStore(populated, count, values.clone());
+			return new IntegerStore(populated, count, Arrays.copyOf(values, size));
 		}
 
 	}
@@ -447,9 +447,9 @@ abstract class PrimitiveStore<V> implements Store<V> {
 			this.values = values;
 		}
 
-		DoubleStore(int capacity) {
-			super(capacity);
-			this.values = new double[capacity];
+		DoubleStore(int size) {
+			super(size);
+			this.values = new double[size];
 		}
 
 		private DoubleStore(BitStore populated, int size, double[] values) {
@@ -479,10 +479,10 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 		@Override
 		protected DoubleStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new DoubleStore(populated, size, values);
-			int capacity = populated.size();
-			if (capacity == values.length) return new DoubleStore(populated, size, values.clone());
-			return new DoubleStore(populated, size, Arrays.copyOf(values, capacity));
+			if (!copy) return new DoubleStore(populated, count, values);
+			int size = populated.size();
+			if (size == values.length) return new DoubleStore(populated, count, values.clone());
+			return new DoubleStore(populated, count, Arrays.copyOf(values, size));
 		}
 
 	}
@@ -497,9 +497,9 @@ abstract class PrimitiveStore<V> implements Store<V> {
 			this.values = values;
 		}
 
-		BooleanStore(int capacity) {
-			super(capacity);
-			this.values = new boolean[capacity];
+		BooleanStore(int size) {
+			super(size);
+			this.values = new boolean[size];
 		}
 
 		private BooleanStore(BitStore populated, int size, boolean[] values) {
@@ -529,10 +529,10 @@ abstract class PrimitiveStore<V> implements Store<V> {
 
 		@Override
 		protected BooleanStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new BooleanStore(populated, size, values);
-			int capacity = populated.size();
-			if (capacity == values.length) return new BooleanStore(populated, size, values.clone());
-			return new BooleanStore(populated, size, Arrays.copyOf(values, capacity));
+			if (!copy) return new BooleanStore(populated, count, values);
+			int size = populated.size();
+			if (size == values.length) return new BooleanStore(populated, count, values.clone());
+			return new BooleanStore(populated, count, Arrays.copyOf(values, size));
 		}
 
 	}

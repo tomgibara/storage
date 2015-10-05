@@ -11,8 +11,8 @@ final class ImmutableStore<V> implements Store<V> {
 	}
 	
 	@Override
-	public int capacity() {
-		return store.capacity();
+	public int size() {
+		return store.size();
 	}
 
 	@Override

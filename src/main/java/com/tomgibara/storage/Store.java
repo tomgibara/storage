@@ -15,8 +15,7 @@ import com.tomgibara.fundament.Transposable;
  * Provides array-like storage of values. Stores are intended to provide a basis
  * for building more complex collection types. Like arrays they feature
  * fixed-length index-based access, but they also provide mutability control via
- * the {@link Mutability} interface and can report a size which is distinct from
- * their capacity.
+ * the {@link Mutability} interface.
  * 
  * <p>
  * Note that stores <i>do not</i> support storing null values in a way that is
@@ -25,7 +24,7 @@ import com.tomgibara.fundament.Transposable;
  * 
  * <p>
  * Due to the provision of default methods, only the methods
- * {@link #valueType()}, {@link #capacity()} and
+ * {@link #valueType()}, {@link #size()} and
  * {@link #get(int)} need to be implemented to provide an immutable store
  * implementation. If a store is mutable, the methods {@link #set(int, Object)}
  * and {@link #isMutable()} must also be implemented.
@@ -52,12 +51,12 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 
 	/**
 	 * The greatest number of values that the store can contain. Valid indices
-	 * range from <code>0 &lt;= i &lt; capacity</code>. Zero capacity stores are
+	 * range from <code>0 &lt;= i &lt; size</code>. Stores of size zero are
 	 * possible.
 	 * 
-	 * @return the capacity of store
+	 * @return the size of store
 	 */
-	int capacity();
+	int size();
 
 	/**
 	 * Retrieves a value held in the store. The method will return null if there
@@ -87,8 +86,8 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	 * Removes all stored values.
 	 */
 	default void clear() {
-		int capacity = capacity();
-		for (int i = 0; i < capacity; i++) {
+		int size = size();
+		for (int i = 0; i < size; i++) {
 			set(i, null);
 		}
 	}
@@ -103,8 +102,8 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	default void fill(V value) {
 		if (!isMutable()) throw new IllegalStateException("immutable");
 		if (value == null) clear();
-		int capacity = capacity();
-		for (int i = 0; i < capacity; i++) {
+		int size = size();
+		for (int i = 0; i < size; i++) {
 			set(i, value);
 		}
 	}
@@ -146,7 +145,7 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 
 			@Override
 			public int size() {
-				return capacity();
+				return size();
 			}
 
 			@Override
@@ -159,7 +158,7 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 
 	/**
 	 * Exposes the store as a list. The size of the list is equal to the
-	 * capacity of the store with 'unset' elements exposed as null. The list
+	 * size of the store with 'unset' elements exposed as null. The list
 	 * supports value mutation via <code>set</code>, but not appending via
 	 * <code>add()</code>.
 	 *
@@ -193,13 +192,13 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 
 			@Override
 			public int size() {
-				return Store.this.capacity();
+				return Store.this.size();
 			}
 
 			@Override
 			public void forEach(Consumer<? super V> action) {
-				int capacity = capacity();
-				for (int i = 0; i < capacity; i++) {
+				int size = size();
+				for (int i = 0; i < size; i++) {
 					action.accept(get(i));
 				}
 			}
@@ -228,8 +227,8 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 			}
 
 			@Override
-			public int capacity() {
-				return Store.this.capacity();
+			public int size() {
+				return Store.this.size();
 			}
 
 			@Override
@@ -267,7 +266,7 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	
 	@Override
 	default Store<V> mutableCopy() {
-		return withCapacity(capacity());
+		return withCapacity(size());
 	}
 
 	@Override

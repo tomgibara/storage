@@ -3,7 +3,7 @@ package com.tomgibara.storage;
 /**
  * <p>
  * Implementations of this interface are able to create {@link Store} instances
- * with a specified capacity.
+ * with a specified size.
  * 
  * <p>
  * Static methods are provided for creating common and useful types of storage.
@@ -25,7 +25,7 @@ public interface Storage<V> {
 	 */
 	@SuppressWarnings("unchecked")
 	static <V> Storage<V> generic() {
-		return capacity -> (Store<V>) new ArrayStore<>(new Object[capacity]);
+		return size -> (Store<V>) new ArrayStore<>(new Object[size]);
 	}
 
 	/**
@@ -44,8 +44,8 @@ public interface Storage<V> {
 	static <V> Storage<V> typed(Class<V> type) throws IllegalArgumentException {
 		if (type == null) throw new IllegalArgumentException("null type");
 		return type.isPrimitive() ?
-				(capacity -> PrimitiveStore.newStore(type, capacity)) :
-				(capacity -> new ArrayStore<>(type, capacity));
+				(size -> PrimitiveStore.newStore(type, size)) :
+				(size -> new ArrayStore<>(type, size));
 	}
 
 	/**
@@ -56,7 +56,7 @@ public interface Storage<V> {
 	 * @return weak storage
 	 */
 	static <V> Storage<V> weak() {
-		return capacity -> new WeakRefStore<>(capacity);
+		return size -> new WeakRefStore<>(size);
 	}
 	
 	/**
@@ -67,18 +67,18 @@ public interface Storage<V> {
 	 * @return soft storage
 	 */
 	static <V> Storage<V> soft() {
-		return capacity -> new SoftRefStore<>(capacity);
+		return size -> new SoftRefStore<>(size);
 	}
 	
 	/**
-	 * Creates a new store with the requested capacity
+	 * Creates a new store with the requested size
 	 * 
-	 * @param capacity
-	 *            the required capacity
+	 * @param size
+	 *            the required size
 	 * @throws IllegalArgumentException
-	 *             if the capacity is negative
+	 *             if the size is negative
 	 * @return an new store
 	 */
-	Store<V> newStore(int capacity) throws IllegalArgumentException;
+	Store<V> newStore(int size) throws IllegalArgumentException;
 	
 }

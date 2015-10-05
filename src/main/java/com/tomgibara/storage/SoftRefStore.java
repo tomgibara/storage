@@ -6,8 +6,8 @@ import java.lang.ref.SoftReference;
 
 final class SoftRefStore<V> extends RefStore<V> {
 
-	SoftRefStore(int capacity) {
-		super(capacity);
+	SoftRefStore(int size) {
+		super(size);
 	}
 
 	@Override

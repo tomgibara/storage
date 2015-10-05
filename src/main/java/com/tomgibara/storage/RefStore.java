@@ -9,17 +9,17 @@ abstract class RefStore<V> implements Store<V> {
 	private final ReferenceQueue<V> queue = new ReferenceQueue<V>();
 	private final Reference<V>[] refs;
 	// counts number of references (cleared or not)
-	private int size;
+	private int count;
 	
 	
 	@SuppressWarnings("unchecked")
-	RefStore(int capacity) {
+	RefStore(int size) {
 		try {
-			refs = new Reference[capacity];
+			refs = new Reference[size];
 		} catch (NegativeArraySizeException e) {
-			throw new IllegalArgumentException("negative capacity");
+			throw new IllegalArgumentException("negative size");
 		}
-		size = 0;
+		count = 0;
 	}
 	
 	@Override
@@ -30,14 +30,14 @@ abstract class RefStore<V> implements Store<V> {
 	}
 	
 	@Override
-	public int capacity() {
+	public int size() {
 		return refs.length;
 	}
 	
 	@Override
 	public int count() {
 		flushQueue();
-		return size;
+		return count;
 	}
 	
 	@Override
@@ -56,14 +56,14 @@ abstract class RefStore<V> implements Store<V> {
 		if (value == null) {
 			if (ref == null) return null;
 			refs[index] = null;
-			size--;
+			count--;
 			return ref.get();
 		}
 
 		// addition case
 		refs[index] = newReference(value, queue, index);
 		if (ref == null) {
-			size++;
+			count++;
 			return null;
 		} else {
 			return ref.get();
@@ -74,7 +74,7 @@ abstract class RefStore<V> implements Store<V> {
 	public void clear() {
 		flushQueue();
 		Arrays.fill(refs, null);
-		size = 0;
+		count = 0;
 	}
 	
 	@Override
@@ -85,19 +85,19 @@ abstract class RefStore<V> implements Store<V> {
 	@Override
 	public Store<V> immutableCopy() {
 		flushQueue();
-		int capacity = refs.length;
+		int size = refs.length;
 		@SuppressWarnings("unchecked")
-		V[] vs = (V[]) new Object[capacity];
-		int size = 0;
-		for (int i = 0; i < capacity; i++) {
+		V[] vs = (V[]) new Object[size];
+		int count = 0;
+		for (int i = 0; i < size; i++) {
 			Reference<V> ref = refs[i];
 			if (ref == null) continue;
 			V value = ref.get();
 			if (value == null) continue;
 			vs[i] = value;
-			size++;
+			count++;
 		}
-		return new ImmutableArrayStore<>(vs, size);
+		return new ImmutableArrayStore<>(vs, count);
 	}
 	
 	abstract Reference<V> newReference(V referent, ReferenceQueue<V> queue, int index);
@@ -125,7 +125,7 @@ abstract class RefStore<V> implements Store<V> {
 			thatRefs[i] = that.newReference(v, thatQueue, i);
 			size ++;
 		}
-		that.size = size;
+		that.count = size;
 		return that;
 	}
 
@@ -135,7 +135,7 @@ abstract class RefStore<V> implements Store<V> {
 			int index = indexOf(ref);
 			if (refs[index] == ref) {
 				refs[index] = null;
-				size --;
+				count --;
 			}
 		}
 	}
