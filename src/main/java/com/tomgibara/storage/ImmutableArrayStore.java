@@ -29,7 +29,7 @@ final class ImmutableArrayStore<V> implements Store<V> {
 	}
 	
 	@Override
-	public int size() { return size; }
+	public int count() { return size; }
 
 	@Override
 	public V get(int index) { return values[index]; }

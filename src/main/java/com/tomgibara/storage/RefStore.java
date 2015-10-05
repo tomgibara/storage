@@ -35,7 +35,7 @@ abstract class RefStore<V> implements Store<V> {
 	}
 	
 	@Override
-	public int size() {
+	public int count() {
 		flushQueue();
 		return size;
 	}

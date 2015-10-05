@@ -47,7 +47,7 @@ abstract class PrimitiveStore<V> implements Store<V> {
 	// store
 	
 	@Override
-	public int size() {
+	public int count() {
 		return size;
 	}
 	

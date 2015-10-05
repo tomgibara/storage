@@ -40,7 +40,7 @@ class ArrayStore<V> implements Store<V> {
 	}
 
 	@Override
-	public int size() {
+	public int count() {
 		return size;
 	}
 	

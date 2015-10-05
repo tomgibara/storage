@@ -8,8 +8,8 @@ public class StoreTest extends TestCase {
 		
 		Store<Integer> s = Stores.newStore(1,2,3);
 		Store<Integer> t = s.transformedBy(i -> 2 * i);
-		assertEquals(s.size(), t.size());
-		for (int i = 0; i < s.size(); i++) {
+		assertEquals(s.count(), t.count());
+		for (int i = 0; i < s.count(); i++) {
 			assertEquals(s.get(i) * 2, t.get(i).intValue());
 		}
 		assertTrue(s.isMutable());

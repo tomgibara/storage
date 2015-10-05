@@ -122,15 +122,15 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	 * @see #mutableCopy()
 	 */
 	default Store<V> withCapacity(int newCapacity) {
-		return new ArrayStore<>(Stores.toArray(this, newCapacity), size());
+		return new ArrayStore<>(Stores.toArray(this, newCapacity), count());
 	}
 
 	/**
 	 * The number of non-null values in the store.
 	 * 
-	 * @return the size of the store
+	 * @return the number of non-null values in the store
 	 */
-	default int size() {
+	default int count() {
 		return population().ones().count();
 	}
 	
@@ -233,8 +233,8 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 			}
 
 			@Override
-			public int size() {
-				return Store.this.size();
+			public int count() {
+				return Store.this.count();
 			}
 
 			@Override
@@ -277,7 +277,7 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	
 	@Override
 	default Store<V> immutableCopy() {
-		return new ImmutableArrayStore<>(Stores.toArray(this), size());
+		return new ImmutableArrayStore<>(Stores.toArray(this), count());
 	}
 
 	@Override
