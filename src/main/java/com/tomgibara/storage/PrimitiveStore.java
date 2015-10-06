@@ -2,9 +2,6 @@ package com.tomgibara.storage;
 
 import java.util.Arrays;
 
-import com.tomgibara.bits.BitStore;
-import com.tomgibara.bits.Bits;
-
 abstract class PrimitiveStore<V> implements Store<V> {
 
 	private static final int BYTE    =  1;
@@ -31,81 +28,55 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 	}
 
-	int count;
-	BitStore populated;
+	final boolean mutable;
 	
-	protected PrimitiveStore(BitStore populated, int count) {
-		this.populated = populated;
-		this.count = count;
+	protected PrimitiveStore() {
+		mutable = true;
 	}
-	
-	protected PrimitiveStore(int size) {
-		populated = Bits.newBitStore(size);
-		this.count = 0;
+
+	protected PrimitiveStore(boolean mutable) {
+		this.mutable = mutable;
 	}
 
 	// store
 	
 	@Override
 	public int count() {
-		return count;
+		return size();
 	}
 	
-	public int size() {
-		return populated.size();
-	}
-	
-	@Override
-	public void clear() {
-		populated.clearWithZeros();
-		count = 0;
-	}
-
 	@Override
 	public void fill(V value) {
-		if (value == null) { // simple case
+		if (!mutable) throw new IllegalStateException("immutable");
+		if (value == null) {
 			clear();
-		} else { // more complex case
-			if (!populated.isMutable()) throw new IllegalStateException("immutable");
-			// do this first in case filling fails due to class error
+		} else {
 			fillImpl(value);
-			populated.clearWithOnes();
-			count = populated.size();
 		}
 	}
 
 	@Override
 	public V get(int index) {
-		return populated.getBit(index) ? getImpl(index) : null;
+		return getImpl(index);
 	}
 
 	@Override
 	public V set(int index, V value) {
-		if (populated.getBit(index)) {
-			V previous = getImpl(index);
-			if (value == null) {
-				populated.setBit(index, false);
-				count --;
-			} else {
-				setImpl(index, value);
-			}
-			return previous;
-		} else if (value != null) {
-			setImpl(index, value);
-			populated.setBit(index, true);
-			count ++;
-		}
-		return null;
+		if (value == null) throw new IllegalArgumentException("null not allowed");
+		V previous = getImpl(index);
+		setImpl(index, value);
+		return previous;
 	}
 	
 	@Override
 	public Store<V> resizedCopy(int newSize) {
-		return duplicate(Bits.resizedCopyOf(populated, newSize, false), true);
+		if (newSize < 0) throw new IllegalArgumentException();
+		return resize(newSize);
 	}
 
 	@Override
-	public BitStore population() {
-		return populated.immutable();
+	public boolean isNullAllowed() {
+		return false;
 	}
 
 	// for extension
@@ -116,23 +87,25 @@ abstract class PrimitiveStore<V> implements Store<V> {
 	
 	abstract protected void fillImpl(V value);
 	
-	abstract protected Store<V> duplicate(BitStore populated, boolean copy);
+	abstract protected Store<V> duplicate(boolean copy, boolean mutable);
+	
+	abstract protected Store<V> resize(int newSize);
 	
 	// mutability
 	
 	@Override
 	public boolean isMutable() {
-		return populated.isMutable();
+		return mutable;
 	}
 	
 	@Override
 	public Store<V> mutableCopy() {
-		return duplicate(populated.mutableCopy(), true);
+		return duplicate(true, true);
 	}
 
 	@Override
 	public Store<V> immutableCopy() {
-		return duplicate(populated.immutableCopy(), true);
+		return duplicate(true, false);
 	}
 	
 	// inner classes
@@ -142,24 +115,26 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		private byte[] values;
 
 		ByteStore(int size) {
-			super(size);
 			this.values = new byte[size];
 		}
 
 		ByteStore(byte[] values) {
-			super(values.length);
-			populated.flip();
 			this.values = values;
 		}
 
-		private ByteStore(BitStore populated, int size, byte[] values) {
-			super(populated, size);
+		ByteStore(byte[] values, boolean mutable) {
+			super(mutable);
 			this.values = values;
 		}
 
 		@Override
 		public Class<Byte> valueType() {
 			return byte.class;
+		}
+		
+		@Override
+		public int size() {
+			return values.length;
 		}
 
 		@Override
@@ -178,11 +153,13 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		protected ByteStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new ByteStore(populated, count, values);
-			int size = populated.size();
-			if (size == values.length) return new ByteStore(populated, count, values.clone());
-			return new ByteStore(populated, count, Arrays.copyOf(values, size));
+		protected ByteStore duplicate(boolean copy, boolean mutable) {
+			return new ByteStore(copy ? values.clone() : values, mutable);
+		}
+
+		@Override
+		protected ByteStore resize(int newSize) {
+			return new ByteStore(Arrays.copyOf(values, newSize));
 		}
 
 	}
@@ -192,24 +169,26 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		private float[] values;
 
 		FloatStore(int size) {
-			super(size);
 			this.values = new float[size];
 		}
 
 		FloatStore(float[] values) {
-			super(values.length);
-			populated.flip();
 			this.values = values;
 		}
 
-		private FloatStore(BitStore populated, int size, float[] values) {
-			super(populated, size);
+		FloatStore(float[] values, boolean mutable) {
+			super(mutable);
 			this.values = values;
 		}
 
 		@Override
 		public Class<Float> valueType() {
 			return float.class;
+		}
+
+		@Override
+		public int size() {
+			return values.length;
 		}
 
 		@Override
@@ -228,11 +207,13 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		protected FloatStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new FloatStore(populated, count, values);
-			int size = populated.size();
-			if (size == values.length) return new FloatStore(populated, count, values.clone());
-			return new FloatStore(populated, count, Arrays.copyOf(values, size));
+		protected FloatStore duplicate(boolean copy, boolean mutable) {
+			return new FloatStore(copy ? values.clone() : values, mutable);
+		}
+
+		@Override
+		protected FloatStore resize(int newSize) {
+			return new FloatStore(Arrays.copyOf(values, newSize));
 		}
 
 	}
@@ -242,24 +223,26 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		private char[] values;
 
 		CharacterStore(int size) {
-			super(size);
 			this.values = new char[size];
 		}
 
 		CharacterStore(char[] values) {
-			super(values.length);
-			populated.flip();
 			this.values = values;
 		}
 
-		private CharacterStore(BitStore populated, int size, char[] values) {
-			super(populated, size);
+		private CharacterStore(char[] values, boolean mutable) {
+			super(mutable);
 			this.values = values;
 		}
 
 		@Override
 		public Class<Character> valueType() {
 			return char.class;
+		}
+
+		@Override
+		public int size() {
+			return values.length;
 		}
 
 		@Override
@@ -278,11 +261,13 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		protected CharacterStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new CharacterStore(populated, count, values);
-			int size = populated.size();
-			if (size == values.length) return new CharacterStore(populated, count, values.clone());
-			return new CharacterStore(populated, count, Arrays.copyOf(values, size));
+		protected CharacterStore duplicate(boolean copy, boolean mutable) {
+			return new CharacterStore(copy ? values.clone() : values, mutable);
+		}
+
+		@Override
+		protected CharacterStore resize(int newSize) {
+			return new CharacterStore(Arrays.copyOf(values, newSize));
 		}
 
 	}
@@ -292,24 +277,26 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		private short[] values;
 
 		ShortStore(short[] values) {
-			super(values.length);
-			populated.flip();
 			this.values = values;
 		}
 
 		ShortStore(int size) {
-			super(size);
 			this.values = new short[size];
 		}
 
-		private ShortStore(BitStore populated, int size, short[] values) {
-			super(populated, size);
+		private ShortStore(short[] values, boolean mutable) {
+			super(mutable);
 			this.values = values;
 		}
 
 		@Override
 		public Class<Short> valueType() {
 			return short.class;
+		}
+
+		@Override
+		public int size() {
+			return values.length;
 		}
 
 		@Override
@@ -328,11 +315,13 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		protected ShortStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new ShortStore(populated, count, values);
-			int size = populated.size();
-			if (size == values.length) return new ShortStore(populated, count, values.clone());
-			return new ShortStore(populated, count, Arrays.copyOf(values, size));
+		protected ShortStore duplicate(boolean copy, boolean mutable) {
+			return new ShortStore(copy ? values.clone() : values, mutable);
+		}
+
+		@Override
+		protected ShortStore resize(int newSize) {
+			return new ShortStore(Arrays.copyOf(values, newSize));
 		}
 
 	}
@@ -342,24 +331,26 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		private long[] values;
 
 		LongStore(long[] values) {
-			super(values.length);
-			populated.flip();
 			this.values = values;
 		}
 
 		LongStore(int size) {
-			super(size);
 			this.values = new long[size];
 		}
 
-		private LongStore(BitStore populated, int size, long[] values) {
-			super(populated, size);
+		private LongStore(long[] values, boolean mutable) {
+			super(mutable);
 			this.values = values;
 		}
 
 		@Override
 		public Class<Long> valueType() {
 			return long.class;
+		}
+
+		@Override
+		public int size() {
+			return values.length;
 		}
 
 		@Override
@@ -378,11 +369,13 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		protected LongStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new LongStore(populated, count, values);
-			int size = populated.size();
-			if (size == values.length) return new LongStore(populated, count, values.clone());
-			return new LongStore(populated, count, Arrays.copyOf(values, size));
+		protected LongStore duplicate(boolean copy, boolean mutable) {
+			return new LongStore(copy ? values.clone() : values, mutable);
+		}
+
+		@Override
+		protected LongStore resize(int newSize) {
+			return new LongStore(Arrays.copyOf(values, newSize));
 		}
 
 	}
@@ -392,24 +385,26 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		private int[] values;
 
 		IntegerStore(int[] values) {
-			super(values.length);
-			populated.flip();
 			this.values = values;
 		}
 
 		IntegerStore(int size) {
-			super(size);
 			this.values = new int[size];
 		}
 
-		private IntegerStore(BitStore populated, int size, int[] values) {
-			super(populated, size);
+		private IntegerStore(int[] values, boolean mutable) {
+			super(mutable);
 			this.values = values;
 		}
 
 		@Override
 		public Class<Integer> valueType() {
 			return int.class;
+		}
+
+		@Override
+		public int size() {
+			return values.length;
 		}
 
 		@Override
@@ -428,11 +423,13 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		protected IntegerStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new IntegerStore(populated, count, values);
-			int size = populated.size();
-			if (size == values.length) return new IntegerStore(populated, count, values.clone());
-			return new IntegerStore(populated, count, Arrays.copyOf(values, size));
+		protected IntegerStore duplicate(boolean copy, boolean mutable) {
+			return new IntegerStore(copy ? values.clone() : values, mutable);
+		}
+
+		@Override
+		protected IntegerStore resize(int newSize) {
+			return new IntegerStore(Arrays.copyOf(values, newSize));
 		}
 
 	}
@@ -442,24 +439,26 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		private double[] values;
 
 		DoubleStore(double[] values) {
-			super(values.length);
-			populated.flip();
 			this.values = values;
 		}
 
 		DoubleStore(int size) {
-			super(size);
 			this.values = new double[size];
 		}
 
-		private DoubleStore(BitStore populated, int size, double[] values) {
-			super(populated, size);
+		private DoubleStore(double[] values, boolean mutable) {
+			super(mutable);
 			this.values = values;
 		}
 
 		@Override
 		public Class<Double> valueType() {
 			return double.class;
+		}
+
+		@Override
+		public int size() {
+			return values.length;
 		}
 
 		@Override
@@ -478,11 +477,13 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		protected DoubleStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new DoubleStore(populated, count, values);
-			int size = populated.size();
-			if (size == values.length) return new DoubleStore(populated, count, values.clone());
-			return new DoubleStore(populated, count, Arrays.copyOf(values, size));
+		protected DoubleStore duplicate(boolean copy, boolean mutable) {
+			return new DoubleStore(copy ? values.clone() : values, mutable);
+		}
+
+		@Override
+		protected DoubleStore resize(int newSize) {
+			return new DoubleStore(Arrays.copyOf(values, newSize));
 		}
 
 	}
@@ -492,24 +493,26 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		private boolean[] values;
 
 		BooleanStore(boolean[] values) {
-			super(values.length);
-			populated.flip();
 			this.values = values;
 		}
 
 		BooleanStore(int size) {
-			super(size);
 			this.values = new boolean[size];
 		}
 
-		private BooleanStore(BitStore populated, int size, boolean[] values) {
-			super(populated, size);
+		private BooleanStore(boolean[] values, boolean mutable) {
+			super(mutable);
 			this.values = values;
 		}
 
 		@Override
 		public Class<Boolean> valueType() {
 			return boolean.class;
+		}
+
+		@Override
+		public int size() {
+			return values.length;
 		}
 
 		@Override
@@ -528,11 +531,13 @@ abstract class PrimitiveStore<V> implements Store<V> {
 		}
 
 		@Override
-		protected BooleanStore duplicate(BitStore populated, boolean copy) {
-			if (!copy) return new BooleanStore(populated, count, values);
-			int size = populated.size();
-			if (size == values.length) return new BooleanStore(populated, count, values.clone());
-			return new BooleanStore(populated, count, Arrays.copyOf(values, size));
+		protected BooleanStore duplicate(boolean copy, boolean mutable) {
+			return new BooleanStore(copy ? values.clone() : values, mutable);
+		}
+
+		@Override
+		protected BooleanStore resize(int newSize) {
+			return new BooleanStore(Arrays.copyOf(values, newSize));
 		}
 
 	}

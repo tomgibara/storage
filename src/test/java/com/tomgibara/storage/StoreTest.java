@@ -6,7 +6,8 @@ public class StoreTest extends TestCase {
 
 	public void testTransformedBy() {
 		
-		Store<Integer> s = Stores.newStore(1,2,3);
+		Store<Integer> s = Stores.intsAndNull(1,2,3);
+		assertTrue(s.isNullAllowed());
 		Store<Integer> t = s.transformedBy(i -> 2 * i);
 		assertEquals(s.count(), t.count());
 		for (int i = 0; i < s.count(); i++) {

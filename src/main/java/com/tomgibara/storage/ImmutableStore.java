@@ -44,4 +44,9 @@ final class ImmutableStore<V> implements Store<V> {
 	public BitStore population() {
 		return store.population();
 	}
+	
+	@Override
+	public boolean isNullAllowed() {
+		return store.isNullAllowed();
+	}
 }

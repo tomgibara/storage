@@ -5,16 +5,19 @@ import java.util.Arrays;
 final class ImmutableArrayStore<V> implements Store<V> {
 
 	private final V[] values;
-	private final int size;
+	private final int count;
+	private final boolean nullAllowed;
 
-	ImmutableArrayStore(V[] values, int size) {
+	ImmutableArrayStore(V[] values, int count) {
 		this.values = values;
-		this.size = size;
+		this.count = count;
+		nullAllowed = true;
 	}
 
-	ImmutableArrayStore(V[] values) {
+	ImmutableArrayStore(V[] values, boolean nullAllowed) {
 		this.values = values;
-		size = Stores.countNonNulls(values);
+		count = Stores.countNonNulls(values);
+		this.nullAllowed = nullAllowed;
 	}
 
 	@Override
@@ -29,25 +32,44 @@ final class ImmutableArrayStore<V> implements Store<V> {
 	}
 	
 	@Override
-	public int count() { return size; }
+	public int count() { return count; }
 
 	@Override
 	public V get(int index) { return values[index]; }
 
 	@Override
 	public Store<V> resizedCopy(int newSize) {
-		return new ArrayStore<>(Arrays.copyOf(values, newSize), size);
+		return nullAllowed ?
+				new NullArrayStore<>(Arrays.copyOf(values, newSize), count) :
+				new ArrayStore<>(Arrays.copyOf(values, newSize));
+	}
+
+	@Override
+	public boolean isNullAllowed() {
+		return nullAllowed;
 	}
 
 	// mutability
 	
 	@Override
-	public Store<V> mutableCopy() { return new ArrayStore<>(values.clone(), size); }
+	public Store<V> mutableCopy() {
+		return nullAllowed ?
+				new NullArrayStore<>(values.clone(), count) :
+				new ArrayStore<>(values.clone());
+		}
 	
 	@Override
-	public Store<V> immutableCopy() { return new ImmutableArrayStore<>(values.clone(), size); }
+	public Store<V> immutableCopy() {
+		return nullAllowed ?
+				new ImmutableArrayStore<>(values.clone(), count) :
+				new ImmutableArrayStore<>(values.clone(), false);
+		}
 	
 	@Override
-	public Store<V> immutableView() { return new ImmutableArrayStore<>(values, size); }
+	public Store<V> immutableView() {
+		return nullAllowed ?
+				new ImmutableArrayStore<>(values, count):
+				new ImmutableArrayStore<>(values, false);
+	}
 
 }

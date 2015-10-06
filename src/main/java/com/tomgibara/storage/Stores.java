@@ -19,9 +19,9 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static <V> Store<V> newStore(V[] values) {
+	public static <V> Store<V> newStore(boolean nullsAllowed, V[] values) {
 		checkValuesNotNull(values);
-		return new ArrayStore<>(values);
+		return nullsAllowed ? new NullArrayStore<>(values) : new ArrayStore<>(values);
 	}
 
 	/**
@@ -31,14 +31,14 @@ public final class Stores {
 	 * 
 	 * @param values
 	 *            the values of the store
-	 * @param size
+	 * @param count
 	 *            the number of non-null values in the array
 	 * @return a store that mediates access to the array
 	 */
-	public static <V> Store<V> newStore(V[] values, int size) {
+	public static <V> Store<V> newStore(V[] values, int count) {
 		checkValuesNotNull(values);
-		if (size < 0) throw new IllegalArgumentException("negative size");
-		return new ArrayStore<>(values, size);
+		if (count < 0) throw new IllegalArgumentException("negative count");
+		return new NullArrayStore<>(values, count);
 	}
 	
 	/**
@@ -49,9 +49,9 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that returns values from array
 	 */
-	public static <V> Store<V> newImmutableStore(V[] values) {
+	public static <V> Store<V> newImmutableStore(V[] values, boolean mayContainNull) {
 		checkValuesNotNull(values);
-		return new ImmutableArrayStore<>(values);
+		return new ImmutableArrayStore<>(values, mayContainNull);
 	}
 	
 	/**
@@ -62,14 +62,14 @@ public final class Stores {
 	 * 
 	 * @param values
 	 *            the values of the store
-	 * @param size
+	 * @param count
 	 *            the number of non-null values in the array
 	 * @return a store that mediates access to the array
 	 */
-	public static <V> Store<V> newImmutableStore(V[] values, int size) {
+	public static <V> Store<V> newImmutableStore(V[] values, int count) {
 		checkValuesNotNull(values);
-		if (size < 0) throw new IllegalArgumentException("negative size");
-		return new ImmutableArrayStore<>(values, size);
+		if (count < 0) throw new IllegalArgumentException("negative size");
+		return new ImmutableArrayStore<>(values, count);
 	}
 	
 	/**
@@ -82,9 +82,24 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Byte> newStore(byte... values) {
+	public static Store<Byte> bytes(byte... values) {
 		checkValuesNotNull(values);
 		return new PrimitiveStore.ByteStore(values);
+	}
+
+	/**
+	 * Creates a mutable store that wraps an existing byte array. Values may
+	 * subsequently be removed from the store by setting an index value to null.
+	 * Such operations will not modify the wrapped array; the null status of an
+	 * index may be obtained from the {@link #population()}.
+	 * 
+	 * @param values
+	 *            the values of the store
+	 * @return a store that mediates access to the array
+	 */
+	public static Store<Byte> bytesAndNull(byte... values) {
+		checkValuesNotNull(values);
+		return new NullPrimitiveStore.ByteStore(values);
 	}
 
 	/**
@@ -97,9 +112,24 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Short> newStore(short... values) {
+	public static Store<Short> shorts(short... values) {
 		checkValuesNotNull(values);
 		return new PrimitiveStore.ShortStore(values);
+	}
+
+	/**
+	 * Creates a mutable store that wraps an existing short array. Values may
+	 * subsequently be removed from the store by setting an index value to null.
+	 * Such operations will not modify the wrapped array; the null status of an
+	 * index may be obtained from the {@link #population()}.
+	 * 
+	 * @param values
+	 *            the values of the store
+	 * @return a store that mediates access to the array
+	 */
+	public static Store<Short> shortsAndNull(short... values) {
+		checkValuesNotNull(values);
+		return new NullPrimitiveStore.ShortStore(values);
 	}
 
 	/**
@@ -112,9 +142,24 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Integer> newStore(int... values) {
+	public static Store<Integer> ints(int... values) {
 		checkValuesNotNull(values);
 		return new PrimitiveStore.IntegerStore(values);
+	}
+
+	/**
+	 * Creates a mutable store that wraps an existing integer array. Values may
+	 * subsequently be removed from the store by setting an index value to null.
+	 * Such operations will not modify the wrapped array; the null status of an
+	 * index may be obtained from the {@link #population()}.
+	 * 
+	 * @param values
+	 *            the values of the store
+	 * @return a store that mediates access to the array
+	 */
+	public static Store<Integer> intsAndNull(int... values) {
+		checkValuesNotNull(values);
+		return new NullPrimitiveStore.IntegerStore(values);
 	}
 
 	/**
@@ -127,9 +172,24 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Long> newStore(long... values) {
+	public static Store<Long> longs(long... values) {
 		checkValuesNotNull(values);
 		return new PrimitiveStore.LongStore(values);
+	}
+
+	/**
+	 * Creates a mutable store that wraps an existing long array. Values may
+	 * subsequently be removed from the store by setting an index value to null.
+	 * Such operations will not modify the wrapped array; the null status of an
+	 * index may be obtained from the {@link #population()}.
+	 * 
+	 * @param values
+	 *            the values of the store
+	 * @return a store that mediates access to the array
+	 */
+	public static Store<Long> longAndNull(long... values) {
+		checkValuesNotNull(values);
+		return new NullPrimitiveStore.LongStore(values);
 	}
 
 	/**
@@ -142,9 +202,24 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Boolean> newStore(boolean... values) {
+	public static Store<Boolean> booleans(boolean... values) {
 		checkValuesNotNull(values);
 		return new PrimitiveStore.BooleanStore(values);
+	}
+
+	/**
+	 * Creates a mutable store that wraps an existing boolean array. Values may
+	 * subsequently be removed from the store by setting an index value to null.
+	 * Such operations will not modify the wrapped array; the null status of an
+	 * index may be obtained from the {@link #population()}.
+	 * 
+	 * @param values
+	 *            the values of the store
+	 * @return a store that mediates access to the array
+	 */
+	public static Store<Boolean> booleansAndNull(boolean... values) {
+		checkValuesNotNull(values);
+		return new NullPrimitiveStore.BooleanStore(values);
 	}
 
 	/**
@@ -157,9 +232,24 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Character> newStore(char... values) {
+	public static Store<Character> chars(char... values) {
 		checkValuesNotNull(values);
 		return new PrimitiveStore.CharacterStore(values);
+	}
+
+	/**
+	 * Creates a mutable store that wraps an existing char array. Values may
+	 * subsequently be removed from the store by setting an index value to null.
+	 * Such operations will not modify the wrapped array; the null status of an
+	 * index may be obtained from the {@link #population()}.
+	 * 
+	 * @param values
+	 *            the values of the store
+	 * @return a store that mediates access to the array
+	 */
+	public static Store<Character> charsAndNull(char... values) {
+		checkValuesNotNull(values);
+		return new NullPrimitiveStore.CharacterStore(values);
 	}
 
 	/**
@@ -172,9 +262,24 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Float> newStore(float... values) {
+	public static Store<Float> floats(float... values) {
 		checkValuesNotNull(values);
 		return new PrimitiveStore.FloatStore(values);
+	}
+
+	/**
+	 * Creates a mutable store that wraps an existing float array. Values may
+	 * subsequently be removed from the store by setting an index value to null.
+	 * Such operations will not modify the wrapped array; the null status of an
+	 * index may be obtained from the {@link #population()}.
+	 * 
+	 * @param values
+	 *            the values of the store
+	 * @return a store that mediates access to the array
+	 */
+	public static Store<Float> floatsAndNull(float... values) {
+		checkValuesNotNull(values);
+		return new NullPrimitiveStore.FloatStore(values);
 	}
 
 	/**
@@ -187,9 +292,24 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Double> newStore(double... values) {
+	public static Store<Double> doubles(double... values) {
 		checkValuesNotNull(values);
 		return new PrimitiveStore.DoubleStore(values);
+	}
+
+	/**
+	 * Creates a mutable store that wraps an existing double array. Values may
+	 * subsequently be removed from the store by setting an index value to null.
+	 * Such operations will not modify the wrapped array; the null status of an
+	 * index may be obtained from the {@link #population()}.
+	 * 
+	 * @param values
+	 *            the values of the store
+	 * @return a store that mediates access to the array
+	 */
+	public static Store<Double> doublesAndNull(double... values) {
+		checkValuesNotNull(values);
+		return new NullPrimitiveStore.DoubleStore(values);
 	}
 
 	// package scoped methods

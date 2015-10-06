@@ -33,6 +33,11 @@ abstract class RefStore<V> implements Store<V> {
 	public int size() {
 		return refs.length;
 	}
+
+	@Override
+	public boolean isNullAllowed() {
+		return true;
+	}
 	
 	@Override
 	public int count() {

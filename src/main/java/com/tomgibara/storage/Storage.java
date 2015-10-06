@@ -24,8 +24,12 @@ public interface Storage<V> {
 	 * @return genericized storage
 	 */
 	@SuppressWarnings("unchecked")
-	static <V> Storage<V> generic() {
-		return size -> (Store<V>) new ArrayStore<>(new Object[size]);
+	static <V> Storage<V> generic(boolean nullsAllowed) {
+		if (nullsAllowed) {
+			return size -> (Store<V>) new NullArrayStore<>(new Object[size], 0);
+		} else {
+			return size -> (Store<V>) new ArrayStore<>(new Object[size]);
+		}
 	}
 
 	/**
@@ -41,11 +45,17 @@ public interface Storage<V> {
 	 *             if the supplied type is null
 	 * @return typed storage
 	 */
-	static <V> Storage<V> typed(Class<V> type) throws IllegalArgumentException {
+	static <V> Storage<V> typed(Class<V> type, boolean nullsAllowed) throws IllegalArgumentException {
 		if (type == null) throw new IllegalArgumentException("null type");
-		return type.isPrimitive() ?
-				(size -> PrimitiveStore.newStore(type, size)) :
-				(size -> new ArrayStore<>(type, size));
+		if (nullsAllowed) {
+			return type.isPrimitive() ?
+					(size -> NullPrimitiveStore.newStore(type, size)) :
+					(size -> new NullArrayStore<>(type, size));
+		} else {
+			return type.isPrimitive() ?
+					(size -> PrimitiveStore.newStore(type, size)) :
+					(size -> new ArrayStore<>(type, size));
+		}
 	}
 
 	/**

@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 import com.tomgibara.bits.AbstractBitStore;
 import com.tomgibara.bits.BitStore;
+import com.tomgibara.bits.Bits;
 import com.tomgibara.fundament.Mutability;
 import com.tomgibara.fundament.Transposable;
 
@@ -67,7 +68,10 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	 * @return the value stored at the specified index
 	 */
 	V get(int index);
-	
+
+	//TODO document
+	boolean isNullAllowed();
+
 	/**
 	 * Stores a value in the store. Storing null will result in no value being
 	 * associated with the specified index
@@ -86,6 +90,7 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	 * Removes all stored values.
 	 */
 	default void clear() {
+		if (!isNullAllowed()) throw new UnsupportedOperationException("null not allowed");
 		int size = size();
 		for (int i = 0; i < size; i++) {
 			set(i, null);
@@ -121,7 +126,9 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	 * @see #mutableCopy()
 	 */
 	default Store<V> resizedCopy(int newSize) {
-		return new ArrayStore<>(Stores.toArray(this, newSize), count());
+		return isNullAllowed() ?
+				new NullArrayStore<>(Stores.toArray(this, newSize), count()) :
+				new ArrayStore<>(Stores.toArray(this, newSize));
 	}
 
 	/**
@@ -141,6 +148,7 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	 * @return bits indicating the indices at which values are present
 	 */
 	default BitStore population() {
+		if (!isNullAllowed()) return Bits.ones(size());
 		return new AbstractBitStore() {
 
 			@Override
@@ -218,17 +226,13 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 			}
 
 			@Override
-			public W get(int index) {
-				V v = Store.this.get(index);
-				if (v == null) return null;
-				W w = fn.apply(v);
-				if (w == null) throw new RuntimeException("mapping fn returned null");
-				return w;
+			public int size() {
+				return Store.this.size();
 			}
 
 			@Override
-			public int size() {
-				return Store.this.size();
+			public boolean isNullAllowed() {
+				return Store.this.isNullAllowed();
 			}
 
 			@Override
@@ -239,6 +243,15 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 			@Override
 			public BitStore population() {
 				return Store.this.population();
+			}
+
+			@Override
+			public W get(int index) {
+				V v = Store.this.get(index);
+				if (v == null) return null;
+				W w = fn.apply(v);
+				if (w == null) throw new RuntimeException("mapping fn returned null");
+				return w;
 			}
 
 		};
