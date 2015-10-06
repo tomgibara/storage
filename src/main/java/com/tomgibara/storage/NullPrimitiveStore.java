@@ -105,7 +105,7 @@ abstract class NullPrimitiveStore<V> implements Store<V> {
 
 	@Override
 	public BitStore population() {
-		return populated.immutable();
+		return populated.immutableView();
 	}
 
 	@Override

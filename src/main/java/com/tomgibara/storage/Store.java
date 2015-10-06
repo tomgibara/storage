@@ -273,20 +273,10 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	}
 	
 	@Override
-	default Store<V> mutable() {
-		return isMutable() ? this : mutableCopy();
-	}
-	
-	@Override
 	default Store<V> mutableCopy() {
 		return resizedCopy(size());
 	}
 
-	@Override
-	default Store<V> immutable() {
-		return isMutable() ? immutableView() : this;
-	}
-	
 	@Override
 	default Store<V> immutableCopy() {
 		return new ImmutableArrayStore<>(Stores.toArray(this), count());
