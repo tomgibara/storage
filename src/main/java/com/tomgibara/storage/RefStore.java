@@ -4,7 +4,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.util.Arrays;
 
-abstract class RefStore<V> implements Store<V> {
+abstract class RefStore<V> extends AbstractStore<V> {
 
 	private final ReferenceQueue<V> queue = new ReferenceQueue<V>();
 	private final Reference<V>[] refs;

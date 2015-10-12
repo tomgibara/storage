@@ -2,7 +2,7 @@ package com.tomgibara.storage;
 
 import com.tomgibara.bits.BitStore;
 
-final class ImmutableStore<V> implements Store<V> {
+final class ImmutableStore<V> extends AbstractStore<V> {
 
 	private Store<V> store;
 	

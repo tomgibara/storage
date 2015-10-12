@@ -218,7 +218,7 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	}
 
 	default <W> Store<W> transformedBy(Class<W> type, Function<V, W> fn) {
-		return new Store<W>() {
+		return new AbstractStore<W>() {
 
 			@Override
 			public Class<W> valueType() {

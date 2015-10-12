@@ -5,7 +5,7 @@ import java.util.Arrays;
 import com.tomgibara.bits.BitStore;
 import com.tomgibara.bits.Bits;
 
-abstract class NullPrimitiveStore<V> implements Store<V> {
+abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 
 	private static final int BYTE    =  1;
 	private static final int FLOAT   =  2;

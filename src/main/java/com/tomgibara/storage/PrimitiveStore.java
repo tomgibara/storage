@@ -2,7 +2,7 @@ package com.tomgibara.storage;
 
 import java.util.Arrays;
 
-abstract class PrimitiveStore<V> implements Store<V> {
+abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 	private static final int BYTE    =  1;
 	private static final int FLOAT   =  2;

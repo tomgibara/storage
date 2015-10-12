@@ -3,7 +3,7 @@ package com.tomgibara.storage;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
-class ArrayStore<V> implements Store<V> {
+class ArrayStore<V> extends AbstractStore<V> {
 
 	final V[] values;
 	

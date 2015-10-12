@@ -3,7 +3,7 @@ package com.tomgibara.storage;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
-class NullArrayStore<V> implements Store<V> {
+class NullArrayStore<V> extends AbstractStore<V> {
 
 	final V[] values;
 	int count;

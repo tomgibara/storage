@@ -2,7 +2,7 @@ package com.tomgibara.storage;
 
 import java.util.Arrays;
 
-final class ImmutableArrayStore<V> implements Store<V> {
+final class ImmutableArrayStore<V> extends AbstractStore<V> {
 
 	private final V[] values;
 	private final int count;
