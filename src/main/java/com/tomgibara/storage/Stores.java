@@ -19,7 +19,7 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static <V> Store<V> newStore(boolean nullsAllowed, V[] values) {
+	public static <V> Store<V> objects(boolean nullsAllowed, V[] values) {
 		checkValuesNotNull(values);
 		return nullsAllowed ? new NullArrayStore<>(values) : new ArrayStore<>(values);
 	}
@@ -35,9 +35,9 @@ public final class Stores {
 	 *            the number of non-null values in the array
 	 * @return a store that mediates access to the array
 	 */
-	public static <V> Store<V> newStore(V[] values, int count) {
-		checkValuesNotNull(values);
+	public static <V> Store<V> objects(int count, V[] values) {
 		if (count < 0) throw new IllegalArgumentException("negative count");
+		checkValuesNotNull(values);
 		return new NullArrayStore<>(values, count);
 	}
 	
@@ -49,9 +49,9 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that returns values from array
 	 */
-	public static <V> Store<V> newImmutableStore(V[] values, boolean mayContainNull) {
+	public static <V> Store<V> immutableObjects(boolean nullsAllowed, V[] values) {
 		checkValuesNotNull(values);
-		return new ImmutableArrayStore<>(values, mayContainNull);
+		return new ImmutableArrayStore<>(values, nullsAllowed);
 	}
 	
 	/**
@@ -66,9 +66,9 @@ public final class Stores {
 	 *            the number of non-null values in the array
 	 * @return a store that mediates access to the array
 	 */
-	public static <V> Store<V> newImmutableStore(V[] values, int count) {
-		checkValuesNotNull(values);
+	public static <V> Store<V> immutableObjects(int count, V[] values) {
 		if (count < 0) throw new IllegalArgumentException("negative size");
+		checkValuesNotNull(values);
 		return new ImmutableArrayStore<>(values, count);
 	}
 	
