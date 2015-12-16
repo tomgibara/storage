@@ -40,7 +40,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 	}
 	
 	protected NullPrimitiveStore(int size) {
-		populated = Bits.newBitStore(size);
+		populated = Bits.store(size);
 		this.count = 0;
 	}
 
