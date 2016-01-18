@@ -57,7 +57,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 	
 	@Override
 	public void clear() {
-		populated.fillWithZeros();
+		populated.clear();
 		count = 0;
 	}
 
@@ -69,7 +69,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 			if (!populated.isMutable()) throw new IllegalStateException("immutable");
 			// do this first in case filling fails due to class error
 			fillImpl(value);
-			populated.fillWithOnes();
+			populated.fill();
 			count = populated.size();
 		}
 	}

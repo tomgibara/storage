@@ -148,7 +148,7 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	 * @return bits indicating the indices at which values are present
 	 */
 	default BitStore population() {
-		if (!isNullAllowed()) return Bits.ones(size());
+		if (!isNullAllowed()) return Bits.oneBits(size());
 		return new AbstractBitStore() {
 
 			@Override
