@@ -55,5 +55,22 @@ public class StoreTest extends TestCase {
 		assertEquals(u.asList(), s.asList());
 		assertEquals(asList(1,2), s.resizedCopy(2).asList());
 	}
-	
+
+	public void testObjectMethods() {
+		Store<Integer> s = Stores.ints(1, 2, 3);
+		Store<Integer> t = Stores.intsAndNull(1, 2, 3);
+		Store<Object> u = Stores.objects(true, new Object[] {1,2,3});
+		Store<Integer> v = Stores.ints(1, 2, 4);
+
+		assertTrue(s.equals(s));
+		assertTrue(s.equals(t));
+		assertTrue(s.equals(u));
+		assertFalse(s.equals(v));
+		
+		assertEquals(s.hashCode(), t.hashCode());
+		assertEquals(s.hashCode(), u.hashCode());
+
+		assertEquals(s.toString(), t.toString());
+		assertEquals(s.toString(), u.toString());
+	}
 }

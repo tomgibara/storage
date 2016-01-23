@@ -25,10 +25,26 @@ import com.tomgibara.fundament.Transposable;
  * 
  * <p>
  * Due to the provision of default methods, only the methods
- * {@link #valueType()}, {@link #size()} and
- * {@link #get(int)} need to be implemented to provide an immutable store
- * implementation. If a store is mutable, the methods {@link #set(int, Object)}
- * and {@link #isMutable()} must also be implemented.
+ * {@link #valueType()}, {@link #size()} and {@link #get(int)} need to be
+ * implemented to provide an immutable store implementation. If a store is
+ * mutable, the methods {@link #set(int, Object)} and {@link #isMutable()} must
+ * also be implemented.
+ * 
+ * <p>
+ * Store implementations are expected to implement the Java object methods as
+ * follows:
+ * 
+ * <ul>
+ * <li>Two stores are equal if their {@link #asList()} representations are
+ * equal.
+ * <li>The hashcode of a store is the hashcode of its list representation.
+ * <li>The string representation of a store is equal to
+ * <code>asList().toString()</code>.
+ * </ul>
+ * 
+ * <p>
+ * {@link AbstractStore} is convenient base class that predefines this
+ * behaviour.
  * 
  * @author Tom Gibara
  *
