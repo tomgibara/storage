@@ -21,6 +21,10 @@ public interface Storage<V> {
 	/**
 	 * Genericized storage backed by <code>Object</code> arrays.
 	 * 
+	 * @param nullsAllowed
+	 *            whether the returned storage will accept null values
+	 * @param <V>
+	 *            the type of values to be stored
 	 * @return genericized storage
 	 */
 	@SuppressWarnings("unchecked")
@@ -41,6 +45,10 @@ public interface Storage<V> {
 	 * 
 	 * @param type
 	 *            the type of the values to be stored
+	 * @param nullsAllowed
+	 *            whether the returned storage will accept null values
+	 * @param <V>
+	 *            the type of values to be stored
 	 * @throws IllegalArgumentException
 	 *             if the supplied type is null
 	 * @return typed storage
@@ -63,6 +71,8 @@ public interface Storage<V> {
 	 * activity, sizes reported by the weak stores may overestimate the number
 	 * of values stored.
 	 * 
+	 * @param <V>
+	 *            the type of values to be stored
 	 * @return weak storage
 	 */
 	static <V> Storage<V> weak() {
@@ -74,6 +84,8 @@ public interface Storage<V> {
 	 * activity, sizes reported by the soft stores may overestimate the number
 	 * of values stored.
 	 * 
+	 * @param <V>
+	 *            the type of values to be stored
 	 * @return soft storage
 	 */
 	static <V> Storage<V> soft() {
@@ -100,8 +112,8 @@ public interface Storage<V> {
 	 * switch to a regular linear bit-packing strategy.
 	 * 
 	 * @param range
-	 *            defines the range <code>[0..range)</code that small values may
-	 *            take in this store
+	 *            defines the range <code>[0..range)</code> that small values
+	 *            may take in this store
 	 * @param nullsAllowed
 	 *            whether the returned storage will accept null values
 	 * @return small value storage

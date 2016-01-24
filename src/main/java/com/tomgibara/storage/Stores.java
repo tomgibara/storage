@@ -17,6 +17,10 @@ public final class Stores {
 	 * 
 	 * @param values
 	 *            the values of the store
+	 * @param nullsAllowed
+	 *            whether the returned storage will accept null values
+	 * @param <V>
+	 *            the type of values to be stored
 	 * @return a store that mediates access to the array
 	 */
 	public static <V> Store<V> objects(boolean nullsAllowed, V[] values) {
@@ -33,6 +37,8 @@ public final class Stores {
 	 *            the values of the store
 	 * @param count
 	 *            the number of non-null values in the array
+	 * @param <V>
+	 *            the type of values to be stored
 	 * @return a store that mediates access to the array
 	 */
 	public static <V> Store<V> objects(int count, V[] values) {
@@ -47,6 +53,10 @@ public final class Stores {
 	 * 
 	 * @param values
 	 *            the values of the store
+	 * @param nullsAllowed
+	 *            whether the returned storage will accept null values
+	 * @param <V>
+	 *            the type of values to be stored
 	 * @return a store that returns values from array
 	 */
 	public static <V> Store<V> immutableObjects(boolean nullsAllowed, V[] values) {
@@ -76,7 +86,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing byte array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -91,7 +101,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing byte array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -106,7 +116,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing short array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -121,7 +131,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing short array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -136,7 +146,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing integer array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -151,7 +161,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing integer array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -166,7 +176,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing long array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -181,7 +191,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing long array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -196,7 +206,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing boolean array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -211,7 +221,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing boolean array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -226,7 +236,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing char array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -241,7 +251,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing char array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -256,7 +266,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing float array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -271,7 +281,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing float array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -286,7 +296,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing double array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -301,7 +311,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing double array. Values may
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link #population()}.
+	 * index may be obtained from the {@link Store#population()}.
 	 * 
 	 * @param values
 	 *            the values of the store
