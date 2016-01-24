@@ -81,6 +81,38 @@ public interface Storage<V> {
 	}
 	
 	/**
+	 * <p>
+	 * Storage that packs bounded non-negative integer values into minimal bit
+	 * sizes. Such storage may be useful in situations where a very large number
+	 * of small integer values need to be stored without occupying more memory
+	 * than is needed. The range must be less than
+	 * <code>Integer.MAX_VALUE</code>
+	 * 
+	 * <p>
+	 * Generally values in a range are packed linearly using the least number of
+	 * bits needed to represent them individually. However, in the present
+	 * implementation, ternary values ([0,1,2] or [null, 0,1]) and quinary
+	 * values ([0,1,2,3,4] or [null, 0, 1, 2, 3]) are treated specially to avoid
+	 * underutilized memory. Ternary storage requires 8 bits for every 5 values
+	 * and quinary storage requires 7 bits for every 3 values. As a result, the
+	 * performance of ternary and quinary storage may degraded in some
+	 * applications. In any such case, it is possible to use a larger range to
+	 * switch to a regular linear bit-packing strategy.
+	 * 
+	 * @param range
+	 *            defines the range <code>[0..range)</code that small values may
+	 *            take in this store
+	 * @param nullsAllowed
+	 *            whether the returned storage will accept null values
+	 * @return small value storage
+	 */
+	public static Storage<Integer> smallValues(int range, boolean nullsAllowed) {
+		if (range < 0) throw new IllegalArgumentException("negative range");
+		if (range == Integer.MAX_VALUE) throw new IllegalArgumentException("range too large");
+		return new SmallValueStorage(range, nullsAllowed);
+	}
+	
+	/**
 	 * Creates a new store with the requested size
 	 * 
 	 * @param size
