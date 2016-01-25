@@ -6,7 +6,7 @@ import com.tomgibara.bits.BitStore;
 import com.tomgibara.bits.BitWriter;
 import com.tomgibara.bits.Bits;
 
-class SmallValueStorage implements Storage<Integer> {
+class SmallValueStores {
 
 	// ternary packing
 	
@@ -72,33 +72,28 @@ class SmallValueStorage implements Storage<Integer> {
 		}
 	}
 
-	private final int range;
-	private final boolean nullsAllowed;
-
-	SmallValueStorage(int range, boolean nullsAllowed) {
-		this.range = range;
-		this.nullsAllowed = nullsAllowed;
-	}
-
-	@Override
-	public Store<Integer> newStore(int size) throws IllegalArgumentException {
-		if (size < 0) throw new IllegalArgumentException("negative size");
+	static Storage<Integer> newStorage(int range, boolean nullsAllowed) {
 		if (nullsAllowed) {
 			switch (range) {
-			case 1: return new ZeroOrNullStore(size);
-			case 2: return new NullableStore(new TernaryStore(size));
-			case 4: return new NullableStore(new QuinaryStore(size));
-			default: return new NullableStore(new ArbitraryStore(size, range + 1));
+			case 1:  return size -> new ZeroOrNullStore(checkedSize(size));
+			case 2:  return size -> new NullableStore(new TernaryStore(checkedSize(size)));
+			case 4:  return size -> new NullableStore(new QuinaryStore(checkedSize(size)));
+			default: return size -> new NullableStore(new ArbitraryStore(checkedSize(size), range + 1));
 			}
 		} else {
 			switch (range) {
-			case 1: return new ConstantStore(size);
-			case 2: return new ZeroOrOneStore(size);
-			case 3: return new TernaryStore(size);
-			case 5: return new QuinaryStore(size);
-			default: return new ArbitraryStore(size, range);
+			case 1:  return size -> new ConstantStore(checkedSize(size));
+			case 2:  return size -> new ZeroOrOneStore(checkedSize(size));
+			case 3:  return size -> new TernaryStore(checkedSize(size));
+			case 5:  return size -> new QuinaryStore(checkedSize(size));
+			default: return size -> new ArbitraryStore(checkedSize(size), range);
 			}
 		}
+	}
+	
+	private static int checkedSize(int size) {
+		if (size < 0) throw new IllegalArgumentException("negative size");
+		return size;
 	}
 	
 	private static abstract class SmallValueStore extends AbstractStore<Integer> {
@@ -165,8 +160,7 @@ class SmallValueStorage implements Storage<Integer> {
 
 	}
 
-	//TODO return to extending SVS
-	class ConstantStore extends NonNullStore {
+	static class ConstantStore extends NonNullStore {
 
 		private final boolean mutable;
 		
@@ -246,7 +240,7 @@ class SmallValueStorage implements Storage<Integer> {
 		void fillInt(int value) { }
 	}
 	
-	class ZeroOrNullStore extends SmallValueStore {
+	static class ZeroOrNullStore extends SmallValueStore {
 
 		private final BitStore bits;
 		
@@ -317,7 +311,7 @@ class SmallValueStorage implements Storage<Integer> {
 		}
 	}
 
-	class ZeroOrOneStore extends SmallValueStore {
+	static class ZeroOrOneStore extends SmallValueStore {
 
 		private final BitStore bits;
 		

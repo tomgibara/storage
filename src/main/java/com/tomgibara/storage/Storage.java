@@ -121,7 +121,7 @@ public interface Storage<V> {
 	public static Storage<Integer> smallValues(int range, boolean nullsAllowed) {
 		if (range < 0) throw new IllegalArgumentException("negative range");
 		if (range == Integer.MAX_VALUE) throw new IllegalArgumentException("range too large");
-		return new SmallValueStorage(range, nullsAllowed);
+		return SmallValueStores.newStorage(range, nullsAllowed);
 	}
 	
 	/**
