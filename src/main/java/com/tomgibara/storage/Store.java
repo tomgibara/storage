@@ -188,7 +188,6 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	 *
 	 * @return a list backed by the values in the store.
 	 */
-
 	default List<V> asList() {
 		return new AbstractList<V>() {
 
@@ -229,10 +228,46 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 		};
 	}
 
+	/**
+	 * <p>
+	 * Derives a store by applying a function over the store values. The
+	 * returned store is immutable, but provides a live view of the original
+	 * store.
+	 * 
+	 * <p>
+	 * Note that the supplied function must preserve null. That is
+	 * <code>fn(a) == null</code> if and only if <code>a == null</code>.
+	 * 
+	 * @param fn
+	 *            a function over the store elements
+	 * 
+	 * @return a view of this store under the specified function
+	 * @see #asTransformedBy(Class, Function)
+	 */
 	default Store<V> asTransformedBy(Function<V, V> fn) {
 		return asTransformedBy(valueType(), fn);
 	}
 
+	/**
+	 * <p>
+	 * Derives a store by applying a function over the store values. The
+	 * returned store is immutable, but provides a live view of the original
+	 * store.
+	 * 
+	 * <p>
+	 * Note that the supplied function must preserve null. That is
+	 * <code>fn(a) == null</code> if and only if <code>a == null</code>.
+	 * 
+	 * @param type
+	 *            the type of values returned by the function
+	 * @param fn
+	 *            a function over the store elements
+	 * @param <W>
+	 *            the type of value in the returned store
+	 * 
+	 * @return a view of this store under the specified function
+	 * @see #asTransformedBy(Function)
+	 */
 	default <W> Store<W> asTransformedBy(Class<W> type, Function<V, W> fn) {
 		return new AbstractStore<W>() {
 
@@ -274,7 +309,8 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	}
 
 	// transposable methods
-	
+
+	@Override
 	default public void transpose(int i, int j) {
 		if (i == j) return;
 		V v = get(i);
@@ -284,6 +320,7 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 
 	// mutability methods
 
+	@Override
 	default boolean isMutable() {
 		return false;
 	}
