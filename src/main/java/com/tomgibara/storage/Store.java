@@ -229,11 +229,11 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 		};
 	}
 
-	default Store<V> transformedBy(Function<V, V> fn) {
-		return transformedBy(valueType(), fn);
+	default Store<V> asTransformedBy(Function<V, V> fn) {
+		return asTransformedBy(valueType(), fn);
 	}
 
-	default <W> Store<W> transformedBy(Class<W> type, Function<V, W> fn) {
+	default <W> Store<W> asTransformedBy(Class<W> type, Function<V, W> fn) {
 		return new AbstractStore<W>() {
 
 			@Override

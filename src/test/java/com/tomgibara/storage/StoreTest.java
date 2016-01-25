@@ -9,7 +9,7 @@ public class StoreTest extends TestCase {
 		
 		Store<Integer> s = Stores.intsAndNull(1,2,3);
 		assertTrue(s.isNullAllowed());
-		Store<Integer> t = s.transformedBy(i -> 2 * i);
+		Store<Integer> t = s.asTransformedBy(i -> 2 * i);
 		assertEquals(s.count(), t.count());
 		for (int i = 0; i < s.count(); i++) {
 			assertEquals(s.get(i) * 2, t.get(i).intValue());
