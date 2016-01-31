@@ -53,8 +53,10 @@ public interface Storage<V> {
 	 *             if the supplied type is null
 	 * @return typed storage
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	static <V> Storage<V> typed(Class<V> type, boolean nullsAllowed) throws IllegalArgumentException {
 		if (type == null) throw new IllegalArgumentException("null type");
+		if (type.isEnum()) return nullsAllowed ? new NullEnumStorage(type) :  new EnumStorage(type);
 		if (nullsAllowed) {
 			return type.isPrimitive() ?
 					(size -> NullPrimitiveStore.newStore(type, size)) :

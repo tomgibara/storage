@@ -1,6 +1,7 @@
 package com.tomgibara.storage;
 
 import java.util.Collections;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -67,6 +68,11 @@ public class StorageTest extends TestCase {
 			s.fill(1);
 			assertEquals(Collections.nCopies(23, 1), s.asList());
 		}
+
+		{
+			Storage<Integer> t = Storage.smallValues(4, false);
+			Store<Integer> s = t.newStore(10);
+		}
 		
 		{
 			Storage<Integer> t = Storage.smallValues(5, false);
@@ -81,5 +87,43 @@ public class StorageTest extends TestCase {
 				assertEquals(i % 5, s.get(i).intValue());
 			}
 		}
+	}
+
+	public void testEnumStorage() {
+
+		Storage<Tri> t = Storage.typed(Tri.class, false);
+		Store<Tri> s = t.newStore(10);
+		assertEquals(Tri.SCALENE, s.get(0));
+		assertEquals(Tri.SCALENE, s.get(9));
+		assertEquals(Tri.SCALENE, s.set(0, Tri.ISOSCELES));
+		assertEquals(Tri.ISOSCELES, s.set(0, Tri.EQUILATERAL));
+		assertEquals(Tri.EQUILATERAL, s.set(0, Tri.SCALENE));
+		s.fill(Tri.ISOSCELES);
+		assertEquals(Collections.nCopies(10, Tri.ISOSCELES), s.asList());
+		try {
+			s.asList().set(0, null);
+			fail();
+		} catch (IllegalArgumentException e) {
+			/* expected */
+		}
+	}
+
+	public void testNullEnumStorage() {
+
+		Storage<Tri> t = Storage.typed(Tri.class, true);
+		Store<Tri> s = t.newStore(10);
+		assertEquals(null, s.set(0, Tri.ISOSCELES));
+		assertEquals(Tri.ISOSCELES, s.set(0, Tri.EQUILATERAL));
+		assertEquals(Tri.EQUILATERAL, s.set(0, Tri.SCALENE));
+		s.fill(Tri.ISOSCELES);
+		assertEquals(Collections.nCopies(10, Tri.ISOSCELES), s.asList());
+		s.set(0, null);
+	}
+
+	enum Tri {
+
+		SCALENE,
+		ISOSCELES,
+		EQUILATERAL
 	}
 }
