@@ -56,7 +56,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 	
 	@Override
 	public boolean isNullAllowed() {
-		return true;
+		return false;
 	}
 
 	// mutability
