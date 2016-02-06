@@ -1,12 +1,17 @@
 package com.tomgibara.storage;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Collections;
-import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class StorageTest extends TestCase {
+public class StorageTest {
 
+	@Test
 	public void testSmallValueStorage() {
 		
 		{
@@ -89,6 +94,7 @@ public class StorageTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testEnumStorage() {
 
 		Storage<Tri> t = Storage.typed(Tri.class, false);
@@ -108,6 +114,7 @@ public class StorageTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testNullEnumStorage() {
 
 		Storage<Tri> t = Storage.typed(Tri.class, true);

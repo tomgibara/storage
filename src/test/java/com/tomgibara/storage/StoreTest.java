@@ -1,10 +1,17 @@
 package com.tomgibara.storage;
 
 import static java.util.Arrays.asList;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-public class StoreTest extends TestCase {
+import org.junit.Test;
 
+public class StoreTest {
+
+	@Test
 	public void testTransformedBy() {
 		
 		Store<Integer> s = Stores.intsAndNull(1,2,3);
@@ -46,6 +53,7 @@ public class StoreTest extends TestCase {
 		assertEquals(asList(1,2), s.resizedCopy(2).asList());
 	}
 	
+	@Test
 	public void testResizedCopy() {
 		Store<Integer> s = Stores.ints(1,2,3);
 		Store<Integer> t = s.resizedCopy(5);
@@ -61,6 +69,7 @@ public class StoreTest extends TestCase {
 		assertEquals(asList(1,2), s.resizedCopy(2).asList());
 	}
 
+	@Test
 	public void testObjectMethods() {
 		Store<Integer> s = Stores.ints(1, 2, 3);
 		Store<Integer> t = Stores.intsAndNull(1, 2, 3);
@@ -78,4 +87,5 @@ public class StoreTest extends TestCase {
 		assertEquals(s.toString(), t.toString());
 		assertEquals(s.toString(), u.toString());
 	}
+
 }
