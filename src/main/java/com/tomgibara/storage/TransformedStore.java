@@ -1,5 +1,6 @@
 package com.tomgibara.storage;
 
+import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -109,4 +110,10 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 		return new TransformedStore<V,W>(store.immutableView(), type, fn);
 	}
 
+	// iterable methods
+	
+	@Override
+	public Iterator<W> iterator() {
+		return new StoreIterator.Transformed<>(store, fn);
+	}
 }

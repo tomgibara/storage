@@ -23,6 +23,16 @@ public class StoreTest {
 		for (int i = 0; i < s.count(); i++) {
 			assertEquals(s.get(i) * 2, t.get(i).intValue());
 		}
+		
+		Iterator<Integer> it = t.iterator();
+		assertTrue(it.hasNext());
+		assertEquals(2, it.next().intValue());
+		assertTrue(it.hasNext());
+		assertEquals(4, it.next().intValue());
+		assertTrue(it.hasNext());
+		assertEquals(6, it.next().intValue());
+		assertFalse(it.hasNext());
+		
 		assertTrue(s.isMutable());
 		assertTrue(t.isMutable());
 		t.set(0, null);

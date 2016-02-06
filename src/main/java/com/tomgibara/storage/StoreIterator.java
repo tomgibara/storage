@@ -3,16 +3,17 @@ package com.tomgibara.storage;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.tomgibara.bits.BitStore.Positions;
 
-class StoreIterator<V> implements Iterator<V> {
+abstract class StoreIterator<V,W> implements Iterator<W> {
 
-	private final Store<V> store;
+	final Store<V> store;
 	private final Positions positions;
 	private int previous = -1;
 
-	StoreIterator(Store<V> store) {
+	private StoreIterator(Store<V> store) {
 		this.store = store;
 		this.positions = store.population().ones().positions();
 	}
@@ -23,7 +24,7 @@ class StoreIterator<V> implements Iterator<V> {
 	}
 
 	@Override
-	public V next() {
+	public W next() {
 		if (!positions.hasNext()) throw new NoSuchElementException();
 		previous = positions.nextPosition();
 		return get(previous);
@@ -32,23 +33,49 @@ class StoreIterator<V> implements Iterator<V> {
 	@Override
 	public void remove() {
 		if (previous == -1) throw new NoSuchElementException();
-		V value = get(previous);
+		W value = get(previous);
 		if (value == null) throw new IllegalStateException();
 		set(previous, null);
 	}
 
 	@Override
-	public void forEachRemaining(Consumer<? super V> action) {
+	public void forEachRemaining(Consumer<? super W> action) {
 		while (positions.hasNext()) {
 			action.accept(get(positions.nextPosition()));
 		}
 	}
-	
-	V get(int index) {
-		return store.get(index);
+
+	abstract W get(int index);
+
+	abstract void set(int index, W v);
+
+	static final class Regular<V> extends StoreIterator<V,V> {
+
+		Regular(Store<V> store) { super(store); }
+		@Override V get(int index) { return store.get(index); }
+		@Override void set(int index, V v) { store.set(index, v); }
+
 	}
 
-	void set(int index, V v) {
-		store.set(index, v);
+	static final class Transformed<V,W> extends StoreIterator<V,W> {
+
+		private final Function<V,W> fn;
+		
+		Transformed(Store<V> store, Function<V,W> fn) {
+			super(store);
+			this.fn = fn;
+		}
+		
+		@Override
+		W get(int index) {
+			return fn.apply(store.get(index));
+		}
+
+		@Override
+		void set(int index, W v) {
+			if (v != null) throw new IllegalArgumentException("non-null v");
+			store.set(index, null);
+		}
+
 	}
 }

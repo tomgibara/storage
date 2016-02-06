@@ -277,11 +277,16 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 		return new TransformedStore<V,W>(this, type, fn);
 	}
 
+	default <W> Iterator<W> transformedIterator(Function<V, W> fn) {
+		if (fn == null) throw new IllegalArgumentException("null fn");
+		return new StoreIterator.Transformed<>(this, fn);
+	}
+	
 	// iterable methods
 	
 	@Override
 	default Iterator<V> iterator() {
-		return new StoreIterator<>(this);
+		return new StoreIterator.Regular<>(this);
 	}
 
 	@Override
