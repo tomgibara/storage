@@ -15,6 +15,11 @@ public class StoreTest extends TestCase {
 			assertEquals(s.get(i) * 2, t.get(i).intValue());
 		}
 		assertTrue(s.isMutable());
+		assertTrue(t.isMutable());
+		t.set(0, null);
+		assertNull(s.get(0));
+		
+		t = s.immutableView().asTransformedBy(i -> 2 * i);
 		assertFalse(t.isMutable());
 		try {
 			t.transpose(0, 1);

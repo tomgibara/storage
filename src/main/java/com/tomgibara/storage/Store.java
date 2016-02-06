@@ -1,9 +1,12 @@
 package com.tomgibara.storage;
 
 import java.util.AbstractList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import com.tomgibara.bits.AbstractBitStore;
 import com.tomgibara.bits.BitStore;
@@ -51,7 +54,7 @@ import com.tomgibara.fundament.Transposable;
  * @param <V>
  *            the type of the values stored
  */
-public interface Store<V> extends Mutability<Store<V>>, Transposable {
+public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposable {
 
 	// store methods
 
@@ -230,9 +233,9 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 
 	/**
 	 * <p>
-	 * Derives a store by applying a function over the store values. The
-	 * returned store is immutable, but provides a live view of the original
-	 * store.
+	 * Derives a store by applying a function over the store values. It provides
+	 * a live view of the original store. The mutability of the returned store
+	 * matches the mutability of this store, but only null values may be set.
 	 * 
 	 * <p>
 	 * Note that the supplied function must preserve null. That is
@@ -244,15 +247,15 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	 * @return a view of this store under the specified function
 	 * @see #asTransformedBy(Class, Function)
 	 */
-	default Store<V> asTransformedBy(Function<V, V> fn) {
+	default Store<V> asTransformedBy(UnaryOperator<V> fn) {
 		return asTransformedBy(valueType(), fn);
 	}
 
 	/**
 	 * <p>
-	 * Derives a store by applying a function over the store values. The
-	 * returned store is immutable, but provides a live view of the original
-	 * store.
+	 * Derives a store by applying a function over the store values. It provides
+	 * a live view of the original store. The mutability of the returned store
+	 * matches the mutability of this store, but only null values may be set.
 	 * 
 	 * <p>
 	 * Note that the supplied function must preserve null. That is
@@ -269,45 +272,38 @@ public interface Store<V> extends Mutability<Store<V>>, Transposable {
 	 * @see #asTransformedBy(Function)
 	 */
 	default <W> Store<W> asTransformedBy(Class<W> type, Function<V, W> fn) {
-		return new AbstractStore<W>() {
-
-			@Override
-			public Class<W> valueType() {
-				return type;
-			}
-
-			@Override
-			public int size() {
-				return Store.this.size();
-			}
-
-			@Override
-			public boolean isNullAllowed() {
-				return Store.this.isNullAllowed();
-			}
-
-			@Override
-			public int count() {
-				return Store.this.count();
-			}
-
-			@Override
-			public BitStore population() {
-				return Store.this.population();
-			}
-
-			@Override
-			public W get(int index) {
-				V v = Store.this.get(index);
-				if (v == null) return null;
-				W w = fn.apply(v);
-				if (w == null) throw new RuntimeException("mapping fn returned null");
-				return w;
-			}
-
-		};
+		if (type == null) throw new IllegalArgumentException("null type");
+		if (fn == null) throw new IllegalArgumentException("null fn");
+		return new TransformedStore<V,W>(this, type, fn);
 	}
 
+	// iterable methods
+	
+	@Override
+	default Iterator<V> iterator() {
+		return new StoreIterator<>(this);
+	}
+
+	@Override
+	public default void forEach(Consumer<? super V> action) {
+		int size = size();
+		if (isNullAllowed()) {
+			for (int i = 0; i < size; i++) {
+				V v = get(size);
+				if (v != null) action.accept(v);
+			}
+		} else {
+			for (int i = 0; i < size; i++) {
+				action.accept(get(size));
+			}
+		}
+	}
+
+	@Override
+	public default Spliterator<V> spliterator() {
+		return new StoreSpliterator<>(this);
+	}
+	
 	// transposable methods
 
 	@Override
