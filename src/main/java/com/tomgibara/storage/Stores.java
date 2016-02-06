@@ -13,7 +13,9 @@ public final class Stores {
 	// public scoped methods
 
 	/**
-	 * Creates a mutable store that wraps an existing array.
+	 * Creates a mutable store that wraps an existing array. Supplying an array
+	 * containing nulls and specifying that nulls are not allowed is likely to
+	 * cause malfunction.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -23,7 +25,8 @@ public final class Stores {
 	 *            the type of values to be stored
 	 * @return a store that mediates access to the array
 	 */
-	public static <V> Store<V> objects(boolean nullsAllowed, V[] values) {
+	@SafeVarargs
+	public static <V> Store<V> objects(boolean nullsAllowed, V... values) {
 		checkValuesNotNull(values);
 		return nullsAllowed ? new NullArrayStore<>(values) : new ArrayStore<>(values);
 	}
@@ -41,7 +44,8 @@ public final class Stores {
 	 *            the type of values to be stored
 	 * @return a store that mediates access to the array
 	 */
-	public static <V> Store<V> objects(int count, V[] values) {
+	@SafeVarargs
+	public static <V> Store<V> objects(int count, V... values) {
 		if (count < 0) throw new IllegalArgumentException("negative count");
 		checkValuesNotNull(values);
 		return new NullArrayStore<>(values, count);
@@ -59,7 +63,8 @@ public final class Stores {
 	 *            the type of values to be stored
 	 * @return a store that returns values from array
 	 */
-	public static <V> Store<V> immutableObjects(boolean nullsAllowed, V[] values) {
+	@SafeVarargs
+	public static <V> Store<V> immutableObjects(boolean nullsAllowed, V... values) {
 		checkValuesNotNull(values);
 		return new ImmutableArrayStore<>(values, nullsAllowed);
 	}
@@ -76,17 +81,15 @@ public final class Stores {
 	 *            the number of non-null values in the array
 	 * @return a store that mediates access to the array
 	 */
-	public static <V> Store<V> immutableObjects(int count, V[] values) {
+	@SafeVarargs
+	public static <V> Store<V> immutableObjects(int count, V... values) {
 		if (count < 0) throw new IllegalArgumentException("negative size");
 		checkValuesNotNull(values);
 		return new ImmutableArrayStore<>(values, count);
 	}
 	
 	/**
-	 * Creates a mutable store that wraps an existing byte array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing byte array.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -113,10 +116,7 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing short array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing short array.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -143,10 +143,7 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing integer array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing integer array.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -173,10 +170,7 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing long array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing long array.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -203,10 +197,7 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing boolean array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing boolean array
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -233,10 +224,7 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing char array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing char array.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -263,10 +251,7 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing float array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing float array.
 	 * 
 	 * @param values
 	 *            the values of the store
@@ -293,10 +278,7 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing double array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing double array.
 	 * 
 	 * @param values
 	 *            the values of the store
