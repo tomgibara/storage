@@ -7,6 +7,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Iterator;
+
 import org.junit.Test;
 
 public class StoreTest {
@@ -88,4 +90,19 @@ public class StoreTest {
 		assertEquals(s.toString(), u.toString());
 	}
 
+	@Test
+	public void testIterator() {
+		Store<Integer> s = Stores.intsAndNull(0,2,4,6,8);
+		s.set(1, null);
+		s.set(3, null);
+		Iterator<Integer> i = s.iterator();
+		assertTrue(i.hasNext());
+		assertEquals(0, i.next().intValue());
+		assertTrue(i.hasNext());
+		assertEquals(4, i.next().intValue());
+		assertTrue(i.hasNext());
+		assertEquals(8, i.next().intValue());
+		i.remove();
+		assertFalse(i.hasNext());
+	}
 }

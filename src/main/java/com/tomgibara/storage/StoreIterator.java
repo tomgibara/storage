@@ -10,6 +10,7 @@ class StoreIterator<V> implements Iterator<V> {
 
 	private final Store<V> store;
 	private final Positions positions;
+	private int previous = -1;
 
 	StoreIterator(Store<V> store) {
 		this.store = store;
@@ -24,17 +25,16 @@ class StoreIterator<V> implements Iterator<V> {
 	@Override
 	public V next() {
 		if (!positions.hasNext()) throw new NoSuchElementException();
-		return get(positions.nextPosition());
+		previous = positions.nextPosition();
+		return get(previous);
 	}
 
 	@Override
 	public void remove() {
-		int previous = positions.previousPosition();
 		if (previous == -1) throw new NoSuchElementException();
 		V value = get(previous);
 		if (value == null) throw new IllegalStateException();
 		set(previous, null);
-		previous = -1;
 	}
 
 	@Override
