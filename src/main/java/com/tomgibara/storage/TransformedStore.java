@@ -5,14 +5,19 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import com.tomgibara.bits.BitStore;
+import com.tomgibara.fundament.Bijection;
 
 class TransformedStore<V,W> extends AbstractStore<W> {
 
 	private final Store<V> store;
 	private final Class<W> type;
-	private final Function<V, W> fn;
+	private final Bijection<V, W> fn;
 	
 	TransformedStore(Store<V> store, Class<W> type, Function<V, W> fn) {
+		this(store, type, new OneWayBijection<>(fn));
+	}
+
+	TransformedStore(Store<V> store, Class<W> type, Bijection<V, W> fn) {
 		this.store = store;
 		this.type = type;
 		this.fn = fn;
@@ -78,14 +83,12 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 	
 	@Override
 	public void fill(W value) {
-		if (value != null) throw new IllegalArgumentException("non-null value");
-		store.clear();
+		store.fill(fn.disapply(value));
 	}
 
 	@Override
 	public W set(int index, W value) {
-		if (value != null) throw new IllegalArgumentException("non-null value");
-		return fn.apply( store.set(index, null) );
+		return fn.apply( store.set(index, fn.disapply(value)) );
 	}
 	
 	@Override
@@ -115,5 +118,28 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 	@Override
 	public Iterator<W> iterator() {
 		return new StoreIterator.Transformed<>(store, fn);
+	}
+
+	// inner classes
+	
+	private static class OneWayBijection<V,W> implements Bijection<V, W> {
+		
+		private final Function<V,W> fn;
+		
+		OneWayBijection(Function<V,W> fn) {
+			this.fn = fn;
+		}
+		
+		@Override
+		public W apply(V v) {
+			return fn.apply(v);
+		}
+		
+		@Override
+		public V disapply(W w) {
+			if (w != null) throw new IllegalArgumentException("non-null value");
+			return null;
+		}
+		
 	}
 }

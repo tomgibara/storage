@@ -2,6 +2,7 @@ package com.tomgibara.storage;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -69,6 +70,28 @@ abstract class StoreIterator<V,W> implements Iterator<W> {
 		@Override
 		W get(int index) {
 			return fn.apply(store.get(index));
+		}
+
+		@Override
+		void set(int index, W v) {
+			if (v != null) throw new IllegalArgumentException("non-null v");
+			store.set(index, null);
+		}
+
+	}
+
+	static final class BiTransformed<V,W> extends StoreIterator<V,W> {
+
+		private final BiFunction<Integer, V,W> fn;
+		
+		BiTransformed(Store<V> store, BiFunction<Integer, V,W> fn) {
+			super(store);
+			this.fn = fn;
+		}
+		
+		@Override
+		W get(int index) {
+			return fn.apply(index, store.get(index));
 		}
 
 		@Override

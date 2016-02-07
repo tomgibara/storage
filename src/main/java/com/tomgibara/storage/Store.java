@@ -4,6 +4,7 @@ import java.util.AbstractList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterator;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -11,6 +12,7 @@ import java.util.function.UnaryOperator;
 import com.tomgibara.bits.AbstractBitStore;
 import com.tomgibara.bits.BitStore;
 import com.tomgibara.bits.Bits;
+import com.tomgibara.fundament.Bijection;
 import com.tomgibara.fundament.Mutability;
 import com.tomgibara.fundament.Transposable;
 
@@ -251,6 +253,10 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 		return asTransformedBy(valueType(), fn);
 	}
 
+	default Store<V> asTransformedBy(Bijection<V,V> fn) {
+		return asTransformedBy(valueType(), fn);
+	}
+
 	/**
 	 * <p>
 	 * Derives a store by applying a function over the store values. It provides
@@ -270,8 +276,15 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * 
 	 * @return a view of this store under the specified function
 	 * @see #asTransformedBy(Function)
+	 * @see #asTransformedBy(Class, Bijection)
 	 */
 	default <W> Store<W> asTransformedBy(Class<W> type, Function<V, W> fn) {
+		if (type == null) throw new IllegalArgumentException("null type");
+		if (fn == null) throw new IllegalArgumentException("null fn");
+		return new TransformedStore<V,W>(this, type, fn);
+	}
+
+	default <W> Store<W> asTransformedBy(Class<W> type, Bijection<V, W> fn) {
 		if (type == null) throw new IllegalArgumentException("null type");
 		if (fn == null) throw new IllegalArgumentException("null fn");
 		return new TransformedStore<V,W>(this, type, fn);
@@ -280,6 +293,11 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	default <W> Iterator<W> transformedIterator(Function<V, W> fn) {
 		if (fn == null) throw new IllegalArgumentException("null fn");
 		return new StoreIterator.Transformed<>(this, fn);
+	}
+	
+	default <W> Iterator<W> transformedIterator(BiFunction<Integer, V, W> fn) {
+		if (fn == null) throw new IllegalArgumentException("null fn");
+		return new StoreIterator.BiTransformed<>(this, fn);
 	}
 	
 	// iterable methods

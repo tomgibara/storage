@@ -11,6 +11,8 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
+import com.tomgibara.fundament.Bijection;
+
 public class StoreTest {
 
 	@Test
@@ -49,7 +51,21 @@ public class StoreTest {
 		s.set(0, null);
 		assertNull(t.get(0));
 	}
-	
+
+	@Test
+	public void testTransformedByBijection() {
+		Store<Integer> s = Stores.intsAndNull(1,2,3);
+		Bijection<Integer, String> fn = new Bijection<Integer, String>() {
+			@Override public String apply(Integer t) { return t.toString(); }
+			@Override public Integer disapply(String r) { return Integer.parseInt(r); }
+		};
+		Store<String> t = s.asTransformedBy(String.class, fn);
+		assertEquals("1", t.get(0));
+		t.set(0, "1000");
+		assertEquals("1000", t.get(0));
+		assertEquals(1000, s.get(0).intValue());
+	}
+
 	public void testNullableResizedCopy() {
 		Store<Integer> s = Stores.intsAndNull(1,2,3);
 		Store<Integer> t = s.resizedCopy(5);
