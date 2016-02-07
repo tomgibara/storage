@@ -7,7 +7,7 @@ class NullArrayStore<V> extends AbstractStore<V> {
 
 	final V[] values;
 	int count;
-	
+
 	@SuppressWarnings("unchecked")
 	NullArrayStore(Class<V> type, int size) {
 		try {
@@ -17,7 +17,7 @@ class NullArrayStore<V> extends AbstractStore<V> {
 		}
 		this.count = 0;
 	}
-	
+
 	NullArrayStore(V[] values) {
 		this.values = values;
 		count = Stores.countNonNulls(values);
@@ -27,13 +27,13 @@ class NullArrayStore<V> extends AbstractStore<V> {
 		this.values = values;
 		this.count = count;
 	}
-	
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public Class<V> valueType() {
 		return (Class<V>) values.getClass().getComponentType();
 	}
-	
+
 	@Override
 	public int size() {
 		return values.length;
@@ -43,7 +43,7 @@ class NullArrayStore<V> extends AbstractStore<V> {
 	public int count() {
 		return count;
 	}
-	
+
 	@Override
 	public V get(int index) {
 		return values[index];
@@ -79,11 +79,11 @@ class NullArrayStore<V> extends AbstractStore<V> {
 
 	@Override
 	public boolean isMutable() { return true; }
-	
+
 	@Override
 	public Store<V> mutableCopy() { return new NullArrayStore<>(values.clone(), count); }
-	
+
 	@Override
 	public Store<V> immutableCopy() { return new ImmutableArrayStore<>(values.clone(), count); }
-	
+
 }

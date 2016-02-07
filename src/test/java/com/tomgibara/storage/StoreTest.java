@@ -17,7 +17,7 @@ public class StoreTest {
 
 	@Test
 	public void testTransformedBy() {
-		
+
 		Store<Integer> s = Stores.intsAndNull(1,2,3);
 		assertTrue(s.isNullAllowed());
 		Store<Integer> t = s.asTransformedBy(i -> 2 * i);
@@ -25,7 +25,7 @@ public class StoreTest {
 		for (int i = 0; i < s.count(); i++) {
 			assertEquals(s.get(i) * 2, t.get(i).intValue());
 		}
-		
+
 		Iterator<Integer> it = t.iterator();
 		assertTrue(it.hasNext());
 		assertEquals(2, it.next().intValue());
@@ -34,12 +34,12 @@ public class StoreTest {
 		assertTrue(it.hasNext());
 		assertEquals(6, it.next().intValue());
 		assertFalse(it.hasNext());
-		
+
 		assertTrue(s.isMutable());
 		assertTrue(t.isMutable());
 		t.set(0, null);
 		assertNull(s.get(0));
-		
+
 		t = s.immutableView().asTransformedBy(i -> 2 * i);
 		assertFalse(t.isMutable());
 		try {
@@ -80,7 +80,7 @@ public class StoreTest {
 		assertEquals(u.asList(), s.asList());
 		assertEquals(asList(1,2), s.resizedCopy(2).asList());
 	}
-	
+
 	@Test
 	public void testResizedCopy() {
 		Store<Integer> s = Stores.ints(1,2,3);
@@ -108,7 +108,7 @@ public class StoreTest {
 		assertTrue(s.equals(t));
 		assertTrue(s.equals(u));
 		assertFalse(s.equals(v));
-		
+
 		assertEquals(s.hashCode(), t.hashCode());
 		assertEquals(s.hashCode(), u.hashCode());
 

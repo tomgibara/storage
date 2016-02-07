@@ -16,17 +16,17 @@ final class WeakRefStore<V> extends RefStore<V> {
 		populate(that);
 		return that;
 	}
-	
+
 	@Override
 	Reference<V> newReference(V referent, ReferenceQueue<V> queue, int index) {
 		return new WeakRef<V>(referent, queue, index);
 	}
-	
+
 	@Override
 	int indexOf(Reference<?> ref) {
 		return ((WeakRef<?>) ref).index;
 	}
-	
+
 	private static class WeakRef<T> extends WeakReference<T> {
 
 		final int index;
@@ -36,5 +36,5 @@ final class WeakRefStore<V> extends RefStore<V> {
 			this.index = index;
 		}
 	}
-	
+
 }

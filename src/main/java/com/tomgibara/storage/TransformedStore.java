@@ -12,7 +12,7 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 	private final Store<V> store;
 	private final Class<W> type;
 	private final Bijection<V, W> fn;
-	
+
 	TransformedStore(Store<V> store, Class<W> type, Function<V, W> fn) {
 		this(store, type, new OneWayBijection<>(fn));
 	}
@@ -24,7 +24,7 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 	}
 
 	// store methods
-	
+
 	@Override
 	public Class<W> valueType() {
 		return type;
@@ -68,19 +68,19 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 	public Store<W> asTransformedBy(UnaryOperator<W> fn) {
 		return new TransformedStore<>(store, type, fn.compose(this.fn));
 	}
-	
+
 	@Override
 	public <X> Store<X> asTransformedBy(Class<X> type, Function<W, X> fn) {
 		return new TransformedStore<>(store, type, fn.compose(this.fn));
 	}
 
 	// mutable
-	
+
 	@Override
 	public void clear() {
 		store.clear();
 	}
-	
+
 	@Override
 	public void fill(W value) {
 		store.fill(fn.disapply(value));
@@ -90,19 +90,19 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 	public W set(int index, W value) {
 		return fn.apply( store.set(index, fn.disapply(value)) );
 	}
-	
+
 	@Override
 	public void transpose(int i, int j) {
 		store.transpose(i, j);
 	}
-	
+
 	// mutability methods
 
 	@Override
 	public boolean isMutable() {
 		return store.isMutable();
 	}
-	
+
 	@Override
 	public Store<W> immutableCopy() {
 		return new TransformedStore<V,W>(store.immutableCopy(), type, fn);
@@ -114,32 +114,32 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 	}
 
 	// iterable methods
-	
+
 	@Override
 	public Iterator<W> iterator() {
 		return new StoreIterator.Transformed<>(store, fn);
 	}
 
 	// inner classes
-	
+
 	private static class OneWayBijection<V,W> implements Bijection<V, W> {
-		
+
 		private final Function<V,W> fn;
-		
+
 		OneWayBijection(Function<V,W> fn) {
 			this.fn = fn;
 		}
-		
+
 		@Override
 		public W apply(V v) {
 			return fn.apply(v);
 		}
-		
+
 		@Override
 		public V disapply(W w) {
 			if (w != null) throw new IllegalArgumentException("non-null value");
 			return null;
 		}
-		
+
 	}
 }

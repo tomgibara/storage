@@ -4,7 +4,7 @@ import java.lang.reflect.Array;
 
 /**
  * Collects static methods for creating new stores that wrap existing arrays.
- * 
+ *
  * @author Tom Gibara
  *
  */
@@ -16,7 +16,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing array. Supplying an array
 	 * containing nulls and specifying that nulls are not allowed is likely to
 	 * cause malfunction.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @param nullsAllowed
@@ -35,7 +35,7 @@ public final class Stores {
 	 * Creates a mutable store that wraps an existing array. This method may be
 	 * used if the size (the number of non-null values) is already known.
 	 * Supplying an incorrect size is likely to cause malfunction.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @param count
@@ -50,11 +50,11 @@ public final class Stores {
 		checkValuesNotNull(values);
 		return new NullArrayStore<>(values, count);
 	}
-	
+
 	/**
 	 * Creates an immutable store that returns values from an existing array.
 	 * The supplied array is not copied and must not be modified.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @param nullsAllowed
@@ -68,13 +68,13 @@ public final class Stores {
 		checkValuesNotNull(values);
 		return new ImmutableArrayStore<>(values, nullsAllowed);
 	}
-	
+
 	/**
 	 * Creates an immutable store that returns values from existing array. The
 	 * supplied array is not copied and must not be modified. This method may be
 	 * used if the size (the number of non-null values) is already known.
 	 * Supplying an incorrect size is likely to cause malfunction.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @param count
@@ -87,10 +87,10 @@ public final class Stores {
 		checkValuesNotNull(values);
 		return new ImmutableArrayStore<>(values, count);
 	}
-	
+
 	/**
 	 * Creates a mutable store that wraps an existing byte array.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -105,7 +105,7 @@ public final class Stores {
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
 	 * index may be obtained from the {@link Store#population()}.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -117,7 +117,7 @@ public final class Stores {
 
 	/**
 	 * Creates a mutable store that wraps an existing short array.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -132,7 +132,7 @@ public final class Stores {
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
 	 * index may be obtained from the {@link Store#population()}.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -144,7 +144,7 @@ public final class Stores {
 
 	/**
 	 * Creates a mutable store that wraps an existing integer array.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -159,7 +159,7 @@ public final class Stores {
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
 	 * index may be obtained from the {@link Store#population()}.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -171,7 +171,7 @@ public final class Stores {
 
 	/**
 	 * Creates a mutable store that wraps an existing long array.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -186,7 +186,7 @@ public final class Stores {
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
 	 * index may be obtained from the {@link Store#population()}.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -198,7 +198,7 @@ public final class Stores {
 
 	/**
 	 * Creates a mutable store that wraps an existing boolean array
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -213,7 +213,7 @@ public final class Stores {
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
 	 * index may be obtained from the {@link Store#population()}.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -225,7 +225,7 @@ public final class Stores {
 
 	/**
 	 * Creates a mutable store that wraps an existing char array.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -240,7 +240,7 @@ public final class Stores {
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
 	 * index may be obtained from the {@link Store#population()}.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -252,7 +252,7 @@ public final class Stores {
 
 	/**
 	 * Creates a mutable store that wraps an existing float array.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -267,7 +267,7 @@ public final class Stores {
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
 	 * index may be obtained from the {@link Store#population()}.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -279,7 +279,7 @@ public final class Stores {
 
 	/**
 	 * Creates a mutable store that wraps an existing double array.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -294,7 +294,7 @@ public final class Stores {
 	 * subsequently be removed from the store by setting an index value to null.
 	 * Such operations will not modify the wrapped array; the null status of an
 	 * index may be obtained from the {@link Store#population()}.
-	 * 
+	 *
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -305,13 +305,13 @@ public final class Stores {
 	}
 
 	// package scoped methods
-	
+
 	static <V> int countNonNulls(V[] vs) {
 		int sum = 0;
 		for (V v : vs) if (v != null) sum++;
 		return sum;
 	}
-	
+
 	static <V> V[] toArray(Store<V> store) {
 		return toArray(store, store.size());
 	}
@@ -329,12 +329,12 @@ public final class Stores {
 		}
 		return vs;
 	}
-	
+
 	static void checkValuesNotNull(Object values) {
 		if (values == null) throw new IllegalArgumentException("null values");
 	}
 
 	// non-constructor
-	
+
 	private Stores() {}
 }

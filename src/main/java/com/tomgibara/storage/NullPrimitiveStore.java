@@ -33,28 +33,28 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 
 	int count;
 	BitStore populated;
-	
+
 	protected NullPrimitiveStore(BitStore populated, int count) {
 		this.populated = populated;
 		this.count = count;
 	}
-	
+
 	protected NullPrimitiveStore(int size) {
 		populated = Bits.store(size);
 		this.count = 0;
 	}
 
 	// store
-	
+
 	@Override
 	public int count() {
 		return count;
 	}
-	
+
 	public int size() {
 		return populated.size();
 	}
-	
+
 	@Override
 	public void clear() {
 		populated.clear();
@@ -97,7 +97,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public Store<V> resizedCopy(int newSize) {
 		return duplicate(Bits.resizedCopyOf(populated, newSize, false), true);
@@ -114,22 +114,22 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 	}
 
 	// for extension
-	
+
 	abstract protected V getImpl(int index);
-	
+
 	abstract protected void setImpl(int index, V value);
-	
+
 	abstract protected void fillImpl(V value);
-	
+
 	abstract protected Store<V> duplicate(BitStore populated, boolean copy);
-	
+
 	// mutability
-	
+
 	@Override
 	public boolean isMutable() {
 		return populated.isMutable();
 	}
-	
+
 	@Override
 	public Store<V> mutableCopy() {
 		return duplicate(populated.mutableCopy(), true);
@@ -139,7 +139,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 	public Store<V> immutableCopy() {
 		return duplicate(populated.immutableCopy(), true);
 	}
-	
+
 	// inner classes
 
 	final static class ByteStore extends NullPrimitiveStore<Byte> {

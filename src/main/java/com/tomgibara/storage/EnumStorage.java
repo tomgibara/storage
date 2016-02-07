@@ -22,7 +22,7 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 	private final class EnumStore implements Store<E> {
 
 		private final SmallValueStore store;
-		
+
 		EnumStore(SmallValueStore store) {
 			this.store = store;
 		}
@@ -58,9 +58,9 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 			if (value == null) throw new IllegalArgumentException("null value");
 			store.fillInt( value.ordinal() );
 		}
-		
+
 		// mutability methods
-		
+
 		@Override
 		public boolean isMutable() {
 			return store.isMutable();
@@ -80,7 +80,7 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		public Store<E> immutableView() {
 			return new EnumStore(store.immutableView());
 		}
-		
+
 		// transposable methods
 
 		@Override

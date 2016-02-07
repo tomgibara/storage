@@ -29,7 +29,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 	}
 
 	final boolean mutable;
-	
+
 	protected PrimitiveStore() {
 		mutable = true;
 	}
@@ -39,12 +39,12 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 	}
 
 	// store
-	
+
 	@Override
 	public int count() {
 		return size();
 	}
-	
+
 	@Override
 	public void fill(V value) {
 		if (!mutable) throw new IllegalStateException("immutable");
@@ -67,7 +67,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		setImpl(index, value);
 		return previous;
 	}
-	
+
 	@Override
 	public Store<V> resizedCopy(int newSize) {
 		if (newSize < 0) throw new IllegalArgumentException();
@@ -80,24 +80,24 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 	}
 
 	// for extension
-	
+
 	abstract protected V getImpl(int index);
-	
+
 	abstract protected void setImpl(int index, V value);
-	
+
 	abstract protected void fillImpl(V value);
-	
+
 	abstract protected Store<V> duplicate(boolean copy, boolean mutable);
-	
+
 	abstract protected Store<V> resize(int newSize);
-	
+
 	// mutability
-	
+
 	@Override
 	public boolean isMutable() {
 		return mutable;
 	}
-	
+
 	@Override
 	public Store<V> mutableCopy() {
 		return duplicate(true, true);
@@ -107,7 +107,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 	public Store<V> immutableCopy() {
 		return duplicate(true, false);
 	}
-	
+
 	// inner classes
 
 	final static class ByteStore extends PrimitiveStore<Byte> {
@@ -131,7 +131,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		public Class<Byte> valueType() {
 			return byte.class;
 		}
-		
+
 		@Override
 		public int size() {
 			return values.length;

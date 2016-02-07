@@ -13,7 +13,7 @@ public class StorageTest {
 
 	@Test
 	public void testSmallValueStorage() {
-		
+
 		{
 			Storage<Integer> t = Storage.smallValues(4, false);
 			Store<Integer> s = t.newStore(100);
@@ -21,14 +21,14 @@ public class StorageTest {
 			s.set(1, 1);
 			s.set(2, 2);
 			s.set(3, 3);
-			
+
 			for (int i = 0; i < 4; i++) {
 				assertEquals(i, s.get(i).intValue());
 			}
-			
+
 			s.fill(0);
 			assertEquals(t.newStore(100), s);
-			
+
 			s.fill(2);
 			assertEquals(Collections.nCopies(100, 2), s.asList());
 		}
@@ -78,7 +78,7 @@ public class StorageTest {
 			Storage<Integer> t = Storage.smallValues(4, false);
 			Store<Integer> s = t.newStore(10);
 		}
-		
+
 		{
 			Storage<Integer> t = Storage.smallValues(5, false);
 			Store<Integer> s = t.newStore(16);

@@ -4,13 +4,13 @@ package com.tomgibara.storage;
  * <p>
  * Implementations of this interface are able to create {@link Store} instances
  * with a specified size.
- * 
+ *
  * <p>
  * Static methods are provided for creating common and useful types of storage.
  * None of the stores originating from these methods are suitable for use by
  * multiple concurrent threads. Access in those circumstances must be externally
  * synchronized.
- * 
+ *
  * @author Tom Gibara
  *
  * @param <V>
@@ -20,7 +20,7 @@ public interface Storage<V> {
 
 	/**
 	 * Genericized storage backed by <code>Object</code> arrays.
-	 * 
+	 *
 	 * @param nullsAllowed
 	 *            whether the returned storage will accept null values
 	 * @param <V>
@@ -42,7 +42,7 @@ public interface Storage<V> {
 	 * type safety than those created by genericized storage. In some contexts
 	 * this will provide a very significant reduction in the memory required to
 	 * store values.
-	 * 
+	 *
 	 * @param type
 	 *            the type of the values to be stored
 	 * @param nullsAllowed
@@ -72,7 +72,7 @@ public interface Storage<V> {
 	 * Genericized storage using weak references. As a consequence of GC
 	 * activity, sizes reported by the weak stores may overestimate the number
 	 * of values stored.
-	 * 
+	 *
 	 * @param <V>
 	 *            the type of values to be stored
 	 * @return weak storage
@@ -80,12 +80,12 @@ public interface Storage<V> {
 	static <V> Storage<V> weak() {
 		return size -> new WeakRefStore<>(size);
 	}
-	
+
 	/**
 	 * Genericized storage using soft references. As a consequence of GC
 	 * activity, sizes reported by the soft stores may overestimate the number
 	 * of values stored.
-	 * 
+	 *
 	 * @param <V>
 	 *            the type of values to be stored
 	 * @return soft storage
@@ -93,7 +93,7 @@ public interface Storage<V> {
 	static <V> Storage<V> soft() {
 		return size -> new SoftRefStore<>(size);
 	}
-	
+
 	/**
 	 * <p>
 	 * Storage that packs bounded non-negative integer values into minimal bit
@@ -101,7 +101,7 @@ public interface Storage<V> {
 	 * of small integer values need to be stored without occupying more memory
 	 * than is needed. The range must be less than
 	 * <code>Integer.MAX_VALUE</code>
-	 * 
+	 *
 	 * <p>
 	 * Generally values in a range are packed linearly using the least number of
 	 * bits needed to represent them individually. However, in the present
@@ -112,7 +112,7 @@ public interface Storage<V> {
 	 * performance of ternary and quinary storage may degraded in some
 	 * applications. In any such case, it is possible to use a larger range to
 	 * switch to a regular linear bit-packing strategy.
-	 * 
+	 *
 	 * @param range
 	 *            defines the range <code>[0..range)</code> that small values
 	 *            may take in this store
@@ -132,7 +132,7 @@ public interface Storage<V> {
 
 	/**
 	 * Creates a new store with the requested size
-	 * 
+	 *
 	 * @param size
 	 *            the required size
 	 * @throws IllegalArgumentException
@@ -140,5 +140,5 @@ public interface Storage<V> {
 	 * @return an new store
 	 */
 	Store<V> newStore(int size) throws IllegalArgumentException;
-	
+
 }

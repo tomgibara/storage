@@ -22,23 +22,23 @@ import com.tomgibara.fundament.Transposable;
  * for building more complex collection types. Like arrays they feature
  * fixed-length index-based access, but they also provide mutability control via
  * the {@link Mutability} interface.
- * 
+ *
  * <p>
  * Note that stores <i>do not</i> support storing null values in a way that is
  * distinct from removal; assigning a null value to an index at which a
  * previously non-null value was stored is to remove that value.
- * 
+ *
  * <p>
  * Due to the provision of default methods, only the methods
  * {@link #valueType()}, {@link #size()} and {@link #get(int)} need to be
  * implemented to provide an immutable store implementation. If a store is
  * mutable, the methods {@link #set(int, Object)} and {@link #isMutable()} must
  * also be implemented.
- * 
+ *
  * <p>
  * Store implementations are expected to implement the Java object methods as
  * follows:
- * 
+ *
  * <ul>
  * <li>Two stores are equal if their {@link #asList()} representations are
  * equal.
@@ -46,11 +46,11 @@ import com.tomgibara.fundament.Transposable;
  * <li>The string representation of a store is equal to
  * <code>asList().toString()</code>.
  * </ul>
- * 
+ *
  * <p>
  * {@link AbstractStore} is convenient base class that predefines this
  * behaviour.
- * 
+ *
  * @author Tom Gibara
  *
  * @param <V>
@@ -66,7 +66,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * classes. Other implementations may treat all values as object types and
 	 * will return <code>Object.class</code> despite ostensibly having a
 	 * genericized type.
-	 * 
+	 *
 	 * @return the value type
 	 */
 	Class<V> valueType();
@@ -75,7 +75,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * The greatest number of values that the store can contain. Valid indices
 	 * range from <code>0 &lt;= i &lt; size</code>. Stores of size zero are
 	 * possible.
-	 * 
+	 *
 	 * @return the size of store
 	 */
 	int size();
@@ -83,7 +83,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	/**
 	 * Retrieves a value held in the store. The method will return null if there
 	 * is no value associated with specified index.
-	 * 
+	 *
 	 * @param index
 	 *            the index from which to retrieve the value
 	 * @return the value stored at the specified index
@@ -93,7 +93,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	/**
 	 * Whether the store can contain null values. Stores in which nulls are not
 	 * allowed must have a value assigned to every index in the store.
-	 * 
+	 *
 	 * @return whether values may be null
 	 */
 	boolean isNullAllowed();
@@ -101,7 +101,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	/**
 	 * Stores a value in the store. Storing null will result in no value being
 	 * associated with the specified index
-	 * 
+	 *
 	 * @param index
 	 *            the index at which to store the value
 	 * @param value
@@ -138,14 +138,14 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 			set(i, value);
 		}
 	}
-	
+
 	/**
 	 * A mutable detached copy of this store with the specified size.
 	 * Detached means that changes to the returned store will not affect the
 	 * copied store. The new size may be smaller, larger or even the same as
 	 * the copied store. This is an analogue of the
 	 * <code>Arrays.copyOf(original, length)</code>.
-	 * 
+	 *
 	 * @param newSize
 	 *            the size required in the new store
 	 * @return a copy of this store with the specified size
@@ -159,18 +159,18 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 	/**
 	 * The number of non-null values in the store.
-	 * 
+	 *
 	 * @return the number of non-null values in the store
 	 */
 	default int count() {
 		return population().ones().count();
 	}
-	
+
 	/**
 	 * Bits indicating which values are null. A zero at an index indicates that
 	 * there is no value stored at that index. The returned bits are immutable
 	 * but will change as values are added and removed from the store.
-	 * 
+	 *
 	 * @return bits indicating the indices at which values are present
 	 */
 	default BitStore population() {
@@ -243,14 +243,14 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * Derives a store by applying a function over the store values. It provides
 	 * a live view of the original store. The mutability of the returned store
 	 * matches the mutability of this store, but only null values may be set.
-	 * 
+	 *
 	 * <p>
 	 * Note that the supplied function must preserve null. That is
 	 * <code>fn(a) == null</code> if and only if <code>a == null</code>.
-	 * 
+	 *
 	 * @param fn
 	 *            a function over the store elements
-	 * 
+	 *
 	 * @return a view of this store under the specified function
 	 * @see #asTransformedBy(Class, Function)
 	 */
@@ -265,14 +265,14 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * matches the mutability of this store. Bijectivity of the supplied
 	 * transforming function has the consequence that values may be set on the
 	 * store in contrast to {@link #asTransformedBy(UnaryOperator)}.
-	 * 
+	 *
 	 * <p>
 	 * Note that the supplied function must preserve null. That is
 	 * <code>fn(a) == null</code> if and only if <code>a == null</code>.
-	 * 
+	 *
 	 * @param fn
 	 *            a bijective function over the store elements
-	 * 
+	 *
 	 * @return a view of this store under the specified function
 	 * @see #asTransformedBy(UnaryOperator)
 	 */
@@ -285,18 +285,18 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * Derives a store by applying a function over the store values. It provides
 	 * a live view of the original store. The mutability of the returned store
 	 * matches the mutability of this store, but only null values may be set.
-	 * 
+	 *
 	 * <p>
 	 * Note that the supplied function must preserve null. That is
 	 * <code>fn(a) == null</code> if and only if <code>a == null</code>.
-	 * 
+	 *
 	 * @param type
 	 *            the type of values returned by the function
 	 * @param fn
 	 *            a function over the store elements
 	 * @param <W>
 	 *            the type of value in the returned store
-	 * 
+	 *
 	 * @return a view of this store under the specified function
 	 * @see #asTransformedBy(Function)
 	 * @see #asTransformedBy(Class, Bijection)
@@ -314,16 +314,16 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * matches the mutability of this store. Bijectivity of the supplied
 	 * transforming function has the consequence that values may be set on the
 	 * store in contrast to {@link #asTransformedBy(Class, Function)}.
-	 * 
+	 *
 	 * <p>
 	 * Note that the supplied function must preserve null. That is
 	 * <code>fn(a) == null</code> if and only if <code>a == null</code>.
-	 * 
+	 *
 	 * @param type
 	 *            the type of values returned by the function
 	 * @param fn
 	 *            a bijective function over the store elements
-	 * 
+	 *
 	 * @return a view of this store under the specified function
 	 * @see #asTransformedBy(Class, Function)
 	 */
@@ -337,8 +337,8 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * Creates an iterator over the non-null values of the store under the image
 	 * of the supplied function. On mutable stores the returned iterator
 	 * supports element removal.
-	 * 
-	 * 
+	 *
+	 *
 	 * @param fn
 	 *            a transforming function
 	 * @return an iterator over transformed non-null values
@@ -347,13 +347,13 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 		if (fn == null) throw new IllegalArgumentException("null fn");
 		return new StoreIterator.Transformed<>(this, fn);
 	}
-	
+
 	/**
 	 * Creates an iterator over the non-null values of the store under the image
 	 * of the supplied binary function. The first argument to the function is
 	 * the index of the value in the store and the second argument is the value
 	 * itself. On mutable stores the returned iterator supports element removal.
-	 * 
+	 *
 	 * @param fn
 	 *            a transforming function over index and value
 	 * @return an iterator over transformed non-null values
@@ -362,12 +362,12 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 		if (fn == null) throw new IllegalArgumentException("null fn");
 		return new StoreIterator.BiTransformed<>(this, fn);
 	}
-	
+
 	// iterable methods
-	
+
 	/**
 	 * Provides an iterator over the non-null values in the store.
-	 * 
+	 *
 	 * @return an iterator over the non-null values
 	 */
 	@Override
@@ -377,7 +377,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 	/**
 	 * Performs the given action over all non-null values in the store.
-	 * 
+	 *
 	 * @param action
 	 *            the action to be performed for each non-null value
 	 */
@@ -400,7 +400,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	public default Spliterator<V> spliterator() {
 		return new StoreSpliterator<>(this);
 	}
-	
+
 	// transposable methods
 
 	@Override
@@ -417,7 +417,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	default boolean isMutable() {
 		return false;
 	}
-	
+
 	@Override
 	default Store<V> mutableCopy() {
 		return resizedCopy(size());

@@ -22,7 +22,7 @@ class NullEnumStorage<E extends Enum<E>> implements Storage<E> {
 	private final class NullEnumStore implements Store<E> {
 
 		private final SmallValueStore store;
-		
+
 		NullEnumStore(SmallValueStore store) {
 			this.store = store;
 		}
@@ -56,14 +56,14 @@ class NullEnumStorage<E extends Enum<E>> implements Storage<E> {
 		public void clear() {
 			store.fillInt(0);
 		}
-		
+
 		@Override
 		public void fill(E value) {
 			store.fillInt( value(value) );
 		}
-		
+
 		// mutability methods
-		
+
 		@Override
 		public boolean isMutable() {
 			return store.isMutable();
@@ -83,7 +83,7 @@ class NullEnumStorage<E extends Enum<E>> implements Storage<E> {
 		public Store<E> immutableView() {
 			return new NullEnumStore(store.immutableView());
 		}
-		
+
 		// transposable methods
 
 		@Override
@@ -92,11 +92,11 @@ class NullEnumStorage<E extends Enum<E>> implements Storage<E> {
 		}
 
 		// private utility methods
-		
+
 		private E constant(int i) {
 			return i == 0 ? null : constants[i - 1];
 		}
-		
+
 		private int value(E e) {
 			return e == null ? 0 : e.ordinal() + 1;
 		}

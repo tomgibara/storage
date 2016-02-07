@@ -5,11 +5,11 @@ import com.tomgibara.bits.BitStore;
 final class ImmutableStore<V> extends AbstractStore<V> {
 
 	private Store<V> store;
-	
+
 	ImmutableStore(Store<V> store) {
 		this.store = store;
 	}
-	
+
 	@Override
 	public int size() {
 		return store.size();
@@ -29,12 +29,12 @@ final class ImmutableStore<V> extends AbstractStore<V> {
 	public V get(int index) {
 		return store.get(index);
 	}
-	
+
 	@Override
 	public Store<V> resizedCopy(int newSize) {
 		return store.resizedCopy(newSize);
 	}
-	
+
 	@Override
 	public Store<V> immutableView() {
 		return new ImmutableStore<>(store);
@@ -44,7 +44,7 @@ final class ImmutableStore<V> extends AbstractStore<V> {
 	public BitStore population() {
 		return store.population();
 	}
-	
+
 	@Override
 	public boolean isNullAllowed() {
 		return store.isNullAllowed();

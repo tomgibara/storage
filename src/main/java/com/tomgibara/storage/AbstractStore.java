@@ -3,7 +3,7 @@ package com.tomgibara.storage;
 /**
  * Defines object methods consistent with the specifications documented for {@link Store}.
  * The class is intended to provide a convenient base class for implementors of the interface.
- * 
+ *
  * @author Tom Gibara
  *
  * @param <V>

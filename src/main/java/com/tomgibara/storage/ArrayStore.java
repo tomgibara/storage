@@ -6,7 +6,7 @@ import java.util.Arrays;
 class ArrayStore<V> extends AbstractStore<V> {
 
 	final V[] values;
-	
+
 	@SuppressWarnings("unchecked")
 	ArrayStore(Class<V> type, int size) {
 		try {
@@ -15,7 +15,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 			throw new IllegalArgumentException("negative size", e);
 		}
 	}
-	
+
 	ArrayStore(V[] values) {
 		this.values = values;
 	}
@@ -25,7 +25,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 	public Class<V> valueType() {
 		return (Class<V>) values.getClass().getComponentType();
 	}
-	
+
 	@Override
 	public int size() {
 		return values.length;
@@ -35,7 +35,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 	public int count() {
 		return values.length;
 	}
-	
+
 	@Override
 	public V get(int index) {
 		return values[index];
@@ -53,7 +53,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 		if (value == null) throw new IllegalArgumentException("null not allowed");
 		Arrays.fill(values, value);
 	}
-	
+
 	@Override
 	public boolean isNullAllowed() {
 		return false;
@@ -63,11 +63,11 @@ class ArrayStore<V> extends AbstractStore<V> {
 
 	@Override
 	public boolean isMutable() { return true; }
-	
+
 	@Override
 	public Store<V> mutableCopy() { return new ArrayStore<>(values.clone()); }
-	
+
 	@Override
 	public Store<V> immutableCopy() { return new ImmutableArrayStore<>(values.clone(), values.length); }
-	
+
 }

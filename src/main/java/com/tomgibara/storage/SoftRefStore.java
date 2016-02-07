@@ -16,17 +16,17 @@ final class SoftRefStore<V> extends RefStore<V> {
 		populate(that);
 		return that;
 	}
-	
+
 	@Override
 	Reference<V> newReference(V referent, ReferenceQueue<V> queue, int index) {
 		return new SoftRef<V>(referent, queue, index);
 	}
-	
+
 	@Override
 	int indexOf(Reference<?> ref) {
 		return ((SoftRef<?>) ref).index;
 	}
-	
+
 	private static class SoftRef<T> extends SoftReference<T> {
 
 		final int index;
@@ -36,5 +36,5 @@ final class SoftRefStore<V> extends RefStore<V> {
 			this.index = index;
 		}
 	}
-	
+
 }

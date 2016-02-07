@@ -10,8 +10,8 @@ abstract class RefStore<V> extends AbstractStore<V> {
 	private final Reference<V>[] refs;
 	// counts number of references (cleared or not)
 	private int count;
-	
-	
+
+
 	@SuppressWarnings("unchecked")
 	RefStore(int size) {
 		try {
@@ -21,14 +21,14 @@ abstract class RefStore<V> extends AbstractStore<V> {
 		}
 		count = 0;
 	}
-	
+
 	@Override
 	//TODO this is pretty smelly
 	@SuppressWarnings("unchecked")
 	public Class<V> valueType() {
 		return (Class<V>) Object.class;
 	}
-	
+
 	@Override
 	public int size() {
 		return refs.length;
@@ -38,25 +38,25 @@ abstract class RefStore<V> extends AbstractStore<V> {
 	public boolean isNullAllowed() {
 		return true;
 	}
-	
+
 	@Override
 	public int count() {
 		flushQueue();
 		return count;
 	}
-	
+
 	@Override
 	public V get(int index) {
 		flushQueue();
 		Reference<V> ref = refs[index];
 		return ref == null ? null : ref.get();
 	}
-	
+
 	@Override
 	public V set(int index, V value) {
 		flushQueue();
 		Reference<V> ref = refs[index];
-		
+
 		// removal case
 		if (value == null) {
 			if (ref == null) return null;
@@ -74,14 +74,14 @@ abstract class RefStore<V> extends AbstractStore<V> {
 			return ref.get();
 		}
 	}
-	
+
 	@Override
 	public void clear() {
 		flushQueue();
 		Arrays.fill(refs, null);
 		count = 0;
 	}
-	
+
 	@Override
 	public boolean isMutable() {
 		return true;
@@ -104,9 +104,9 @@ abstract class RefStore<V> extends AbstractStore<V> {
 		}
 		return new ImmutableArrayStore<>(vs, count);
 	}
-	
+
 	abstract Reference<V> newReference(V referent, ReferenceQueue<V> queue, int index);
-	
+
 	// should be overridden for efficiency
 	int indexOf(Reference<?> ref) {
 		for (int i = 0; i < refs.length; i++) {
@@ -114,7 +114,7 @@ abstract class RefStore<V> extends AbstractStore<V> {
 		}
 		return -1;
 	}
-	
+
 	// that must be clear
 	RefStore<V> populate(RefStore<V> that) {
 		flushQueue();

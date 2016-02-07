@@ -30,7 +30,7 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 	public Class<V> valueType() {
 		return (Class<V>) values.getClass().getComponentType();
 	}
-	
+
 	@Override
 	public int count() { return count; }
 
@@ -50,21 +50,21 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 	}
 
 	// mutability
-	
+
 	@Override
 	public Store<V> mutableCopy() {
 		return nullAllowed ?
 				new NullArrayStore<>(values.clone(), count) :
 				new ArrayStore<>(values.clone());
 		}
-	
+
 	@Override
 	public Store<V> immutableCopy() {
 		return nullAllowed ?
 				new ImmutableArrayStore<>(values.clone(), count) :
 				new ImmutableArrayStore<>(values.clone(), false);
 		}
-	
+
 	@Override
 	public Store<V> immutableView() {
 		return nullAllowed ?

@@ -18,7 +18,7 @@ abstract class StoreIterator<V,W> implements Iterator<W> {
 		this.store = store;
 		this.positions = store.population().ones().positions();
 	}
-	
+
 	@Override
 	public boolean hasNext() {
 		return positions.hasNext();
@@ -61,12 +61,12 @@ abstract class StoreIterator<V,W> implements Iterator<W> {
 	static final class Transformed<V,W> extends StoreIterator<V,W> {
 
 		private final Function<V,W> fn;
-		
+
 		Transformed(Store<V> store, Function<V,W> fn) {
 			super(store);
 			this.fn = fn;
 		}
-		
+
 		@Override
 		W get(int index) {
 			return fn.apply(store.get(index));
@@ -83,12 +83,12 @@ abstract class StoreIterator<V,W> implements Iterator<W> {
 	static final class BiTransformed<V,W> extends StoreIterator<V,W> {
 
 		private final BiFunction<Integer, V,W> fn;
-		
+
 		BiTransformed(Store<V> store, BiFunction<Integer, V,W> fn) {
 			super(store);
 			this.fn = fn;
 		}
-		
+
 		@Override
 		W get(int index) {
 			return fn.apply(index, store.get(index));

@@ -10,11 +10,11 @@ class StoreSpliterator<V> implements Spliterator<V> {
 	private final int chi;
 	private int from;
 	private int to;
-	
+
 	StoreSpliterator(Store<V> store) {
 		this.store = store;
 		if (store.isNullAllowed()) {
-			chi = store.isMutable() ? ORDERED : ORDERED | IMMUTABLE; 
+			chi = store.isMutable() ? ORDERED : ORDERED | IMMUTABLE;
 		} else {
 			chi = store.isMutable() ? ORDERED | SIZED | SUBSIZED | NONNULL : ORDERED | SIZED | SUBSIZED | NONNULL | IMMUTABLE;
 		}
@@ -64,5 +64,5 @@ class StoreSpliterator<V> implements Spliterator<V> {
 	public int characteristics() {
 		return chi;
 	}
-	
+
 }
