@@ -90,7 +90,12 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 */
 	V get(int index);
 
-	//TODO document
+	/**
+	 * Whether the store can contain null values. Stores in which nulls are not
+	 * allowed must have a value assigned to every index in the store.
+	 * 
+	 * @return whether values may be null
+	 */
 	boolean isNullAllowed();
 
 	/**
@@ -253,6 +258,24 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 		return asTransformedBy(valueType(), fn);
 	}
 
+	/**
+	 * <p>
+	 * Derives a store by applying a function over the store values. It provides
+	 * a live view of the original store. The mutability of the returned store
+	 * matches the mutability of this store. Bijectivity of the supplied
+	 * transforming function has the consequence that values may be set on the
+	 * store in contrast to {@link #asTransformedBy(UnaryOperator)}.
+	 * 
+	 * <p>
+	 * Note that the supplied function must preserve null. That is
+	 * <code>fn(a) == null</code> if and only if <code>a == null</code>.
+	 * 
+	 * @param fn
+	 *            a bijective function over the store elements
+	 * 
+	 * @return a view of this store under the specified function
+	 * @see #asTransformedBy(UnaryOperator)
+	 */
 	default Store<V> asTransformedBy(Bijection<V,V> fn) {
 		return asTransformedBy(valueType(), fn);
 	}
@@ -284,17 +307,57 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 		return new TransformedStore<V,W>(this, type, fn);
 	}
 
+	/**
+	 * <p>
+	 * Derives a store by applying a function over the store values. It provides
+	 * a live view of the original store. The mutability of the returned store
+	 * matches the mutability of this store. Bijectivity of the supplied
+	 * transforming function has the consequence that values may be set on the
+	 * store in contrast to {@link #asTransformedBy(Class, Function)}.
+	 * 
+	 * <p>
+	 * Note that the supplied function must preserve null. That is
+	 * <code>fn(a) == null</code> if and only if <code>a == null</code>.
+	 * 
+	 * @param type
+	 *            the type of values returned by the function
+	 * @param fn
+	 *            a bijective function over the store elements
+	 * 
+	 * @return a view of this store under the specified function
+	 * @see #asTransformedBy(Class, Function)
+	 */
 	default <W> Store<W> asTransformedBy(Class<W> type, Bijection<V, W> fn) {
 		if (type == null) throw new IllegalArgumentException("null type");
 		if (fn == null) throw new IllegalArgumentException("null fn");
 		return new TransformedStore<V,W>(this, type, fn);
 	}
 
+	/**
+	 * Creates an iterator over the non-null values of the store under the image
+	 * of the supplied function. On mutable stores the returned iterator
+	 * supports element removal.
+	 * 
+	 * 
+	 * @param fn
+	 *            a transforming function
+	 * @return an iterator over transformed non-null values
+	 */
 	default <W> Iterator<W> transformedIterator(Function<V, W> fn) {
 		if (fn == null) throw new IllegalArgumentException("null fn");
 		return new StoreIterator.Transformed<>(this, fn);
 	}
 	
+	/**
+	 * Creates an iterator over the non-null values of the store under the image
+	 * of the supplied binary function. The first argument to the function is
+	 * the index of the value in the store and the second argument is the value
+	 * itself. On mutable stores the returned iterator supports element removal.
+	 * 
+	 * @param fn
+	 *            a transforming function over index and value
+	 * @return an iterator over transformed non-null values
+	 */
 	default <W> Iterator<W> transformedIterator(BiFunction<Integer, V, W> fn) {
 		if (fn == null) throw new IllegalArgumentException("null fn");
 		return new StoreIterator.BiTransformed<>(this, fn);
@@ -302,11 +365,22 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	
 	// iterable methods
 	
+	/**
+	 * Provides an iterator over the non-null values in the store.
+	 * 
+	 * @return an iterator over the non-null values
+	 */
 	@Override
 	default Iterator<V> iterator() {
 		return new StoreIterator.Regular<>(this);
 	}
 
+	/**
+	 * Performs the given action over all non-null values in the store.
+	 * 
+	 * @param action
+	 *            the action to be performed for each non-null value
+	 */
 	@Override
 	public default void forEach(Consumer<? super V> action) {
 		int size = size();
