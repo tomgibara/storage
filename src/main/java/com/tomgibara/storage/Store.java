@@ -174,7 +174,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 			@Override
 			public int size() {
-				return size();
+				return Store.this.size();
 			}
 
 			@Override
