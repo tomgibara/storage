@@ -91,14 +91,6 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	V get(int index);
 
 	/**
-	 * Whether the store can contain null values. Stores in which nulls are not
-	 * allowed must have a value assigned to every index in the store.
-	 *
-	 * @return whether values may be null
-	 */
-	//boolean isNullAllowed();
-
-	/**
 	 * <p>
 	 * A value that substitutes for null in this store. For stores support that
 	 * support the storage of null values this method will always return null.
