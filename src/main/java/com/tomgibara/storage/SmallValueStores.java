@@ -643,11 +643,6 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
-		public Integer nullValue() {
-			return null;
-		}
-
-		@Override
 		public Integer get(int index) {
 			checkIndex(index);
 			return bits.getBit(index) ? 0 : null;
@@ -720,11 +715,6 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		@Override
 		public int size() {
 			return wrapped.size;
-		}
-
-		@Override
-		public Integer nullValue() {
-			return null;
 		}
 
 		@Override

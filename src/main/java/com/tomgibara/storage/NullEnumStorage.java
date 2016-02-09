@@ -33,11 +33,6 @@ class NullEnumStorage<E extends Enum<E>> implements Storage<E> {
 		}
 
 		@Override
-		public E nullValue() {
-			return null;
-		}
-
-		@Override
 		public int size() {
 			return store.size;
 		}

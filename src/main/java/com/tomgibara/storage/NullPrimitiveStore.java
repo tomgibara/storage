@@ -108,11 +108,6 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		return populated.immutableView();
 	}
 
-	@Override
-	public V nullValue() {
-		return null;
-	}
-	
 	// for extension
 
 	abstract protected V getImpl(int index);

@@ -112,7 +112,9 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * 
 	 * @return the value that substitutes for null, or null
 	 */
-	V nullValue();
+	default V nullValue() {
+		return null;
+	}
 	
 	/**
 	 * Stores a value in the store. Storing null will result in no value being

@@ -70,11 +70,6 @@ class NullArrayStore<V> extends AbstractStore<V> {
 		count = value == null ? 0 : values.length;
 	}
 	
-	@Override
-	public V nullValue() {
-		return null;
-	}
-
 	// mutability
 
 	@Override
