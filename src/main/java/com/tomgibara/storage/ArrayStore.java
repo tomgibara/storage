@@ -8,12 +8,14 @@ class ArrayStore<V> extends AbstractStore<V> {
 	final V[] values;
 
 	@SuppressWarnings("unchecked")
-	ArrayStore(Class<V> type, int size) {
+	ArrayStore(Class<V> type, int size, V initialValue) {
+		if (initialValue == null) throw new IllegalArgumentException("null initialValue");
 		try {
 			values = (V[]) Array.newInstance(type, size);
 		} catch (NegativeArraySizeException e) {
 			throw new IllegalArgumentException("negative size", e);
 		}
+		Arrays.fill(values, initialValue);
 	}
 
 	ArrayStore(V[] values) {
@@ -43,6 +45,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 
 	@Override
 	public V set(int index, V value) {
+		if (value == null) throw new IllegalArgumentException("null value");
 		V old = values[index];
 		values[index] = value;
 		return old;
@@ -50,7 +53,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 
 	@Override
 	public void fill(V value) {
-		if (value == null) throw new IllegalArgumentException("null not allowed");
+		if (value == null) throw new IllegalArgumentException("null value");
 		Arrays.fill(values, value);
 	}
 

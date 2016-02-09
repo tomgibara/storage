@@ -1,5 +1,7 @@
 package com.tomgibara.storage;
 
+import java.util.Arrays;
+
 /**
  * <p>
  * Implementations of this interface are able to create {@link Store} instances
@@ -19,34 +21,51 @@ package com.tomgibara.storage;
 public interface Storage<V> {
 
 	/**
-	 * Genericized storage backed by <code>Object</code> arrays.
+	 * Genericized storage backed by <code>Object</code> arrays. The storage
+	 * returned by this method <em>will</em> support null values.
 	 *
-	 * @param nullsAllowed
-	 *            whether the returned storage will accept null values
 	 * @param <V>
 	 *            the type of values to be stored
 	 * @return genericized storage
 	 */
 	@SuppressWarnings("unchecked")
-	static <V> Storage<V> generic(boolean nullsAllowed) {
-		if (nullsAllowed) {
-			return size -> (Store<V>) new NullArrayStore<>(new Object[size], 0);
-		} else {
-			return size -> (Store<V>) new ArrayStore<>(new Object[size]);
-		}
+	static <V> Storage<V> generic() {
+		return size -> (Store<V>) new NullArrayStore<>(new Object[size], 0);
 	}
 
 	/**
-	 * Storage backed by typed arrays. Specifying a primitive type will result
-	 * in storage backed by arrays of primitives. Such stores provide greater
-	 * type safety than those created by genericized storage. In some contexts
-	 * this will provide a very significant reduction in the memory required to
-	 * store values.
+	 * Genericized storage backed by <code>Object</code> arrays. The storage
+	 * returned by this method <em>will not</em> support null values.
+	 *
+	 * @param initialValue
+	 *            the initial value at each index of the store, not null
+	 * @param <V>
+	 *            the type of values to be stored
+	 * @return genericized storage
+	 */
+	@SuppressWarnings("unchecked")
+	static <V> Storage<V> generic(V initialValue) {
+		if (initialValue == null) throw new IllegalArgumentException("null initialValue");
+		return size -> {
+			Object[] array = new Object[size];
+			Arrays.fill(array, initialValue);
+			return (Store<V>) new ArrayStore<>(array);
+		};
+	}
+
+	/**
+	 * <p>
+	 * Storage backed by typed arrays. The storage returned by this method
+	 * <em>will</em> support null values.
+	 * 
+	 * <p>
+	 * Specifying a primitive type will result in storage backed by arrays of
+	 * primitives. Such stores provide greater type safety than those created by
+	 * genericized storage. In some contexts this will provide a very
+	 * significant reduction in the memory required to store values.
 	 *
 	 * @param type
 	 *            the type of the values to be stored
-	 * @param nullsAllowed
-	 *            whether the returned storage will accept null values
 	 * @param <V>
 	 *            the type of values to be stored
 	 * @throws IllegalArgumentException
@@ -54,24 +73,51 @@ public interface Storage<V> {
 	 * @return typed storage
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	static <V> Storage<V> typed(Class<V> type, boolean nullsAllowed) throws IllegalArgumentException {
+	static <V> Storage<V> typed(Class<V> type) throws IllegalArgumentException {
 		if (type == null) throw new IllegalArgumentException("null type");
-		if (type.isEnum()) return nullsAllowed ? new NullEnumStorage(type) :  new EnumStorage(type);
-		if (nullsAllowed) {
-			return type.isPrimitive() ?
-					(size -> NullPrimitiveStore.newStore(type, size)) :
-					(size -> new NullArrayStore<>(type, size));
-		} else {
-			return type.isPrimitive() ?
-					(size -> PrimitiveStore.newStore(type, size)) :
-					(size -> new ArrayStore<>(type, size));
-		}
+		if (type.isEnum()) return new NullEnumStorage(type);
+		if (type.isPrimitive()) return size -> NullPrimitiveStore.newStore(type, size);
+		return size -> new NullArrayStore<>(type, size);
 	}
 
 	/**
-	 * Genericized storage using weak references. As a consequence of GC
-	 * activity, sizes reported by the weak stores may overestimate the number
-	 * of values stored.
+	 * <p>
+	 * Storage backed by typed arrays. The storage returned by this method
+	 * <em>will not</em> allow null values.
+	 * 
+	 * <p>
+	 * Specifying a primitive type will result in storage backed by arrays of
+	 * primitives. Such stores provide greater type safety than those created by
+	 * genericized storage. In some contexts this will provide a very
+	 * significant reduction in the memory required to store values.
+	 *
+	 * @param type
+	 *            the type of the values to be stored
+	 * @param initialValue
+	 *            the initial value at each index of the store, not null
+	 * @param <V>
+	 *            the type of values to be stored
+	 * @throws IllegalArgumentException
+	 *             if the type or the initial value is null
+	 * @return typed storage
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	static <V> Storage<V> typed(Class<V> type, V initialValue) throws IllegalArgumentException {
+		if (type == null) throw new IllegalArgumentException("null type");
+		if (initialValue == null) throw new IllegalArgumentException("null initialValue");
+		if (type.isEnum()) return new EnumStorage(type);
+		if (type.isPrimitive()) return size -> PrimitiveStore.newStore(type, size, initialValue);
+		return size -> new ArrayStore<>(type, size, initialValue);
+	}
+
+	/**
+	 * <p>
+	 * Genericized storage using weak references. The storage returned by this
+	 * method <em>will</em> allow null values.
+	 * 
+	 * <p>
+	 * As a consequence of GC activity, sizes reported by the weak stores may
+	 * overestimate the number of values stored.
 	 *
 	 * @param <V>
 	 *            the type of values to be stored
@@ -82,9 +128,13 @@ public interface Storage<V> {
 	}
 
 	/**
-	 * Genericized storage using soft references. As a consequence of GC
-	 * activity, sizes reported by the soft stores may overestimate the number
-	 * of values stored.
+	 * <p>
+	 * Genericized storage using soft references. The storage returned by this
+	 * method <em>will</em> allow null values.
+	 * 
+	 * <p>
+	 * As a consequence of GC activity, sizes reported by the soft stores may
+	 * overestimate the number of values stored.
 	 *
 	 * @param <V>
 	 *            the type of values to be stored

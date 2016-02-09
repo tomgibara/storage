@@ -5,18 +5,30 @@ import com.tomgibara.storage.SmallValueStore.SmallValueStorage;
 class EnumStorage<E extends Enum<E>> implements Storage<E> {
 
 	private final Class<E> type;
-	private final SmallValueStorage storage;
 	private final E[] constants;
+	private final int initialValue;
+	private final SmallValueStorage storage;
 
 	EnumStorage(Class<E> type) {
 		this.type = type;
 		constants = type.getEnumConstants();
+		if (constants.length == 0) throw new IllegalArgumentException("no enum values");
+		initialValue = 0;
+		storage = SmallValueStore.newStorage(constants.length);
+	}
+
+	EnumStorage(E initialValue) {
+		type = initialValue.getDeclaringClass();
+		constants = type.getEnumConstants();
+		this.initialValue = initialValue.ordinal();
 		storage = SmallValueStore.newStorage(constants.length);
 	}
 
 	@Override
 	public Store<E> newStore(int size) throws IllegalArgumentException {
-		return new EnumStore(storage.newStore(size));
+		SmallValueStore store = storage.newStore(size);
+		if (initialValue != 0) store.fillInt(initialValue);
+		return new EnumStore(store);
 	}
 
 	private final class EnumStore implements Store<E> {

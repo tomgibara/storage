@@ -1,12 +1,14 @@
 package com.tomgibara.storage;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Collections;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class StorageTest {
@@ -97,7 +99,7 @@ public class StorageTest {
 	@Test
 	public void testEnumStorage() {
 
-		Storage<Tri> t = Storage.typed(Tri.class, false);
+		Storage<Tri> t = Storage.typed(Tri.class, Tri.SCALENE);
 		Store<Tri> s = t.newStore(10);
 		assertEquals(Tri.SCALENE, s.get(0));
 		assertEquals(Tri.SCALENE, s.get(9));
@@ -117,7 +119,7 @@ public class StorageTest {
 	@Test
 	public void testNullEnumStorage() {
 
-		Storage<Tri> t = Storage.typed(Tri.class, true);
+		Storage<Tri> t = Storage.typed(Tri.class);
 		Store<Tri> s = t.newStore(10);
 		assertEquals(null, s.set(0, Tri.ISOSCELES));
 		assertEquals(Tri.ISOSCELES, s.set(0, Tri.EQUILATERAL));
@@ -127,6 +129,12 @@ public class StorageTest {
 		s.set(0, null);
 	}
 
+	@Test
+	public void testNonNullStorage() {
+		assertNotNull(Storage.typed(String.class, "").newStore(10).get(0));
+		assertNotNull(Storage.generic(new Object()).newStore(10).get(0));
+	}
+	
 	enum Tri {
 
 		SCALENE,

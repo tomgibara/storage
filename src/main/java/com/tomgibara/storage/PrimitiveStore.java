@@ -14,16 +14,16 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 	private static final int BOOLEAN = 12;
 
 	@SuppressWarnings("unchecked")
-	static <V> PrimitiveStore<V> newStore(Class<V> type, int size) {
+	static <V> PrimitiveStore<V> newStore(Class<V> type, int size, V initialValue) {
 		switch((type.getName().hashCode() >> 8) & 0xf) {
-		case BYTE:    return (PrimitiveStore<V>) new ByteStore     (size);
-		case FLOAT:   return (PrimitiveStore<V>) new FloatStore    (size);
-		case CHAR:    return (PrimitiveStore<V>) new CharacterStore(size);
-		case SHORT:   return (PrimitiveStore<V>) new ShortStore    (size);
-		case LONG:    return (PrimitiveStore<V>) new LongStore     (size);
-		case INT:     return (PrimitiveStore<V>) new IntegerStore  (size);
-		case DOUBLE:  return (PrimitiveStore<V>) new DoubleStore   (size);
-		case BOOLEAN: return (PrimitiveStore<V>) new BooleanStore  (size);
+		case BYTE:    return (PrimitiveStore<V>) new ByteStore     (size, (Byte)      initialValue);
+		case FLOAT:   return (PrimitiveStore<V>) new FloatStore    (size, (Float)     initialValue);
+		case CHAR:    return (PrimitiveStore<V>) new CharacterStore(size, (Character) initialValue);
+		case SHORT:   return (PrimitiveStore<V>) new ShortStore    (size, (Short)     initialValue);
+		case LONG:    return (PrimitiveStore<V>) new LongStore     (size, (Long)      initialValue);
+		case INT:     return (PrimitiveStore<V>) new IntegerStore  (size, (Integer)   initialValue);
+		case DOUBLE:  return (PrimitiveStore<V>) new DoubleStore   (size, (Double)    initialValue);
+		case BOOLEAN: return (PrimitiveStore<V>) new BooleanStore  (size, (Boolean)   initialValue);
 		default: throw new IllegalArgumentException(type.getName());
 		}
 	}
@@ -114,8 +114,9 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		private byte[] values;
 
-		ByteStore(int size) {
-			this.values = new byte[size];
+		ByteStore(int size, byte initialValue) {
+			values = new byte[size];
+			if (initialValue != (byte) 0) Arrays.fill(values, initialValue);
 		}
 
 		ByteStore(byte[] values) {
@@ -168,8 +169,9 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		private float[] values;
 
-		FloatStore(int size) {
+		FloatStore(int size, float initialValue) {
 			this.values = new float[size];
+			if (initialValue != (float) 0) Arrays.fill(values, initialValue);
 		}
 
 		FloatStore(float[] values) {
@@ -222,8 +224,9 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		private char[] values;
 
-		CharacterStore(int size) {
+		CharacterStore(int size, char initialValue) {
 			this.values = new char[size];
+			if (initialValue != (char) 0) Arrays.fill(values, initialValue);
 		}
 
 		CharacterStore(char[] values) {
@@ -276,12 +279,13 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		private short[] values;
 
-		ShortStore(short[] values) {
-			this.values = values;
+		ShortStore(int size, short initialValue) {
+			this.values = new short[size];
+			if (initialValue != (short) 0) Arrays.fill(values, initialValue);
 		}
 
-		ShortStore(int size) {
-			this.values = new short[size];
+		ShortStore(short[] values) {
+			this.values = values;
 		}
 
 		private ShortStore(short[] values, boolean mutable) {
@@ -330,12 +334,13 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		private long[] values;
 
-		LongStore(long[] values) {
-			this.values = values;
+		LongStore(int size, long initialValue) {
+			this.values = new long[size];
+			if (initialValue != (long) 0) Arrays.fill(values, initialValue);
 		}
 
-		LongStore(int size) {
-			this.values = new long[size];
+		LongStore(long[] values) {
+			this.values = values;
 		}
 
 		private LongStore(long[] values, boolean mutable) {
@@ -384,12 +389,13 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		private int[] values;
 
-		IntegerStore(int[] values) {
-			this.values = values;
+		IntegerStore(int size, int initialValue) {
+			this.values = new int[size];
+			if (initialValue != (int) 0) Arrays.fill(values, initialValue);
 		}
 
-		IntegerStore(int size) {
-			this.values = new int[size];
+		IntegerStore(int[] values) {
+			this.values = values;
 		}
 
 		private IntegerStore(int[] values, boolean mutable) {
@@ -438,12 +444,13 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		private double[] values;
 
-		DoubleStore(double[] values) {
-			this.values = values;
+		DoubleStore(int size, double initialValue) {
+			this.values = new double[size];
+			if (initialValue != (double) 0) Arrays.fill(values, initialValue);
 		}
 
-		DoubleStore(int size) {
-			this.values = new double[size];
+		DoubleStore(double[] values) {
+			this.values = values;
 		}
 
 		private DoubleStore(double[] values, boolean mutable) {
@@ -492,12 +499,13 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		private boolean[] values;
 
-		BooleanStore(boolean[] values) {
-			this.values = values;
+		BooleanStore(int size, boolean initialValue) {
+			this.values = new boolean[size];
+			if (initialValue) Arrays.fill(values, initialValue);
 		}
 
-		BooleanStore(int size) {
-			this.values = new boolean[size];
+		BooleanStore(boolean[] values) {
+			this.values = values;
 		}
 
 		private BooleanStore(boolean[] values, boolean mutable) {
