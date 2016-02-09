@@ -184,7 +184,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @return bits indicating the indices at which values are present
 	 */
 	default BitStore population() {
-		if (nullValue() == null) return Bits.oneBits(size());
+		if (nullValue() != null) return Bits.oneBits(size());
 		return new AbstractBitStore() {
 
 			@Override
