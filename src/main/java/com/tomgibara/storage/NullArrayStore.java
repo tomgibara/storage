@@ -69,10 +69,10 @@ class NullArrayStore<V> extends AbstractStore<V> {
 		Arrays.fill(values, value);
 		count = value == null ? 0 : values.length;
 	}
-
+	
 	@Override
-	public boolean isNullAllowed() {
-		return true;
+	public V nullValue() {
+		return null;
 	}
 
 	// mutability

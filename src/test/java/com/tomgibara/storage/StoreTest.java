@@ -3,11 +3,13 @@ package com.tomgibara.storage;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 import org.junit.Test;
 
@@ -19,7 +21,7 @@ public class StoreTest {
 	public void testTransformedBy() {
 
 		Store<Integer> s = Stores.intsAndNull(1,2,3);
-		assertTrue(s.isNullAllowed());
+		assertNull(s.nullValue());
 		Store<Integer> t = s.asTransformedBy(i -> 2 * i);
 		assertEquals(s.count(), t.count());
 		for (int i = 0; i < s.count(); i++) {
@@ -70,7 +72,7 @@ public class StoreTest {
 		Store<Integer> s = Stores.intsAndNull(1,2,3);
 		Store<Integer> t = s.resizedCopy(5);
 		assertTrue(t.isMutable());
-		assertTrue(t.isNullAllowed());
+		assertNull(t.nullValue());
 		assertEquals(asList(1,2,3,null,null), t.asList());
 		Store<Integer> u = s.immutableCopy();
 		t.set(0, 0);
@@ -86,7 +88,7 @@ public class StoreTest {
 		Store<Integer> s = Stores.ints(1,2,3);
 		Store<Integer> t = s.resizedCopy(5);
 		assertTrue(t.isMutable());
-		assertFalse(t.isNullAllowed());
+		assertNotNull(t.nullValue());
 		assertEquals(asList(1,2,3,0,0), t.asList());
 		Store<Integer> u = s.immutableCopy();
 		t.set(0, 4);
@@ -101,7 +103,7 @@ public class StoreTest {
 	public void testObjectMethods() {
 		Store<Integer> s = Stores.ints(1, 2, 3);
 		Store<Integer> t = Stores.intsAndNull(1, 2, 3);
-		Store<Object> u = Stores.objects(true, new Object[] {1,2,3});
+		Store<Object> u = Stores.objects(Optional.empty(), new Object[] {1,2,3});
 		Store<Integer> v = Stores.ints(1, 2, 4);
 
 		assertTrue(s.equals(s));

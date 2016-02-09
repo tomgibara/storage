@@ -46,7 +46,8 @@ final class ImmutableStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
-	public boolean isNullAllowed() {
-		return store.isNullAllowed();
+	public V nullValue() {
+		return store.nullValue();
 	}
+	
 }

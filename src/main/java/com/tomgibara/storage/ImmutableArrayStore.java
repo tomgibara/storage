@@ -6,18 +6,18 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 
 	private final V[] values;
 	private final int count;
-	private final boolean nullAllowed;
+	private final V nullValue;
 
 	ImmutableArrayStore(V[] values, int count) {
 		this.values = values;
 		this.count = count;
-		nullAllowed = true;
+		nullValue = null;
 	}
 
-	ImmutableArrayStore(V[] values, boolean nullAllowed) {
+	ImmutableArrayStore(V[] values, V nullValue) {
 		this.values = values;
 		count = Stores.countNonNulls(values);
-		this.nullAllowed = nullAllowed;
+		this.nullValue = nullValue;
 	}
 
 	@Override
@@ -39,37 +39,38 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 
 	@Override
 	public Store<V> resizedCopy(int newSize) {
-		return nullAllowed ?
+		return nullValue == null ?
 				new NullArrayStore<>(Arrays.copyOf(values, newSize), count) :
-				new ArrayStore<>(Arrays.copyOf(values, newSize));
+				new ArrayStore<>(Stores.resizedCopyOf(values, newSize, nullValue), nullValue);
 	}
 
+	
 	@Override
-	public boolean isNullAllowed() {
-		return nullAllowed;
+	public V nullValue() {
+		return nullValue;
 	}
 
 	// mutability
 
 	@Override
 	public Store<V> mutableCopy() {
-		return nullAllowed ?
+		return nullValue == null ?
 				new NullArrayStore<>(values.clone(), count) :
-				new ArrayStore<>(values.clone());
+				new ArrayStore<>(values.clone(), nullValue);
 		}
 
 	@Override
 	public Store<V> immutableCopy() {
-		return nullAllowed ?
+		return nullValue == null ?
 				new ImmutableArrayStore<>(values.clone(), count) :
-				new ImmutableArrayStore<>(values.clone(), false);
+				new ImmutableArrayStore<>(values.clone(), nullValue);
 		}
 
 	@Override
 	public Store<V> immutableView() {
-		return nullAllowed ?
+		return nullValue == null ?
 				new ImmutableArrayStore<>(values, count):
-				new ImmutableArrayStore<>(values, false);
+				new ImmutableArrayStore<>(values, nullValue);
 	}
 
 }

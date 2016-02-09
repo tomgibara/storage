@@ -121,8 +121,8 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 	}
 
 	@Override
-	public boolean isNullAllowed() {
-		return false;
+	public Integer nullValue() {
+		return 0;
 	}
 
 	@Override
@@ -184,11 +184,6 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
-		public boolean isNullAllowed() {
-			return false;
-		}
-
-		@Override
 		public Integer get(int index) {
 			checkIndex(index);
 			return 0;
@@ -232,8 +227,8 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			checkMutable();
 		}
 
-		private void checkValue(int value) {
-			if (value != 0) throw new IllegalArgumentException("non-zero value");
+		private void checkValue(Integer value) {
+			if (value != null && value.intValue() != 0) throw new IllegalArgumentException("non-zero value");
 		}
 
 		private void checkMutable() {
@@ -315,7 +310,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		private boolean checkedValue(Integer value) {
-			if (value == null) throw new IllegalArgumentException("null value");
+			if (value == null) return false;
 			switch (value) {
 			case 0 : return false;
 			case 1 : return true;
@@ -354,14 +349,12 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		@Override
 		public Integer set(int index, Integer value) {
 			checkIndex(index);
-			checkValue(value);
-			return setInt(index, value);
+			return setInt(index, checkedValue(value));
 		}
 
 		@Override
 		public void fill(Integer value) {
-			checkValue(value);
-			fillInt(value);
+			fillInt(checkedValue(value));
 		}
 
 		@Override
@@ -418,10 +411,11 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			Arrays.fill(data, tPack(u));
 		}
 
-		private void checkValue(Integer value) {
-			if (value == null) throw new IllegalArgumentException("null value");
+		private int checkedValue(Integer value) {
+			if (value == null) return 0;
 			if (value < 0) throw new IllegalArgumentException("negative value");
 			if (value >= 3) throw new IllegalArgumentException("value too large");
+			return value;
 		}
 	}
 
@@ -448,14 +442,12 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		@Override
 		public Integer set(int index, Integer value) {
 			checkIndex(index);
-			checkValue(value);
-			return setInt(index, value);
+			return setInt(index, checkedValue(value));
 		}
 
 		@Override
 		public void fill(Integer value) {
-			checkValue(value);
-			fillInt(value);
+			fillInt(checkedValue(value));
 		}
 
 		@Override
@@ -521,10 +513,11 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			}
 		}
 
-		private void checkValue(Integer value) {
-			if (value == null) throw new IllegalArgumentException("null value");
+		private int checkedValue(Integer value) {
+			if (value == null) return 0;
 			if (value < 0) throw new IllegalArgumentException("negative value");
 			if (value >= 5) throw new IllegalArgumentException("value too large");
+			return value;
 		}
 
 		private int getBits(int index) {
@@ -568,20 +561,12 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		@Override
 		public Integer set(int index, Integer value) {
 			checkIndex(index);
-			if (value == null) throw new IllegalArgumentException("null value");
-			checkValue(value);
-			return setInt(index, value);
+			return setInt(index, checkedValue(value));
 		}
 
 		@Override
 		public void fill(Integer value) {
-			if (value == null) throw new IllegalArgumentException("null value");
-			checkValue(value);
-			if (value == 0) {
-				bits.clear();
-			} else {
-				fillInt(value);
-			}
+			fillInt(checkedValue(value));
 		}
 
 		@Override
@@ -611,16 +596,22 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		@Override
 		void fillInt(int value) {
-			BitWriter w = bits.openWriter();
-			for (int i = 0; i < size; i++) {
-				w.write(value, count);
+			if (value == 0) {
+				bits.clear();
+			} else {
+				BitWriter w = bits.openWriter();
+				for (int i = 0; i < size; i++) {
+					w.write(value, count);
+				}
+				w.flush();
 			}
-			w.flush();
 		}
 
-		private void checkValue(int value) {
-			if (value < 0L) throw new IllegalArgumentException("negative value");
+		private int checkedValue(Integer value) {
+			if (value == null) return 0;
+			if (value < 0) throw new IllegalArgumentException("negative value");
 			if (value >= range) throw new IllegalArgumentException("value too large");
+			return value;
 		}
 
 	}
@@ -652,8 +643,8 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
-		public boolean isNullAllowed() {
-			return true;
+		public Integer nullValue() {
+			return null;
 		}
 
 		@Override
@@ -732,8 +723,8 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
-		public boolean isNullAllowed() {
-			return true;
+		public Integer nullValue() {
+			return null;
 		}
 
 		@Override

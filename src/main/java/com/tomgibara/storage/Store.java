@@ -96,8 +96,24 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 *
 	 * @return whether values may be null
 	 */
-	boolean isNullAllowed();
+	//boolean isNullAllowed();
 
+	/**
+	 * <p>
+	 * A value that substitutes for null in this store. For stores support that
+	 * support the storage of null values this method will always return null.
+	 * Some stores do not support null values (for example, those backed by
+	 * primitive arrays) in this instance the returned value will never be null.
+	 * 
+	 * <p>
+	 * Note that the value returned by this method will by substituted for null
+	 * in calls to {@link #set(int, Object)} and {@link #clear()} but
+	 * occurrences of this value in the store will not be treated as null.
+	 * 
+	 * @return the value that substitutes for null, or null
+	 */
+	V nullValue();
+	
 	/**
 	 * Stores a value in the store. Storing null will result in no value being
 	 * associated with the specified index
@@ -116,7 +132,6 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * Removes all stored values.
 	 */
 	default void clear() {
-		if (!isNullAllowed()) throw new UnsupportedOperationException("null not allowed");
 		int size = size();
 		for (int i = 0; i < size; i++) {
 			set(i, null);
@@ -152,9 +167,10 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @see #mutableCopy()
 	 */
 	default Store<V> resizedCopy(int newSize) {
-		return isNullAllowed() ?
+		V nv = nullValue();
+		return nv == null ?
 				new NullArrayStore<>(Stores.toArray(this, newSize), count()) :
-				new ArrayStore<>(Stores.toArray(this, newSize));
+				new ArrayStore<>(Stores.toArray(this, newSize), nv);
 	}
 
 	/**
@@ -174,7 +190,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @return bits indicating the indices at which values are present
 	 */
 	default BitStore population() {
-		if (!isNullAllowed()) return Bits.oneBits(size());
+		if (nullValue() == null) return Bits.oneBits(size());
 		return new AbstractBitStore() {
 
 			@Override
@@ -384,7 +400,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	@Override
 	public default void forEach(Consumer<? super V> action) {
 		int size = size();
-		if (isNullAllowed()) {
+		if (nullValue() == null) {
 			for (int i = 0; i < size; i++) {
 				V v = get(size);
 				if (v != null) action.accept(v);

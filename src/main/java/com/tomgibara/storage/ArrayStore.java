@@ -6,20 +6,25 @@ import java.util.Arrays;
 class ArrayStore<V> extends AbstractStore<V> {
 
 	final V[] values;
+	final V nullValue;
 
 	@SuppressWarnings("unchecked")
-	ArrayStore(Class<V> type, int size, V initialValue) {
-		if (initialValue == null) throw new IllegalArgumentException("null initialValue");
-		try {
+	ArrayStore(Class<V> type, int size, V nullValue) {
+		if (nullValue == null) throw new IllegalArgumentException("null initialValue");
+		if (type == Object.class) {
+			values = (V[]) new Object[size];
+		} else try {
 			values = (V[]) Array.newInstance(type, size);
 		} catch (NegativeArraySizeException e) {
 			throw new IllegalArgumentException("negative size", e);
 		}
-		Arrays.fill(values, initialValue);
+		Arrays.fill(values, nullValue);
+		this.nullValue = nullValue;
 	}
 
-	ArrayStore(V[] values) {
+	ArrayStore(V[] values, V nullValue) {
 		this.values = values;
+		this.nullValue = nullValue;
 	}
 
 	@Override
@@ -45,7 +50,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 
 	@Override
 	public V set(int index, V value) {
-		if (value == null) throw new IllegalArgumentException("null value");
+		if (value == null) value = nullValue;
 		V old = values[index];
 		values[index] = value;
 		return old;
@@ -53,22 +58,22 @@ class ArrayStore<V> extends AbstractStore<V> {
 
 	@Override
 	public void fill(V value) {
-		if (value == null) throw new IllegalArgumentException("null value");
+		if (value == null) value = nullValue;
 		Arrays.fill(values, value);
 	}
 
 	@Override
-	public boolean isNullAllowed() {
-		return false;
+	public V nullValue() {
+		return nullValue;
 	}
-
+	
 	// mutability
 
 	@Override
 	public boolean isMutable() { return true; }
 
 	@Override
-	public Store<V> mutableCopy() { return new ArrayStore<>(values.clone()); }
+	public Store<V> mutableCopy() { return new ArrayStore<V>(values.clone(), nullValue); }
 
 	@Override
 	public Store<V> immutableCopy() { return new ImmutableArrayStore<>(values.clone(), values.length); }

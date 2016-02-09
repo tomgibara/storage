@@ -108,12 +108,8 @@ public class StorageTest {
 		assertEquals(Tri.EQUILATERAL, s.set(0, Tri.SCALENE));
 		s.fill(Tri.ISOSCELES);
 		assertEquals(Collections.nCopies(10, Tri.ISOSCELES), s.asList());
-		try {
-			s.asList().set(0, null);
-			fail();
-		} catch (IllegalArgumentException e) {
-			/* expected */
-		}
+		s.asList().set(0, null);
+		assertEquals(s.nullValue(), s.get(0));
 	}
 
 	@Test

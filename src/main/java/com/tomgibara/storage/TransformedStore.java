@@ -36,10 +36,10 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 	}
 
 	@Override
-	public boolean isNullAllowed() {
-		return store.isNullAllowed();
+	public W nullValue() {
+		return fn.apply(store.nullValue());
 	}
-
+	
 	@Override
 	public int count() {
 		return store.count();

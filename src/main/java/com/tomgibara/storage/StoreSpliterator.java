@@ -13,7 +13,7 @@ class StoreSpliterator<V> implements Spliterator<V> {
 
 	StoreSpliterator(Store<V> store) {
 		this.store = store;
-		if (store.isNullAllowed()) {
+		if (store.nullValue() == null) {
 			chi = store.isMutable() ? ORDERED : ORDERED | IMMUTABLE;
 		} else {
 			chi = store.isMutable() ? ORDERED | SIZED | SUBSIZED | NONNULL : ORDERED | SIZED | SUBSIZED | NONNULL | IMMUTABLE;
@@ -33,7 +33,7 @@ class StoreSpliterator<V> implements Spliterator<V> {
 
 	@Override
 	public boolean tryAdvance(Consumer<? super V> action) {
-		if (store.isNullAllowed()) {
+		if (store.nullValue() == null) {
 			while (from < to) {
 				V v = store.get(from++);
 				if (v != null) {

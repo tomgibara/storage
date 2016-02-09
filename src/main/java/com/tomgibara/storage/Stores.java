@@ -1,6 +1,8 @@
 package com.tomgibara.storage;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Collects static methods for creating new stores that wrap existing arrays.
@@ -13,22 +15,41 @@ public final class Stores {
 	// public scoped methods
 
 	/**
-	 * Creates a mutable store that wraps an existing array. Supplying an array
-	 * containing nulls and specifying that nulls are not allowed is likely to
+	 * Creates a mutable store that wraps an existing array. The returned store
+	 * supports null values if the <code>nullValue</code> optional parameter is
+	 * empty and in this case, supplying an array containing nulls is likely to
 	 * cause malfunction.
 	 *
 	 * @param values
 	 *            the values of the store
-	 * @param nullsAllowed
-	 *            whether the returned storage will accept null values
+	 * @param nullValue
+	 *            the contains the value substituted for null on mutation, or is
+	 *            empty if the store should support null values
 	 * @param <V>
 	 *            the type of values to be stored
 	 * @return a store that mediates access to the array
 	 */
 	@SafeVarargs
-	public static <V> Store<V> objects(boolean nullsAllowed, V... values) {
+	public static <V> Store<V> objects(Optional<V> nullValue, V... values) {
+		checkNullValueNotNull(values);
 		checkValuesNotNull(values);
-		return nullsAllowed ? new NullArrayStore<>(values) : new ArrayStore<>(values);
+		return nullValue.isPresent() ? new ArrayStore<>(values, nullValue.get()) : new NullArrayStore<>(values);
+	}
+
+	/**
+	 * Creates a mutable store that wraps an existing array. The returned store
+	 * supports null values.
+	 *
+	 * @param values
+	 *            the values of the store
+	 * @param <V>
+	 *            the type of values to be stored
+	 * @return a store that mediates access to the array
+	 */
+	@SafeVarargs
+	public static <V> Store<V> objectsAndNull(V... values) {
+		checkValuesNotNull(values);
+		return new NullArrayStore<>(values);
 	}
 
 	/**
@@ -45,10 +66,33 @@ public final class Stores {
 	 * @return a store that mediates access to the array
 	 */
 	@SafeVarargs
-	public static <V> Store<V> objects(int count, V... values) {
+	public static <V> Store<V> objectsAndNullCount(int count, V... values) {
 		if (count < 0) throw new IllegalArgumentException("negative count");
 		checkValuesNotNull(values);
 		return new NullArrayStore<>(values, count);
+	}
+
+	/**
+	 * Creates an immutable store that returns values from an existing array.
+	 * The returned store supports null values if the <code>nullValue</code>
+	 * optional parameter is empty and in this case, supplying an array
+	 * containing nulls is likely to cause malfunction. The supplied array is
+	 * not copied and must not be modified.
+	 *
+	 * @param values
+	 *            the values of the store
+	 * @param nullValue
+	 *            the contains the value substituted for null in any mutable
+	 *            copies, or is empty if the store should support null values
+	 * @param <V>
+	 *            the type of values to be stored
+	 * @return a store that returns values from array
+	 */
+	@SafeVarargs
+	public static <V> Store<V> immutableObjects(Optional<V> nullValue, V... values) {
+		checkNullValueNotNull(values);
+		checkValuesNotNull(values);
+		return new ImmutableArrayStore<>(values, nullValue.orElse(null));
 	}
 
 	/**
@@ -57,16 +101,14 @@ public final class Stores {
 	 *
 	 * @param values
 	 *            the values of the store
-	 * @param nullsAllowed
-	 *            whether the returned storage will accept null values
 	 * @param <V>
 	 *            the type of values to be stored
 	 * @return a store that returns values from array
 	 */
 	@SafeVarargs
-	public static <V> Store<V> immutableObjects(boolean nullsAllowed, V... values) {
+	public static <V> Store<V> immutableObjectsAndNull(V... values) {
 		checkValuesNotNull(values);
-		return new ImmutableArrayStore<>(values, nullsAllowed);
+		return new ImmutableArrayStore<>(values, null);
 	}
 
 	/**
@@ -82,7 +124,7 @@ public final class Stores {
 	 * @return a store that mediates access to the array
 	 */
 	@SafeVarargs
-	public static <V> Store<V> immutableObjects(int count, V... values) {
+	public static <V> Store<V> immutableObjectsAndNullCount(int count, V... values) {
 		if (count < 0) throw new IllegalArgumentException("negative size");
 		checkValuesNotNull(values);
 		return new ImmutableArrayStore<>(values, count);
@@ -97,7 +139,7 @@ public final class Stores {
 	 */
 	public static Store<Byte> bytes(byte... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.ByteStore(values);
+		return new PrimitiveStore.ByteStore(values, (byte) 0);
 	}
 
 	/**
@@ -124,7 +166,7 @@ public final class Stores {
 	 */
 	public static Store<Short> shorts(short... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.ShortStore(values);
+		return new PrimitiveStore.ShortStore(values, (short) 0);
 	}
 
 	/**
@@ -151,7 +193,7 @@ public final class Stores {
 	 */
 	public static Store<Integer> ints(int... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.IntegerStore(values);
+		return new PrimitiveStore.IntegerStore(values, (int) 0);
 	}
 
 	/**
@@ -178,7 +220,7 @@ public final class Stores {
 	 */
 	public static Store<Long> longs(long... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.LongStore(values);
+		return new PrimitiveStore.LongStore(values, (long) 0);
 	}
 
 	/**
@@ -205,7 +247,7 @@ public final class Stores {
 	 */
 	public static Store<Boolean> booleans(boolean... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.BooleanStore(values);
+		return new PrimitiveStore.BooleanStore(values, false);
 	}
 
 	/**
@@ -232,7 +274,7 @@ public final class Stores {
 	 */
 	public static Store<Character> chars(char... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.CharacterStore(values);
+		return new PrimitiveStore.CharacterStore(values, (char) 0);
 	}
 
 	/**
@@ -259,7 +301,7 @@ public final class Stores {
 	 */
 	public static Store<Float> floats(float... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.FloatStore(values);
+		return new PrimitiveStore.FloatStore(values, (float) 0);
 	}
 
 	/**
@@ -286,7 +328,7 @@ public final class Stores {
 	 */
 	public static Store<Double> doubles(double... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.DoubleStore(values);
+		return new PrimitiveStore.DoubleStore(values, (double) 0);
 	}
 
 	/**
@@ -334,6 +376,18 @@ public final class Stores {
 		if (values == null) throw new IllegalArgumentException("null values");
 	}
 
+	static void checkNullValueNotNull(Object nullValue) {
+		if (nullValue == null) throw new IllegalArgumentException("null nullValue");
+	}
+
+	static <V> V[] resizedCopyOf(V[] vs, int newSize, V v) {
+		if (v == null) return Arrays.copyOf(vs, newSize);
+		int oldSize = vs.length;
+		vs = Arrays.copyOf(vs, newSize);
+		if (newSize > oldSize) Arrays.fill(vs, oldSize, newSize, v);
+		return vs;
+	}
+	
 	// non-constructor
 
 	private Stores() {}

@@ -14,16 +14,16 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 	private static final int BOOLEAN = 12;
 
 	@SuppressWarnings("unchecked")
-	static <V> PrimitiveStore<V> newStore(Class<V> type, int size, V initialValue) {
+	static <V> PrimitiveStore<V> newStore(Class<V> type, int size, V nullValue) {
 		switch((type.getName().hashCode() >> 8) & 0xf) {
-		case BYTE:    return (PrimitiveStore<V>) new ByteStore     (size, (Byte)      initialValue);
-		case FLOAT:   return (PrimitiveStore<V>) new FloatStore    (size, (Float)     initialValue);
-		case CHAR:    return (PrimitiveStore<V>) new CharacterStore(size, (Character) initialValue);
-		case SHORT:   return (PrimitiveStore<V>) new ShortStore    (size, (Short)     initialValue);
-		case LONG:    return (PrimitiveStore<V>) new LongStore     (size, (Long)      initialValue);
-		case INT:     return (PrimitiveStore<V>) new IntegerStore  (size, (Integer)   initialValue);
-		case DOUBLE:  return (PrimitiveStore<V>) new DoubleStore   (size, (Double)    initialValue);
-		case BOOLEAN: return (PrimitiveStore<V>) new BooleanStore  (size, (Boolean)   initialValue);
+		case BYTE:    return (PrimitiveStore<V>) new ByteStore     (size, (Byte)      nullValue);
+		case FLOAT:   return (PrimitiveStore<V>) new FloatStore    (size, (Float)     nullValue);
+		case CHAR:    return (PrimitiveStore<V>) new CharacterStore(size, (Character) nullValue);
+		case SHORT:   return (PrimitiveStore<V>) new ShortStore    (size, (Short)     nullValue);
+		case LONG:    return (PrimitiveStore<V>) new LongStore     (size, (Long)      nullValue);
+		case INT:     return (PrimitiveStore<V>) new IntegerStore  (size, (Integer)   nullValue);
+		case DOUBLE:  return (PrimitiveStore<V>) new DoubleStore   (size, (Double)    nullValue);
+		case BOOLEAN: return (PrimitiveStore<V>) new BooleanStore  (size, (Boolean)   nullValue);
 		default: throw new IllegalArgumentException(type.getName());
 		}
 	}
@@ -74,11 +74,6 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		return resize(newSize);
 	}
 
-	@Override
-	public boolean isNullAllowed() {
-		return false;
-	}
-
 	// for extension
 
 	abstract protected V getImpl(int index);
@@ -112,20 +107,24 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 	final static class ByteStore extends PrimitiveStore<Byte> {
 
-		private byte[] values;
+		private final byte[] values;
+		private final byte nullValue;
 
-		ByteStore(int size, byte initialValue) {
+		ByteStore(int size, byte nullValue) {
 			values = new byte[size];
-			if (initialValue != (byte) 0) Arrays.fill(values, initialValue);
+			this.nullValue = nullValue;
+			if (nullValue != (byte) 0) Arrays.fill(values, nullValue);
 		}
 
-		ByteStore(byte[] values) {
+		ByteStore(byte[] values, byte nullValue) {
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
-		ByteStore(byte[] values, boolean mutable) {
+		ByteStore(byte[] values, byte nullValue, boolean mutable) {
 			super(mutable);
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
 		@Override
@@ -145,42 +144,56 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected void setImpl(int index, Byte value) {
-			values[index] = value;
+			values[index] = value == null ? nullValue : value.byteValue();
 		}
 
 		@Override
 		protected void fillImpl(Byte value) {
-			Arrays.fill(values, value);
+			Arrays.fill(values, value == null ? nullValue : value.byteValue());
 		}
 
 		@Override
 		protected ByteStore duplicate(boolean copy, boolean mutable) {
-			return new ByteStore(copy ? values.clone() : values, mutable);
+			return new ByteStore(copy ? values.clone() : values, nullValue, mutable);
 		}
 
 		@Override
 		protected ByteStore resize(int newSize) {
-			return new ByteStore(Arrays.copyOf(values, newSize));
+			byte[] newValues = Arrays.copyOf(values, newSize);
+			if (nullValue != (byte) 0) {
+				int oldSize = values.length;
+				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
+			}
+			return new ByteStore(newValues, nullValue);
+		}
+
+		@Override
+		public Byte nullValue() {
+			return nullValue;
 		}
 
 	}
 
 	final static class FloatStore extends PrimitiveStore<Float> {
 
-		private float[] values;
+		private final float[] values;
+		private final float nullValue;
 
-		FloatStore(int size, float initialValue) {
+		FloatStore(int size, float nullValue) {
 			this.values = new float[size];
-			if (initialValue != (float) 0) Arrays.fill(values, initialValue);
+			this.nullValue = nullValue;
+			if (nullValue != (float) 0) Arrays.fill(values, nullValue);
 		}
 
-		FloatStore(float[] values) {
+		FloatStore(float[] values, float nullValue) {
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
-		FloatStore(float[] values, boolean mutable) {
+		FloatStore(float[] values, float nullValue, boolean mutable) {
 			super(mutable);
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
 		@Override
@@ -200,42 +213,56 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected void setImpl(int index, Float value) {
-			values[index] = value;
+			values[index] = value == null ? nullValue : value.floatValue();
 		}
 
 		@Override
 		protected void fillImpl(Float value) {
-			Arrays.fill(values, value);
+			Arrays.fill(values, value == null ? nullValue : value.floatValue());
 		}
 
 		@Override
 		protected FloatStore duplicate(boolean copy, boolean mutable) {
-			return new FloatStore(copy ? values.clone() : values, mutable);
+			return new FloatStore(copy ? values.clone() : values, nullValue, mutable);
 		}
 
 		@Override
 		protected FloatStore resize(int newSize) {
-			return new FloatStore(Arrays.copyOf(values, newSize));
+			float[] newValues = Arrays.copyOf(values, newSize);
+			if (nullValue != (float) 0) {
+				int oldSize = values.length;
+				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
+			}
+			return new FloatStore(newValues, nullValue);
+		}
+
+		@Override
+		public Float nullValue() {
+			return nullValue;
 		}
 
 	}
 
 	final static class CharacterStore extends PrimitiveStore<Character> {
 
-		private char[] values;
+		private final char[] values;
+		private final char nullValue;
 
-		CharacterStore(int size, char initialValue) {
+		CharacterStore(int size, char nullValue) {
 			this.values = new char[size];
-			if (initialValue != (char) 0) Arrays.fill(values, initialValue);
+			this.nullValue = nullValue;
+			if (nullValue != (char) 0) Arrays.fill(values, nullValue);
 		}
 
-		CharacterStore(char[] values) {
+		CharacterStore(char[] values, char nullValue) {
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
-		private CharacterStore(char[] values, boolean mutable) {
+		private CharacterStore(char[] values, char nullValue, boolean mutable) {
 			super(mutable);
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
 		@Override
@@ -255,42 +282,56 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected void setImpl(int index, Character value) {
-			values[index] = value;
+			values[index] = value == null ? nullValue : value.charValue();
 		}
 
 		@Override
 		protected void fillImpl(Character value) {
-			Arrays.fill(values, value);
+			Arrays.fill(values, value == null ? nullValue : value.charValue());
 		}
 
 		@Override
 		protected CharacterStore duplicate(boolean copy, boolean mutable) {
-			return new CharacterStore(copy ? values.clone() : values, mutable);
+			return new CharacterStore(copy ? values.clone() : values, nullValue, mutable);
 		}
 
 		@Override
 		protected CharacterStore resize(int newSize) {
-			return new CharacterStore(Arrays.copyOf(values, newSize));
+			char[] newValues = Arrays.copyOf(values, newSize);
+			if (nullValue != (char) 0) {
+				int oldSize = values.length;
+				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
+			}
+			return new CharacterStore(newValues, nullValue);
+		}
+
+		@Override
+		public Character nullValue() {
+			return nullValue;
 		}
 
 	}
 
 	final static class ShortStore extends PrimitiveStore<Short> {
 
-		private short[] values;
+		private final short[] values;
+		private final short nullValue;
 
-		ShortStore(int size, short initialValue) {
+		ShortStore(int size, short nullValue) {
 			this.values = new short[size];
-			if (initialValue != (short) 0) Arrays.fill(values, initialValue);
+			this.nullValue = nullValue;
+			if (nullValue != (short) 0) Arrays.fill(values, nullValue);
 		}
 
-		ShortStore(short[] values) {
+		ShortStore(short[] values, short nullValue) {
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
-		private ShortStore(short[] values, boolean mutable) {
+		private ShortStore(short[] values, short nullValue, boolean mutable) {
 			super(mutable);
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
 		@Override
@@ -310,42 +351,56 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected void setImpl(int index, Short value) {
-			values[index] = value;
+			values[index] = value == null ? nullValue : value.shortValue();
 		}
 
 		@Override
 		protected void fillImpl(Short value) {
-			Arrays.fill(values, value);
+			Arrays.fill(values, value == null ? nullValue : value.shortValue());
 		}
 
 		@Override
 		protected ShortStore duplicate(boolean copy, boolean mutable) {
-			return new ShortStore(copy ? values.clone() : values, mutable);
+			return new ShortStore(copy ? values.clone() : values, nullValue, mutable);
 		}
 
 		@Override
 		protected ShortStore resize(int newSize) {
-			return new ShortStore(Arrays.copyOf(values, newSize));
+			short[] newValues = Arrays.copyOf(values, newSize);
+			if (nullValue != (short) 0) {
+				int oldSize = values.length;
+				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
+			}
+			return new ShortStore(newValues, nullValue);
+		}
+
+		@Override
+		public Short nullValue() {
+			return nullValue;
 		}
 
 	}
 
 	final static class LongStore extends PrimitiveStore<Long> {
 
-		private long[] values;
+		private final long[] values;
+		private final long nullValue;
 
-		LongStore(int size, long initialValue) {
+		LongStore(int size, long nullValue) {
 			this.values = new long[size];
-			if (initialValue != (long) 0) Arrays.fill(values, initialValue);
+			if (nullValue != (long) 0) Arrays.fill(values, nullValue);
+			this.nullValue = nullValue;
 		}
 
-		LongStore(long[] values) {
+		LongStore(long[] values, long nullValue) {
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
-		private LongStore(long[] values, boolean mutable) {
+		private LongStore(long[] values, long nullValue, boolean mutable) {
 			super(mutable);
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
 		@Override
@@ -365,42 +420,56 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected void setImpl(int index, Long value) {
-			values[index] = value;
+			values[index] = value == null ? nullValue : value.longValue();
 		}
 
 		@Override
 		protected void fillImpl(Long value) {
-			Arrays.fill(values, value);
+			Arrays.fill(values, value == null ? nullValue : value.longValue());
 		}
 
 		@Override
 		protected LongStore duplicate(boolean copy, boolean mutable) {
-			return new LongStore(copy ? values.clone() : values, mutable);
+			return new LongStore(copy ? values.clone() : values, nullValue, mutable);
 		}
 
 		@Override
 		protected LongStore resize(int newSize) {
-			return new LongStore(Arrays.copyOf(values, newSize));
+			long[] newValues = Arrays.copyOf(values, newSize);
+			if (nullValue != (long) 0) {
+				int oldSize = values.length;
+				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
+			}
+			return new LongStore(newValues, nullValue);
+		}
+
+		@Override
+		public Long nullValue() {
+			return nullValue;
 		}
 
 	}
 
 	final static class IntegerStore extends PrimitiveStore<Integer> {
 
-		private int[] values;
+		private final int[] values;
+		private final int nullValue;
 
-		IntegerStore(int size, int initialValue) {
+		IntegerStore(int size, int nullValue) {
 			this.values = new int[size];
-			if (initialValue != (int) 0) Arrays.fill(values, initialValue);
+			this.nullValue = nullValue;
+			if (nullValue != (int) 0) Arrays.fill(values, nullValue);
 		}
 
-		IntegerStore(int[] values) {
+		IntegerStore(int[] values, int nullValue) {
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
-		private IntegerStore(int[] values, boolean mutable) {
+		private IntegerStore(int[] values, int nullValue, boolean mutable) {
 			super(mutable);
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
 		@Override
@@ -420,42 +489,56 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected void setImpl(int index, Integer value) {
-			values[index] = value;
+			values[index] = value == null ? nullValue : value.intValue();
 		}
 
 		@Override
 		protected void fillImpl(Integer value) {
-			Arrays.fill(values, value);
+			Arrays.fill(values, value == null ? nullValue : value.intValue());
 		}
 
 		@Override
 		protected IntegerStore duplicate(boolean copy, boolean mutable) {
-			return new IntegerStore(copy ? values.clone() : values, mutable);
+			return new IntegerStore(copy ? values.clone() : values, nullValue, mutable);
 		}
 
 		@Override
 		protected IntegerStore resize(int newSize) {
-			return new IntegerStore(Arrays.copyOf(values, newSize));
+			int[] newValues = Arrays.copyOf(values, newSize);
+			if (nullValue != (int) 0) {
+				int oldSize = values.length;
+				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
+			}
+			return new IntegerStore(newValues, nullValue);
+		}
+
+		@Override
+		public Integer nullValue() {
+			return nullValue;
 		}
 
 	}
 
 	final static class DoubleStore extends PrimitiveStore<Double> {
 
-		private double[] values;
+		private final double[] values;
+		private final double nullValue;
 
-		DoubleStore(int size, double initialValue) {
+		DoubleStore(int size, double nullValue) {
 			this.values = new double[size];
-			if (initialValue != (double) 0) Arrays.fill(values, initialValue);
+			this.nullValue = nullValue;
+			if (nullValue != (double) 0) Arrays.fill(values, nullValue);
 		}
 
-		DoubleStore(double[] values) {
+		DoubleStore(double[] values, double nullValue) {
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
-		private DoubleStore(double[] values, boolean mutable) {
+		private DoubleStore(double[] values, double nullValue, boolean mutable) {
 			super(mutable);
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
 		@Override
@@ -475,42 +558,56 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected void setImpl(int index, Double value) {
-			values[index] = value;
+			values[index] = value == null ? nullValue : value.doubleValue();
 		}
 
 		@Override
 		protected void fillImpl(Double value) {
-			Arrays.fill(values, value);
+			Arrays.fill(values, value == null ? nullValue : value.doubleValue());
 		}
 
 		@Override
 		protected DoubleStore duplicate(boolean copy, boolean mutable) {
-			return new DoubleStore(copy ? values.clone() : values, mutable);
+			return new DoubleStore(copy ? values.clone() : values, nullValue, mutable);
 		}
 
 		@Override
 		protected DoubleStore resize(int newSize) {
-			return new DoubleStore(Arrays.copyOf(values, newSize));
+			double[] newValues = Arrays.copyOf(values, newSize);
+			if (nullValue != (double) 0) {
+				int oldSize = values.length;
+				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
+			}
+			return new DoubleStore(newValues, nullValue);
+		}
+
+		@Override
+		public Double nullValue() {
+			return nullValue;
 		}
 
 	}
 
 	final static class BooleanStore extends PrimitiveStore<Boolean> {
 
-		private boolean[] values;
+		private final boolean[] values;
+		private final boolean nullValue;
 
-		BooleanStore(int size, boolean initialValue) {
+		BooleanStore(int size, boolean nullValue) {
 			this.values = new boolean[size];
-			if (initialValue) Arrays.fill(values, initialValue);
+			this.nullValue = nullValue;
+			if (nullValue) Arrays.fill(values, nullValue);
 		}
 
-		BooleanStore(boolean[] values) {
+		BooleanStore(boolean[] values, boolean nullValue) {
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
-		private BooleanStore(boolean[] values, boolean mutable) {
+		private BooleanStore(boolean[] values, boolean nullValue, boolean mutable) {
 			super(mutable);
 			this.values = values;
+			this.nullValue = nullValue;
 		}
 
 		@Override
@@ -530,22 +627,32 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected void setImpl(int index, Boolean value) {
-			values[index] = value;
+			values[index] = value == null ? nullValue : value.booleanValue();
 		}
 
 		@Override
 		protected void fillImpl(Boolean value) {
-			Arrays.fill(values, value);
+			Arrays.fill(values, value == null ? nullValue : value.booleanValue());
 		}
 
 		@Override
 		protected BooleanStore duplicate(boolean copy, boolean mutable) {
-			return new BooleanStore(copy ? values.clone() : values, mutable);
+			return new BooleanStore(copy ? values.clone() : values, nullValue, mutable);
 		}
 
 		@Override
 		protected BooleanStore resize(int newSize) {
-			return new BooleanStore(Arrays.copyOf(values, newSize));
+			boolean[] newValues = Arrays.copyOf(values, newSize);
+			if (nullValue) {
+				int oldSize = values.length;
+				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
+			}
+			return new BooleanStore(newValues, nullValue);
+		}
+
+		@Override
+		public Boolean nullValue() {
+			return nullValue;
 		}
 
 	}

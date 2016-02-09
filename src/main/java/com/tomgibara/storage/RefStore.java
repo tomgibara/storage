@@ -35,10 +35,10 @@ abstract class RefStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
-	public boolean isNullAllowed() {
-		return true;
+	public V nullValue() {
+		return null;
 	}
-
+	
 	@Override
 	public int count() {
 		flushQueue();

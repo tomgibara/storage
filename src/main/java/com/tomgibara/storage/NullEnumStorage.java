@@ -33,8 +33,8 @@ class NullEnumStorage<E extends Enum<E>> implements Storage<E> {
 		}
 
 		@Override
-		public boolean isNullAllowed() {
-			return true;
+		public E nullValue() {
+			return null;
 		}
 
 		@Override

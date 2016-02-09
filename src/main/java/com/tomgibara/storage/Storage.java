@@ -1,7 +1,5 @@
 package com.tomgibara.storage;
 
-import java.util.Arrays;
-
 /**
  * <p>
  * Implementations of this interface are able to create {@link Store} instances
@@ -44,13 +42,9 @@ public interface Storage<V> {
 	 * @return genericized storage
 	 */
 	@SuppressWarnings("unchecked")
-	static <V> Storage<V> generic(V initialValue) {
-		if (initialValue == null) throw new IllegalArgumentException("null initialValue");
-		return size -> {
-			Object[] array = new Object[size];
-			Arrays.fill(array, initialValue);
-			return (Store<V>) new ArrayStore<>(array);
-		};
+	static <V> Storage<V> generic(V nullValue) {
+		if (nullValue == null) throw new IllegalArgumentException("null initialValue");
+		return size -> new ArrayStore<V>((Class<V>)Object.class, size, nullValue);
 	}
 
 	/**

@@ -1,8 +1,9 @@
 package com.tomgibara.storage;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.util.Optional;
 
 import org.junit.Test;
 
@@ -10,8 +11,9 @@ public class StoresTest {
 
 	@Test
 	public void testIsNullable() {
-		assertTrue( Stores.objects(true).isNullAllowed() );
-		assertFalse( Stores.objects(false).isNullAllowed() );
+		assertTrue( Stores.objects(Optional.empty()).nullValue() == null );
+		assertTrue( Stores.objects(Optional.of(new Object())).nullValue() != null );
+		assertTrue( Stores.objectsAndNull(Optional.of(new Object())).nullValue() == null );
 	}
 
 	@Test

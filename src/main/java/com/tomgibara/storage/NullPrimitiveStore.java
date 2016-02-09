@@ -109,10 +109,10 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
-	public boolean isNullAllowed() {
-		return true;
+	public V nullValue() {
+		return null;
 	}
-
+	
 	// for extension
 
 	abstract protected V getImpl(int index);

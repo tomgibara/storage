@@ -6,28 +6,28 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 
 	private final Class<E> type;
 	private final E[] constants;
-	private final int initialValue;
+	private final int nullValue;
 	private final SmallValueStorage storage;
 
 	EnumStorage(Class<E> type) {
 		this.type = type;
 		constants = type.getEnumConstants();
 		if (constants.length == 0) throw new IllegalArgumentException("no enum values");
-		initialValue = 0;
+		nullValue = 0;
 		storage = SmallValueStore.newStorage(constants.length);
 	}
 
-	EnumStorage(E initialValue) {
-		type = initialValue.getDeclaringClass();
+	EnumStorage(E nullValue) {
+		type = nullValue.getDeclaringClass();
 		constants = type.getEnumConstants();
-		this.initialValue = initialValue.ordinal();
+		this.nullValue = nullValue.ordinal();
 		storage = SmallValueStore.newStorage(constants.length);
 	}
 
 	@Override
 	public Store<E> newStore(int size) throws IllegalArgumentException {
 		SmallValueStore store = storage.newStore(size);
-		if (initialValue != 0) store.fillInt(initialValue);
+		if (nullValue != 0) store.fillInt(nullValue);
 		return new EnumStore(store);
 	}
 
@@ -45,8 +45,8 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		}
 
 		@Override
-		public boolean isNullAllowed() {
-			return false;
+		public E nullValue() {
+			return constant( nullValue );
 		}
 
 		@Override
@@ -56,19 +56,17 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 
 		@Override
 		public E get(int index) {
-			return constants[ store.getInt(index) ];
+			return constant( store.getInt(index) );
 		}
 
 		@Override
 		public E set(int index, E value) {
-			if (value == null) throw new IllegalArgumentException("null value");
-			return constants[ store.setInt(index, value.ordinal()) ];
+			return constant( store.setInt(index, value(value)) );
 		}
 
 		@Override
 		public void fill(E value) {
-			if (value == null) throw new IllegalArgumentException("null value");
-			store.fillInt( value.ordinal() );
+			store.fillInt( value(value) );
 		}
 
 		// mutability methods
@@ -100,6 +98,15 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 			store.transpose(i, j);
 		}
 
+		// private utility methods
+		
+		private int value(E e) {
+			return e == null ? nullValue : e.ordinal();
+		}
+		
+		private E constant(int i) {
+			return constants[i];
+		}
 	}
 
 }
