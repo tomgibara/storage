@@ -1,6 +1,7 @@
 package com.tomgibara.storage;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 final class ImmutableArrayStore<V> extends AbstractStore<V> {
 
@@ -46,8 +47,8 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 
 	
 	@Override
-	public V nullValue() {
-		return nullValue;
+	public Optional<V> nullValue() {
+		return Optional.of(nullValue);
 	}
 
 	// mutability

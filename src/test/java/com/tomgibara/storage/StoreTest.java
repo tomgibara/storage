@@ -3,7 +3,6 @@ package com.tomgibara.storage;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -21,7 +20,7 @@ public class StoreTest {
 	public void testTransformedBy() {
 
 		Store<Integer> s = Stores.intsAndNull(1,2,3);
-		assertNull(s.nullValue());
+		assertFalse(s.nullValue().isPresent());
 		Store<Integer> t = s.asTransformedBy(i -> 2 * i);
 		assertEquals(s.count(), t.count());
 		for (int i = 0; i < s.count(); i++) {
@@ -72,7 +71,7 @@ public class StoreTest {
 		Store<Integer> s = Stores.intsAndNull(1,2,3);
 		Store<Integer> t = s.resizedCopy(5);
 		assertTrue(t.isMutable());
-		assertNull(t.nullValue());
+		assertFalse(t.nullValue().isPresent());
 		assertEquals(asList(1,2,3,null,null), t.asList());
 		Store<Integer> u = s.immutableCopy();
 		t.set(0, 0);
@@ -88,7 +87,7 @@ public class StoreTest {
 		Store<Integer> s = Stores.ints(1,2,3);
 		Store<Integer> t = s.resizedCopy(5);
 		assertTrue(t.isMutable());
-		assertNotNull(t.nullValue());
+		assertTrue(t.nullValue().isPresent());
 		assertEquals(asList(1,2,3,0,0), t.asList());
 		Store<Integer> u = s.immutableCopy();
 		t.set(0, 4);

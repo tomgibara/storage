@@ -3,6 +3,7 @@ package com.tomgibara.storage;
 import java.util.AbstractList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Spliterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -104,8 +105,8 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * 
 	 * @return the value that substitutes for null, or null
 	 */
-	default V nullValue() {
-		return null;
+	default Optional<V> nullValue() {
+		return Optional.empty();
 	}
 	
 	/**
@@ -161,10 +162,10 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @see #mutableCopy()
 	 */
 	default Store<V> resizedCopy(int newSize) {
-		V nv = nullValue();
-		return nv == null ?
-				new NullArrayStore<>(Stores.toArray(this, newSize), count()) :
-				new ArrayStore<>(Stores.toArray(this, newSize), nv);
+		Optional<V> nv = nullValue();
+		return nv.isPresent() ?
+				new ArrayStore<>(Stores.toArray(this, newSize), nv.get()) :
+				new NullArrayStore<>(Stores.toArray(this, newSize), count());
 	}
 
 	/**
@@ -184,7 +185,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @return bits indicating the indices at which values are present
 	 */
 	default BitStore population() {
-		if (nullValue() != null) return Bits.oneBits(size());
+		if (nullValue().isPresent()) return Bits.oneBits(size());
 		return new AbstractBitStore() {
 
 			@Override
@@ -394,14 +395,14 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	@Override
 	public default void forEach(Consumer<? super V> action) {
 		int size = size();
-		if (nullValue() == null) {
+		if (nullValue().isPresent()) {
 			for (int i = 0; i < size; i++) {
-				V v = get(size);
-				if (v != null) action.accept(v);
+				action.accept(get(size));
 			}
 		} else {
 			for (int i = 0; i < size; i++) {
-				action.accept(get(size));
+				V v = get(size);
+				if (v != null) action.accept(v);
 			}
 		}
 	}

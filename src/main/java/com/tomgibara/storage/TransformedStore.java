@@ -1,6 +1,7 @@
 package com.tomgibara.storage;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -36,8 +37,9 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 	}
 
 	@Override
-	public W nullValue() {
-		return fn.apply(store.nullValue());
+	public Optional<W> nullValue() {
+		Optional<V> nv = store.nullValue();
+		return nv.isPresent() ? Optional.of(fn.apply(nv.get())) : Optional.empty();
 	}
 	
 	@Override

@@ -1,5 +1,6 @@
 package com.tomgibara.storage;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -11,9 +12,9 @@ public class StoresTest {
 
 	@Test
 	public void testIsNullable() {
-		assertTrue( Stores.objects(Optional.empty()).nullValue() == null );
-		assertTrue( Stores.objects(Optional.of(new Object())).nullValue() != null );
-		assertTrue( Stores.objectsAndNull(Optional.of(new Object())).nullValue() == null );
+		assertFalse( Stores.objects(Optional.empty()).nullValue().isPresent() );
+		assertTrue( Stores.objects(Optional.of(new Object())).nullValue().isPresent() );
+		assertFalse( Stores.objectsAndNull(Optional.of(new Object())).nullValue().isPresent() );
 	}
 
 	@Test

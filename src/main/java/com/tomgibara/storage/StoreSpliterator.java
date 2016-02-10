@@ -33,20 +33,19 @@ class StoreSpliterator<V> implements Spliterator<V> {
 
 	@Override
 	public boolean tryAdvance(Consumer<? super V> action) {
-		if (store.nullValue() == null) {
-			while (from < to) {
-				V v = store.get(from++);
-				if (v != null) {
-					action.accept(v);
-					return true;
-				}
-			}
-			return false;
-		} else {
+		if ((chi & NONNULL) != 0) {
 			if (from == to) return false;
 			action.accept(store.get(from++));
+			return true;
 		}
-		return true;
+		while (from < to) {
+			V v = store.get(from++);
+			if (v != null) {
+				action.accept(v);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

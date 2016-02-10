@@ -1,6 +1,7 @@
 package com.tomgibara.storage;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
@@ -168,8 +169,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public Byte nullValue() {
-			return nullValue;
+		public Optional<Byte> nullValue() {
+			return Optional.of(nullValue);
 		}
 
 	}
@@ -237,8 +238,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public Float nullValue() {
-			return nullValue;
+		public Optional<Float> nullValue() {
+			return Optional.of(nullValue);
 		}
 
 	}
@@ -306,8 +307,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public Character nullValue() {
-			return nullValue;
+		public Optional<Character> nullValue() {
+			return Optional.of(nullValue);
 		}
 
 	}
@@ -375,8 +376,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public Short nullValue() {
-			return nullValue;
+		public Optional<Short> nullValue() {
+			return Optional.of(nullValue);
 		}
 
 	}
@@ -444,8 +445,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public Long nullValue() {
-			return nullValue;
+		public Optional<Long> nullValue() {
+			return Optional.of(nullValue);
 		}
 
 	}
@@ -513,8 +514,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public Integer nullValue() {
-			return nullValue;
+		public Optional<Integer> nullValue() {
+			return Optional.of(nullValue);
 		}
 
 	}
@@ -582,8 +583,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public Double nullValue() {
-			return nullValue;
+		public Optional<Double> nullValue() {
+			return Optional.of(nullValue);
 		}
 
 	}
@@ -651,8 +652,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public Boolean nullValue() {
-			return nullValue;
+		public Optional<Boolean> nullValue() {
+			return Optional.of(nullValue);
 		}
 
 	}

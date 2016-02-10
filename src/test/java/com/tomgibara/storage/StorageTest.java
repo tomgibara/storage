@@ -4,11 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.Collections;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 public class StorageTest {
@@ -109,7 +107,7 @@ public class StorageTest {
 		s.fill(Tri.ISOSCELES);
 		assertEquals(Collections.nCopies(10, Tri.ISOSCELES), s.asList());
 		s.asList().set(0, null);
-		assertEquals(s.nullValue(), s.get(0));
+		assertEquals(s.nullValue().get(), s.get(0));
 	}
 
 	@Test

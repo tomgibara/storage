@@ -1,5 +1,7 @@
 package com.tomgibara.storage;
 
+import java.util.Optional;
+
 import com.tomgibara.storage.SmallValueStore.SmallValueStorage;
 
 class EnumStorage<E extends Enum<E>> implements Storage<E> {
@@ -45,8 +47,8 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		}
 
 		@Override
-		public E nullValue() {
-			return constant( nullValue );
+		public Optional<E> nullValue() {
+			return Optional.of( constant(nullValue) );
 		}
 
 		@Override

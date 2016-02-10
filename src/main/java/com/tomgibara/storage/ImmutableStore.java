@@ -1,5 +1,7 @@
 package com.tomgibara.storage;
 
+import java.util.Optional;
+
 import com.tomgibara.bits.BitStore;
 
 final class ImmutableStore<V> extends AbstractStore<V> {
@@ -46,7 +48,7 @@ final class ImmutableStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
-	public V nullValue() {
+	public Optional<V> nullValue() {
 		return store.nullValue();
 	}
 	

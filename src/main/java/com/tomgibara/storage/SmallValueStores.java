@@ -1,6 +1,7 @@
 package com.tomgibara.storage;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import com.tomgibara.bits.BitStore;
 import com.tomgibara.bits.BitWriter;
@@ -10,6 +11,8 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 	// statics - ternary packing
 
+	private static final Optional<Integer> OPTIONAL_ZERO = Optional.of(0);
+	
 	private static final byte[] TERNARY_PACK = new byte[1024];
 	private static final int[] TERNARY_UNPACK = new int[243];
 
@@ -121,8 +124,8 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 	}
 
 	@Override
-	public Integer nullValue() {
-		return 0;
+	public Optional<Integer> nullValue() {
+		return OPTIONAL_ZERO;
 	}
 
 	@Override
