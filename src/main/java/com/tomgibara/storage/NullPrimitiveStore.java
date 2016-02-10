@@ -7,26 +7,17 @@ import com.tomgibara.bits.Bits;
 
 abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 
-	private static final int BYTE    =  1;
-	private static final int FLOAT   =  2;
-	private static final int CHAR    =  3;
-	private static final int SHORT   =  4;
-	private static final int LONG    =  6;
-	private static final int INT     =  7;
-	private static final int DOUBLE  = 11;
-	private static final int BOOLEAN = 12;
-
 	@SuppressWarnings("unchecked")
 	static <V> NullPrimitiveStore<V> newStore(Class<V> type, int size) {
 		switch((type.getName().hashCode() >> 8) & 0xf) {
-		case BYTE:    return (NullPrimitiveStore<V>) new ByteStore     (size);
-		case FLOAT:   return (NullPrimitiveStore<V>) new FloatStore    (size);
-		case CHAR:    return (NullPrimitiveStore<V>) new CharacterStore(size);
-		case SHORT:   return (NullPrimitiveStore<V>) new ShortStore    (size);
-		case LONG:    return (NullPrimitiveStore<V>) new LongStore     (size);
-		case INT:     return (NullPrimitiveStore<V>) new IntegerStore  (size);
-		case DOUBLE:  return (NullPrimitiveStore<V>) new DoubleStore   (size);
-		case BOOLEAN: return (NullPrimitiveStore<V>) new BooleanStore  (size);
+		case Stores.BYTE:    return (NullPrimitiveStore<V>) new ByteStore     (size);
+		case Stores.FLOAT:   return (NullPrimitiveStore<V>) new FloatStore    (size);
+		case Stores.CHAR:    return (NullPrimitiveStore<V>) new CharacterStore(size);
+		case Stores.SHORT:   return (NullPrimitiveStore<V>) new ShortStore    (size);
+		case Stores.LONG:    return (NullPrimitiveStore<V>) new LongStore     (size);
+		case Stores.INT:     return (NullPrimitiveStore<V>) new IntegerStore  (size);
+		case Stores.DOUBLE:  return (NullPrimitiveStore<V>) new DoubleStore   (size);
+		case Stores.BOOLEAN: return (NullPrimitiveStore<V>) new BooleanStore  (size);
 		default: throw new IllegalArgumentException(type.getName());
 		}
 	}

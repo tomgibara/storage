@@ -12,6 +12,30 @@ import java.util.Optional;
  */
 public final class Stores {
 
+	// private statics
+	
+	private static final Optional<Byte>      OPT_BYTE    = Optional.of((byte)   0);
+	private static final Optional<Float>     OPT_FLOAT   = Optional.of((float)  0);
+	private static final Optional<Character> OPT_CHAR    = Optional.of((char)   0);
+	private static final Optional<Short>     OPT_SHORT   = Optional.of((short)  0);
+	private static final Optional<Long>      OPT_LONG    = Optional.of((long)   0);
+	private static final Optional<Integer>   OPT_INT     = Optional.of((int)    0);
+	private static final Optional<Double>    OPT_DOUBLE  = Optional.of((double) 0);
+	private static final Optional<Boolean>   OPT_BOOLEAN = Optional.of(     false);
+
+	private static final Optional<String> OPT_STRING  = Optional.of("");
+	
+	// package statics
+	
+	static final int BYTE    =  1;
+	static final int FLOAT   =  2;
+	static final int CHAR    =  3;
+	static final int SHORT   =  4;
+	static final int LONG    =  6;
+	static final int INT     =  7;
+	static final int DOUBLE  = 11;
+	static final int BOOLEAN = 12;
+
 	// public scoped methods
 
 	/**
@@ -346,6 +370,68 @@ public final class Stores {
 		return new NullPrimitiveStore.DoubleStore(values);
 	}
 
+	/**
+	 * <p>
+	 * Suggests a suitable null value for a specified type. This method may be
+	 * used to identify an appropriate null value for stores of common types.
+	 * 
+	 * <p>
+	 * It returns optionals wrapping the following values for the types given.
+	 * 
+	 * <dl>
+	 * <dt>primitive numeric types
+	 * <dd><code>0</code>
+	 * <dt><code>boolean</code>
+	 * <dd><code>false</code>
+	 * <dt><code>char</code>
+	 * <dd><code>'\0'</code>
+	 * <dt>primitive wrapper types
+	 * <dd><em>as per primitive types</dd>
+	 * <dt>enumerations
+	 * <dd>the enum constant with ordinal 0
+	 * <dt><code>java.lang.String</code>
+	 * <dd>the empty string <code>""</code>
+	 * </dl>
+	 * 
+	 * <p>
+	 * For all other types, the method returns an empty optional. Future
+	 * implementations may return non-empty optionals for a greater number of
+	 * types.
+	 * 
+	 * @param type
+	 *            a type of stored value
+	 * @return an optional null value
+	 */
+	@SuppressWarnings("unchecked")
+	public static <V> Optional<V> defaultNullValue(Class<V> type) {
+		if (type == null) throw new IllegalArgumentException("null type");
+		if (type.isEnum()) return Optional.of((V) type.getEnumConstants()[0]);
+		if (type.isPrimitive()) {
+			switch((type.getName().hashCode() >> 8) & 0xf) {
+			case Stores.BYTE:    return (Optional<V>) OPT_BYTE;
+			case Stores.FLOAT:   return (Optional<V>) OPT_FLOAT;
+			case Stores.CHAR:    return (Optional<V>) OPT_CHAR;
+			case Stores.SHORT:   return (Optional<V>) OPT_SHORT;
+			case Stores.LONG:    return (Optional<V>) OPT_LONG;
+			case Stores.INT:     return (Optional<V>) OPT_INT;
+			case Stores.DOUBLE:  return (Optional<V>) OPT_DOUBLE;
+			case Stores.BOOLEAN: return (Optional<V>) OPT_BOOLEAN;
+			}
+		}
+		switch (type.getName()) {
+		case "java.lang.String"    : return (Optional<V>) OPT_STRING;
+		case "java.lang.Boolean"   : return (Optional<V>) OPT_BOOLEAN;
+		case "java.lang.Character" : return (Optional<V>) OPT_CHAR;
+		case "java.lang.Float"     : return (Optional<V>) OPT_FLOAT;
+		case "java.lang.Double"    : return (Optional<V>) OPT_DOUBLE;
+		case "java.lang.Byte"      : return (Optional<V>) OPT_BYTE;
+		case "java.lang.Short"     : return (Optional<V>) OPT_SHORT;
+		case "java.lang.Integer"   : return (Optional<V>) OPT_INT;
+		case "java.lang.Long"      : return (Optional<V>) OPT_LONG;
+		}
+		return Optional.empty();
+	}
+	
 	// package scoped methods
 
 	static <V> int countNonNulls(V[] vs) {
