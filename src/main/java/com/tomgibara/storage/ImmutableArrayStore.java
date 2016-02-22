@@ -48,7 +48,7 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 	
 	@Override
 	public Optional<V> nullValue() {
-		return Optional.of(nullValue);
+		return Optional.ofNullable(nullValue);
 	}
 
 	// mutability
