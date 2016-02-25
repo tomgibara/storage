@@ -432,7 +432,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 			}
 		} else {
 			for (int i = 0; i < size; i++) {
-				V v = get(size);
+				V v = get(i);
 				if (v != null) action.accept(v);
 			}
 		}

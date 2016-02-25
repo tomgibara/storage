@@ -28,6 +28,8 @@ import java.util.Optional;
 
 import org.junit.Test;
 
+import com.tomgibara.bits.BitStore;
+import com.tomgibara.bits.Bits;
 import com.tomgibara.fundament.Bijection;
 
 public class StoreTest {
@@ -147,5 +149,16 @@ public class StoreTest {
 		assertEquals(8, i.next().intValue());
 		i.remove();
 		assertFalse(i.hasNext());
+	}
+
+	@Test
+	public void testForEach() {
+		Store<Integer> s = Stores.intsAndNull(0,1,2,3,4,5,6);
+		int size = s.size();
+		s.set(3, null);
+		s.set(6, null);
+		BitStore p = Bits.store(size);
+		s.forEach(i -> p.setBit(i, true));
+		assertEquals(p, s.population());
 	}
 }
