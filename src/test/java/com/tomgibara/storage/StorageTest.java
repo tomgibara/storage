@@ -108,6 +108,8 @@ public class StorageTest {
 		assertEquals(Collections.nCopies(10, Tri.ISOSCELES), s.asList());
 		s.asList().set(0, null);
 		assertEquals(s.nullValue().get(), s.get(0));
+
+		assertEquals(Tri.ISOSCELES, Storage.typed(Tri.class, Tri.ISOSCELES).newStore(1).get(0));
 	}
 
 	@Test
