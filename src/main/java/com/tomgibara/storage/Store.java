@@ -210,7 +210,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 			@Override
 			public boolean getBit(int index) {
-				return get(index) != null;
+				return !isNull(index);
 			}
 
 		};
