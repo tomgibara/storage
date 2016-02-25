@@ -72,5 +72,5 @@ final class ImmutableStore<V> extends AbstractStore<V> {
 	public Optional<V> nullValue() {
 		return store.nullValue();
 	}
-	
+
 }

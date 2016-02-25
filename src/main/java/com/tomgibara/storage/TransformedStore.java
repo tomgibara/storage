@@ -57,7 +57,7 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 		Optional<V> nv = store.nullValue();
 		return nv.isPresent() ? Optional.of(fn.apply(nv.get())) : Optional.empty();
 	}
-	
+
 	@Override
 	public int count() {
 		return store.count();

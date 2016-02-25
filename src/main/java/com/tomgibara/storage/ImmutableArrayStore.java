@@ -64,7 +64,7 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 				new ArrayStore<>(Stores.resizedCopyOf(values, newSize, nullValue), nullValue);
 	}
 
-	
+
 	@Override
 	public Optional<V> nullValue() {
 		return Optional.ofNullable(nullValue);

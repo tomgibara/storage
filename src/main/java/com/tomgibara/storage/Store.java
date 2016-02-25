@@ -127,19 +127,19 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * <em>empty</em>. Some stores do not support null values (for example,
 	 * those backed by primitive arrays) in this instance the returned value may
 	 * never be <em>empty</em>.
-	 * 
+	 *
 	 * <p>
 	 * Note that the value returned by this method will by substituted for null
 	 * in calls to {@link #set(int, Object)} and {@link #clear()} but
 	 * occurrences of this value in the store will not be reported as null.
-	 * 
+	 *
 	 * @return the value that substitutes for null wrapped in an optional, or
 	 *         empty
 	 */
 	default Optional<V> nullValue() {
 		return Optional.empty();
 	}
-	
+
 	/**
 	 * Stores a value in the store. Storing null will result in no value being
 	 * associated with the specified index

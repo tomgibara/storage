@@ -88,7 +88,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 	public Optional<V> nullValue() {
 		return Optional.of(nullValue);
 	}
-	
+
 	// mutability
 
 	@Override

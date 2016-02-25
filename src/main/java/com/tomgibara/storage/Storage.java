@@ -76,7 +76,7 @@ public interface Storage<V> {
 	 * Storage backed by typed arrays. The storage returned by this method
 	 * <em>will</em> support null values. This is a convenience method that is
 	 * equivalent to calling {@link #typed(Class, Object)} with a null value.
-	 * 
+	 *
 	 * <p>
 	 * Specifying a primitive type will result in storage backed by arrays of
 	 * primitives. Such stores provide greater type safety than those created by
@@ -103,7 +103,7 @@ public interface Storage<V> {
 	 * <code>nullValue</code> is null, otherwise it <em>will not</em> allow
 	 * null values and the initial value at every index will be the specified
 	 * <code>nullValue</code>.
-	 * 
+	 *
 	 * <p>
 	 * Specifying a primitive type will result in storage backed by arrays of
 	 * primitives. Such stores provide greater type safety than those created by
@@ -139,7 +139,7 @@ public interface Storage<V> {
 	 * <p>
 	 * Genericized storage using weak references. The storage returned by this
 	 * method <em>will</em> allow null values.
-	 * 
+	 *
 	 * <p>
 	 * As a consequence of GC activity, sizes reported by the weak stores may
 	 * overestimate the number of values stored.
@@ -156,7 +156,7 @@ public interface Storage<V> {
 	 * <p>
 	 * Genericized storage using soft references. The storage returned by this
 	 * method <em>will</em> allow null values.
-	 * 
+	 *
 	 * <p>
 	 * As a consequence of GC activity, sizes reported by the soft stores may
 	 * overestimate the number of values stored.

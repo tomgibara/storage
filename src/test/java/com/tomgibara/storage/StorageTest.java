@@ -152,7 +152,7 @@ public class StorageTest {
 		assertNotNull(Storage.typed(String.class, "").newStore(10).get(0));
 		assertNotNull(Storage.generic(new Object()).newStore(10).get(0));
 	}
-	
+
 	enum Tri {
 
 		SCALENE,

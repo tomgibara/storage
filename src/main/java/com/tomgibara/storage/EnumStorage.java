@@ -129,11 +129,11 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		}
 
 		// private utility methods
-		
+
 		private int value(E e) {
 			return e == null ? nullValue : e.ordinal();
 		}
-		
+
 		private E constant(int i) {
 			return constants[i];
 		}

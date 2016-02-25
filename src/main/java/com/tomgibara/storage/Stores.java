@@ -29,7 +29,7 @@ import java.util.Optional;
 public final class Stores {
 
 	// private statics
-	
+
 	private static final Optional<Byte>      OPT_BYTE    = Optional.of((byte)   0);
 	private static final Optional<Float>     OPT_FLOAT   = Optional.of((float)  0);
 	private static final Optional<Character> OPT_CHAR    = Optional.of((char)   0);
@@ -40,9 +40,9 @@ public final class Stores {
 	private static final Optional<Boolean>   OPT_BOOLEAN = Optional.of(     false);
 
 	private static final Optional<String> OPT_STRING  = Optional.of("");
-	
+
 	// package statics
-	
+
 	static final int BYTE    =  1;
 	static final int FLOAT   =  2;
 	static final int CHAR    =  3;
@@ -390,10 +390,10 @@ public final class Stores {
 	 * <p>
 	 * Suggests a suitable null value for a specified type. This method may be
 	 * used to identify an appropriate null value for stores of common types.
-	 * 
+	 *
 	 * <p>
 	 * It returns optionals wrapping the following values for the types given.
-	 * 
+	 *
 	 * <dl>
 	 * <dt>primitive numeric types
 	 * <dd><code>0</code>
@@ -408,12 +408,12 @@ public final class Stores {
 	 * <dt><code>java.lang.String</code>
 	 * <dd>the empty string <code>""</code>
 	 * </dl>
-	 * 
+	 *
 	 * <p>
 	 * For all other types, the method returns an empty optional. Future
 	 * implementations may return non-empty optionals for a greater number of
 	 * types.
-	 * 
+	 *
 	 * @param type
 	 *            a type of stored value
 	 * @return an optional null value
@@ -447,7 +447,7 @@ public final class Stores {
 		}
 		return Optional.empty();
 	}
-	
+
 	// package scoped methods
 
 	static <V> int countNonNulls(V[] vs) {
@@ -489,7 +489,7 @@ public final class Stores {
 		if (newSize > oldSize) Arrays.fill(vs, oldSize, newSize, v);
 		return vs;
 	}
-	
+
 	// non-constructor
 
 	private Stores() {}

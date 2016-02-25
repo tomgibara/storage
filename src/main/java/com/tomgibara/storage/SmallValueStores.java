@@ -28,7 +28,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 	// statics - ternary packing
 
 	private static final Optional<Integer> OPTIONAL_ZERO = Optional.of(0);
-	
+
 	private static final byte[] TERNARY_PACK = new byte[1024];
 	private static final int[] TERNARY_UNPACK = new int[243];
 
