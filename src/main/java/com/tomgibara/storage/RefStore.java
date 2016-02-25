@@ -155,6 +155,7 @@ abstract class RefStore<V> extends AbstractStore<V> {
 	private void flushQueue() {
 		while (true) {
 			Reference<?> ref = queue.poll();
+			if (ref == null) break; // queue exhausted
 			int index = indexOf(ref);
 			if (refs[index] == ref) {
 				refs[index] = null;
