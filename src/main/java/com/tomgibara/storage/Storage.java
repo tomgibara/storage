@@ -33,17 +33,20 @@ public interface Storage<V> {
 
 	/**
 	 * Genericized storage backed by <code>Object</code> arrays. The storage
-	 * returned by this method <em>will not</em> support null values.
+	 * returned by this method <em>will not</em> support null values; the
+	 * initial value at every index will be the specified <code>nullValue</code>
+	 * .
 	 *
-	 * @param initialValue
-	 *            the initial value at each index of the store, not null
+	 * @param nullValue
+	 *            the value that stands-in for absent values in the store, never
+	 *            itself null
 	 * @param <V>
 	 *            the type of values to be stored
 	 * @return genericized storage
 	 */
 	@SuppressWarnings("unchecked")
 	static <V> Storage<V> generic(V nullValue) {
-		if (nullValue == null) throw new IllegalArgumentException("null initialValue");
+		if (nullValue == null) throw new IllegalArgumentException("null nullValue");
 		return size -> new ArrayStore<V>((Class<V>)Object.class, size, nullValue);
 	}
 
@@ -77,7 +80,8 @@ public interface Storage<V> {
 	/**
 	 * <p>
 	 * Storage backed by typed arrays. The storage returned by this method
-	 * <em>will not</em> allow null values.
+	 * <em>will not</em> allow null values; the initial value at every index
+	 * will be the specified <code>nullValue</code>.
 	 * 
 	 * <p>
 	 * Specifying a primitive type will result in storage backed by arrays of
@@ -87,8 +91,9 @@ public interface Storage<V> {
 	 *
 	 * @param type
 	 *            the type of the values to be stored
-	 * @param initialValue
-	 *            the initial value at each index of the store, not null
+	 * @param nullValue
+	 *            the value that stands-in for absent values in the store, never
+	 *            itself null
 	 * @param <V>
 	 *            the type of values to be stored
 	 * @throws IllegalArgumentException
@@ -96,12 +101,12 @@ public interface Storage<V> {
 	 * @return typed storage
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	static <V> Storage<V> typed(Class<V> type, V initialValue) throws IllegalArgumentException {
+	static <V> Storage<V> typed(Class<V> type, V nullValue) throws IllegalArgumentException {
 		if (type == null) throw new IllegalArgumentException("null type");
-		if (initialValue == null) throw new IllegalArgumentException("null initialValue");
-		if (type.isEnum()) return new EnumStorage(type);
-		if (type.isPrimitive()) return size -> PrimitiveStore.newStore(type, size, initialValue);
-		return size -> new ArrayStore<>(type, size, initialValue);
+		if (nullValue == null) throw new IllegalArgumentException("null nullValue");
+		if (type.isEnum()) return new EnumStorage(type, (Enum) nullValue);
+		if (type.isPrimitive()) return size -> PrimitiveStore.newStore(type, size, nullValue);
+		return size -> new ArrayStore<>(type, size, nullValue);
 	}
 
 	/**

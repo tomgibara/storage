@@ -26,6 +26,13 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		storage = SmallValueStore.newStorage(constants.length);
 	}
 
+	EnumStorage(Class<E> type, E nullValue) {
+		this.type = type;
+		this.nullValue = nullValue.ordinal();
+		constants = type.getEnumConstants();
+		storage = SmallValueStore.newStorage(constants.length);
+	}
+
 	@Override
 	public Store<E> newStore(int size) throws IllegalArgumentException {
 		SmallValueStore store = storage.newStore(size);
