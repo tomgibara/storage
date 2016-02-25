@@ -20,22 +20,24 @@ public interface Storage<V> {
 
 	/**
 	 * Genericized storage backed by <code>Object</code> arrays. The storage
-	 * returned by this method <em>will</em> support null values.
+	 * returned by this method <em>will</em> support null values. This is a
+	 * convenience method that is equivalent to calling
+	 * {@link #generic(Class, Object)} with an empty null value.
 	 *
 	 * @param <V>
 	 *            the type of values to be stored
 	 * @return genericized storage
 	 */
-	@SuppressWarnings("unchecked")
 	static <V> Storage<V> generic() {
-		return size -> (Store<V>) new NullArrayStore<>(new Object[size], 0);
+		return generic(null);
 	}
 
 	/**
 	 * Genericized storage backed by <code>Object</code> arrays. The storage
-	 * returned by this method <em>will not</em> support null values; the
-	 * initial value at every index will be the specified <code>nullValue</code>
-	 * .
+	 * returned by this method <em>will</em> support null values <em>if</em> the
+	 * supplied <code>nullValue</code> is null, otherwise it <em>will not</em>
+	 * allow null values and the initial value at every index will be the
+	 * specified <code>nullValue</code>.
 	 *
 	 * @param nullValue
 	 *            the value that stands-in for absent values in the store, never
@@ -46,14 +48,18 @@ public interface Storage<V> {
 	 */
 	@SuppressWarnings("unchecked")
 	static <V> Storage<V> generic(V nullValue) {
-		if (nullValue == null) throw new IllegalArgumentException("null nullValue");
-		return size -> new ArrayStore<V>((Class<V>)Object.class, size, nullValue);
+		if (nullValue == null) {
+			return size -> (Store<V>) new NullArrayStore<>(new Object[size], 0);
+		} else {
+			return size -> new ArrayStore<V>((Class<V>)Object.class, size, nullValue);
+		}
 	}
 
 	/**
 	 * <p>
 	 * Storage backed by typed arrays. The storage returned by this method
-	 * <em>will</em> support null values.
+	 * <em>will</em> support null values. This is a convenience method that is
+	 * equivalent to calling {@link #typed(Class, Object)} with a null value.
 	 * 
 	 * <p>
 	 * Specifying a primitive type will result in storage backed by arrays of
@@ -68,20 +74,19 @@ public interface Storage<V> {
 	 * @throws IllegalArgumentException
 	 *             if the supplied type is null
 	 * @return typed storage
+	 * @see #typed(Class, Optional)
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	static <V> Storage<V> typed(Class<V> type) throws IllegalArgumentException {
-		if (type == null) throw new IllegalArgumentException("null type");
-		if (type.isEnum()) return new NullEnumStorage(type);
-		if (type.isPrimitive()) return size -> NullPrimitiveStore.newStore(type, size);
-		return size -> new NullArrayStore<>(type, size);
+		return typed(type, null);
 	}
 
 	/**
 	 * <p>
 	 * Storage backed by typed arrays. The storage returned by this method
-	 * <em>will not</em> allow null values; the initial value at every index
-	 * will be the specified <code>nullValue</code>.
+	 * <em>will</em> support null values <em>if</em> the supplied
+	 * <code>nullValue</code> is null, otherwise it <em>will not</em> allow
+	 * null values and the initial value at every index will be the specified
+	 * <code>nullValue</code>.
 	 * 
 	 * <p>
 	 * Specifying a primitive type will result in storage backed by arrays of
@@ -92,8 +97,8 @@ public interface Storage<V> {
 	 * @param type
 	 *            the type of the values to be stored
 	 * @param nullValue
-	 *            the value that stands-in for absent values in the store, never
-	 *            itself null
+	 *            the value that stands-in for absent values in the store, or
+	 *            null
 	 * @param <V>
 	 *            the type of values to be stored
 	 * @throws IllegalArgumentException
@@ -103,10 +108,15 @@ public interface Storage<V> {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	static <V> Storage<V> typed(Class<V> type, V nullValue) throws IllegalArgumentException {
 		if (type == null) throw new IllegalArgumentException("null type");
-		if (nullValue == null) throw new IllegalArgumentException("null nullValue");
-		if (type.isEnum()) return new EnumStorage(type, (Enum) nullValue);
-		if (type.isPrimitive()) return size -> PrimitiveStore.newStore(type, size, nullValue);
-		return size -> new ArrayStore<>(type, size, nullValue);
+		if (nullValue == null) {
+			if (type.isEnum()) return new NullEnumStorage(type);
+			if (type.isPrimitive()) return size -> NullPrimitiveStore.newStore(type, size);
+			return size -> new NullArrayStore<>(type, size);
+		} else {
+			if (type.isEnum()) return new EnumStorage(type, (Enum) nullValue);
+			if (type.isPrimitive()) return size -> PrimitiveStore.newStore(type, size, nullValue);
+			return size -> new ArrayStore<>(type, size, nullValue);
+		}
 	}
 
 	/**
