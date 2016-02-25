@@ -29,7 +29,16 @@ public class StoresTest {
 		}
 		Stores.intsAndNull(1,2,3).set(0, null);
 	}
-	
+
+	@Test
+	public void testPrimitiveIsNull() {
+		assertFalse( Stores.ints(1,2,3).isNull(0) );
+		Store<Integer> ints = Stores.intsAndNull(1,2,3);
+		ints.set(0, null);
+		assertTrue( ints.isNull(0) );
+		assertFalse( ints.isNull(1) );
+	}
+
 	@Test
 	public void testDefaultNullValue() {
 		assertEquals(Optional.of(""), Stores.defaultNullValue(String.class));

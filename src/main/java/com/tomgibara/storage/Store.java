@@ -92,6 +92,19 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	V get(int index);
 
 	/**
+	 * Whether the value at the specified index is null. In many implementations
+	 * this method may be faster than calling {@link #get(int)} and checking for
+	 * null.
+	 *
+	 * @param index
+	 *            the index of the value to be compared to null
+	 * @return true if and only if the value at the specified index is null
+	 */
+	default boolean isNull(int index) {
+		return get(index) != null;
+	}
+
+	/**
 	 * <p>
 	 * The value that substitutes for null in this store. For stores that
 	 * support the storage of null values this method will always return

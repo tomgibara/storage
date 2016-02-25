@@ -39,6 +39,9 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 	public V get(int index) { return values[index]; }
 
 	@Override
+	public boolean isNull(int index) { return values[index] == null; }
+
+	@Override
 	public Store<V> resizedCopy(int newSize) {
 		return nullValue == null ?
 				new NullArrayStore<>(Arrays.copyOf(values, newSize), count) :

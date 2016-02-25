@@ -50,6 +50,11 @@ class ArrayStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
+	public boolean isNull(int index) {
+		return false;
+	}
+
+	@Override
 	public V set(int index, V value) {
 		if (value == null) value = nullValue;
 		V old = values[index];

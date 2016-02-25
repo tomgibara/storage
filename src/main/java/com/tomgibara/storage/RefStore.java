@@ -48,6 +48,13 @@ abstract class RefStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
+	public boolean isNull(int index) {
+		flushQueue();
+		Reference<V> ref = refs[index];
+		return ref == null || ref.get() == null;
+	}
+
+	@Override
 	public V set(int index, V value) {
 		flushQueue();
 		Reference<V> ref = refs[index];

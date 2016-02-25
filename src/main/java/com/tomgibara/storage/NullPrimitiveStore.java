@@ -71,6 +71,11 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
+	public boolean isNull(int index) {
+		return !populated.getBit(index);
+	}
+
+	@Override
 	public V set(int index, V value) {
 		if (populated.getBit(index)) {
 			V previous = getImpl(index);

@@ -33,6 +33,11 @@ final class ImmutableStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
+	public boolean isNull(int index) {
+		return store.isNull(index);
+	}
+
+	@Override
 	public Store<V> resizedCopy(int newSize) {
 		return store.resizedCopy(newSize);
 	}

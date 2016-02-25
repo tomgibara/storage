@@ -1,6 +1,7 @@
 package com.tomgibara.storage;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -47,8 +48,11 @@ public class StorageTest {
 			s.set(3, 0);
 			s.set(6, 0);
 			assertEquals(0, s.get(3).intValue());
+			assertFalse(s.isNull(0));
 			assertNull(s.get(1));
+			assertTrue(s.isNull(1));
 			assertNull(s.get(2));
+			assertTrue(s.isNull(2));
 			assertEquals("0001001001", s.population().toString());
 		}
 
@@ -122,7 +126,9 @@ public class StorageTest {
 		assertEquals(Tri.EQUILATERAL, s.set(0, Tri.SCALENE));
 		s.fill(Tri.ISOSCELES);
 		assertEquals(Collections.nCopies(10, Tri.ISOSCELES), s.asList());
+		assertFalse(s.isNull(0));
 		s.set(0, null);
+		assertTrue(s.isNull(0));
 	}
 
 	@Test

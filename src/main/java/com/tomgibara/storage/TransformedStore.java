@@ -62,6 +62,11 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 	}
 
 	@Override
+	public boolean isNull(int index) {
+		return store.isNull(index);
+	}
+
+	@Override
 	public Store<W> resizedCopy(int newSize) {
 		return new TransformedStore<>(store.resizedCopy(newSize), type, fn);
 	}

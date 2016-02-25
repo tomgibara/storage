@@ -69,6 +69,11 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		}
 
 		@Override
+		public boolean isNull(int index) {
+			return false;
+		}
+
+		@Override
 		public E set(int index, E value) {
 			return constant( store.setInt(index, value(value)) );
 		}

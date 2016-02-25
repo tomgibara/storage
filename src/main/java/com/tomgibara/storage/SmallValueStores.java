@@ -124,6 +124,12 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 	}
 
 	@Override
+	public boolean isNull(int index) {
+		if (index < 0 || index >= size) throw new IllegalArgumentException("invalid index");
+		return false;
+	}
+
+	@Override
 	public Optional<Integer> nullValue() {
 		return OPTIONAL_ZERO;
 	}
@@ -652,6 +658,12 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
+		public boolean isNull(int index) {
+			checkIndex(index);
+			return !bits.getBit(index);
+		}
+
+		@Override
 		public Integer set(int index, Integer value) {
 			checkIndex(index);
 			boolean v = checkedValue(value);
@@ -724,6 +736,12 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		public Integer get(int index) {
 			wrapped.checkIndex(index);
 			return unwrap(wrapped.getInt(index));
+		}
+
+		@Override
+		public boolean isNull(int index) {
+			wrapped.checkIndex(index);
+			return wrapped.getInt(index) == 0;
 		}
 
 		@Override
