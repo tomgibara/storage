@@ -558,14 +558,12 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		private final int range;
 		private final int count;
-		private final int mask;
 		private final BitStore bits;
 
 		ArbitraryStore(int size, int range) {
 			super(size);
 			this.range = range;
 			count = Integer.highestOneBit(range - 1) << 1;
-			mask = (1 << count) - 1;
 			bits = Bits.store(size * count);
 		}
 
@@ -573,7 +571,6 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			super(that.size());
 			this.range = that.range;
 			this.count = that.count;
-			this.mask = that.mask;
 			this.bits = bits;
 		}
 
@@ -609,14 +606,14 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		@Override
 		int setInt(int index, int value) {
 			int position = index * count;
-			int v = ((int) bits.getBits(position, count)) & mask;
+			int v = (int) bits.getBits(position, count);
 			bits.setBits(position, value, count);
 			return v;
 		}
 
 		@Override
 		int getInt(int index) {
-			return ((int) bits.getBits(index * count, count)) & mask;
+			return (int) bits.getBits(index * count, count);
 		}
 
 		@Override
