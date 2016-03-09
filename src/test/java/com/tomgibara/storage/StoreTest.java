@@ -74,11 +74,8 @@ public class StoreTest {
 	@Test
 	public void testTransformedByBijection() {
 		Store<Integer> s = Stores.intsAndNull(1,2,3);
-		Bijection<Integer, String> fn = new Bijection<Integer, String>() {
-			@Override public String apply(Integer t) { return t.toString(); }
-			@Override public Integer disapply(String r) { return Integer.parseInt(r); }
-		};
-		Store<String> t = s.asTransformedBy(String.class, fn);
+		Bijection<Integer, String> fn = Bijection.fromFunctions(Integer.class, String.class, i -> i.toString(), t -> Integer.parseInt(t));
+		Store<String> t = s.asTransformedBy(fn);
 		assertEquals("1", t.get(0));
 		t.set(0, "1000");
 		assertEquals("1000", t.get(0));

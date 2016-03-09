@@ -30,6 +30,7 @@ import com.tomgibara.bits.AbstractBitStore;
 import com.tomgibara.bits.BitStore;
 import com.tomgibara.bits.Bits;
 import com.tomgibara.fundament.Bijection;
+import com.tomgibara.fundament.Mapping;
 import com.tomgibara.fundament.Mutability;
 import com.tomgibara.fundament.Transposable;
 
@@ -282,97 +283,70 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 	/**
 	 * <p>
-	 * Derives a store by applying a function over the store values. It provides
-	 * a live view of the original store. The mutability of the returned store
-	 * matches the mutability of this store, but only null values may be set.
+	 * Derives a store by applying an operator over the store values. It
+	 * provides a live view of the original store. The mutability of the
+	 * returned store matches the mutability of this store, but only null values
+	 * may be set.
 	 *
 	 * <p>
-	 * Note that the supplied function must preserve null. That is
-	 * <code>fn(a) == null</code> if and only if <code>a == null</code>.
+	 * Note that the supplied operator must preserve null. That is
+	 * <code>op(a) == null</code> if and only if <code>a == null</code>.
 	 *
-	 * @param fn
-	 *            a function over the store elements
+	 * @param op
+	 *            an operator over the store elements
 	 *
-	 * @return a view of this store under the specified function
-	 * @see #asTransformedBy(Class, Function)
+	 * @return a view of this store under the specified operator
+	 * @see #asTransformedBy(Mapping)
 	 */
 	default Store<V> asTransformedBy(UnaryOperator<V> fn) {
-		return asTransformedBy(valueType(), fn);
+		return asTransformedBy(Mapping.fromUnaryOperator(valueType(), fn));
 	}
 
 	/**
 	 * <p>
-	 * Derives a store by applying a function over the store values. It provides
-	 * a live view of the original store. The mutability of the returned store
-	 * matches the mutability of this store. Bijectivity of the supplied
-	 * transforming function has the consequence that values may be set on the
-	 * store in contrast to {@link #asTransformedBy(UnaryOperator)}.
-	 *
-	 * <p>
-	 * Note that the supplied function must preserve null. That is
-	 * <code>fn(a) == null</code> if and only if <code>a == null</code>.
-	 *
-	 * @param fn
-	 *            a bijective function over the store elements
-	 *
-	 * @return a view of this store under the specified function
-	 * @see #asTransformedBy(UnaryOperator)
-	 */
-	default Store<V> asTransformedBy(Bijection<V,V> fn) {
-		return asTransformedBy(valueType(), fn);
-	}
-
-	/**
-	 * <p>
-	 * Derives a store by applying a function over the store values. It provides
+	 * Derives a store by applying a mapping over the store values. It provides
 	 * a live view of the original store. The mutability of the returned store
 	 * matches the mutability of this store, but only null values may be set.
 	 *
 	 * <p>
-	 * Note that the supplied function must preserve null. That is
+	 * Note that the supplied mapping must preserve null. That is
 	 * <code>fn(a) == null</code> if and only if <code>a == null</code>.
 	 *
-	 * @param type
-	 *            the type of values returned by the function
 	 * @param fn
-	 *            a function over the store elements
+	 *            a mapping over the store elements
 	 * @param <W>
 	 *            the type of value in the returned store
 	 *
-	 * @return a view of this store under the specified function
-	 * @see #asTransformedBy(Function)
-	 * @see #asTransformedBy(Class, Bijection)
+	 * @return a view of this store under the specified mapping
+	 * @see #asTransformedBy(UnaryOperator)
+	 * @see #asTransformedBy(Bijection)
 	 */
-	default <W> Store<W> asTransformedBy(Class<W> type, Function<V, W> fn) {
-		if (type == null) throw new IllegalArgumentException("null type");
+	default <W> Store<W> asTransformedBy(Mapping<V, W> fn) {
 		if (fn == null) throw new IllegalArgumentException("null fn");
-		return new TransformedStore<V,W>(this, type, fn);
+		return new TransformedStore<V,W>(this, fn);
 	}
 
 	/**
 	 * <p>
-	 * Derives a store by applying a function over the store values. It provides
-	 * a live view of the original store. The mutability of the returned store
-	 * matches the mutability of this store. Bijectivity of the supplied
-	 * transforming function has the consequence that values may be set on the
-	 * store in contrast to {@link #asTransformedBy(Class, Function)}.
+	 * Derives a store by applying a bijection over the store values. It
+	 * provides a live view of the original store. The mutability of the
+	 * returned store matches the mutability of this store. Bijectivity of the
+	 * supplied transforming function has the consequence that values may be set
+	 * on the store in contrast to {@link #asTransformedBy(Function)}.
 	 *
 	 * <p>
 	 * Note that the supplied function must preserve null. That is
 	 * <code>fn(a) == null</code> if and only if <code>a == null</code>.
 	 *
-	 * @param type
-	 *            the type of values returned by the function
 	 * @param fn
 	 *            a bijective function over the store elements
 	 *
 	 * @return a view of this store under the specified function
-	 * @see #asTransformedBy(Class, Function)
+	 * @see #asTransformedBy(Function)
 	 */
-	default <W> Store<W> asTransformedBy(Class<W> type, Bijection<V, W> fn) {
-		if (type == null) throw new IllegalArgumentException("null type");
+	default <W> Store<W> asTransformedBy(Bijection<V, W> fn) {
 		if (fn == null) throw new IllegalArgumentException("null fn");
-		return new TransformedStore<V,W>(this, type, fn);
+		return new TransformedStore<V,W>(this, fn);
 	}
 
 	/**

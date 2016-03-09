@@ -18,25 +18,35 @@ package com.tomgibara.storage;
 
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 import com.tomgibara.bits.BitStore;
 import com.tomgibara.fundament.Bijection;
+import com.tomgibara.fundament.Mapping;
 
 class TransformedStore<V,W> extends AbstractStore<W> {
 
+	private static <V, W> Bijection<V, W> oneWay(Mapping<V, W> fn) {
+		Class<V> domainType = fn.domainType();
+		Class<W> rangeType = fn.rangeType();
+		return new Bijection<V, W>() {
+			@Override public Class<V> domainType() { return domainType; }
+			@Override public Class<W> rangeType() { return rangeType; }
+			@Override public W apply(V t) { return fn.apply(t); }
+			@Override public V disapply(W w) { if (w == null) return null; else throw new IllegalArgumentException("non-null value"); }
+			@Override public boolean isInDomain(Object obj) { return obj == null || domainType.isInstance(obj); }
+			@Override public boolean isInRange(Object obj) { return obj == null || rangeType.isInstance(obj); }
+		};
+	}
+	
 	private final Store<V> store;
-	private final Class<W> type;
 	private final Bijection<V, W> fn;
 
-	TransformedStore(Store<V> store, Class<W> type, Function<V, W> fn) {
-		this(store, type, new OneWayBijection<>(fn));
+	TransformedStore(Store<V> store, Mapping<V, W> fn) {
+		this(store, oneWay(fn));
 	}
 
-	TransformedStore(Store<V> store, Class<W> type, Bijection<V, W> fn) {
+	TransformedStore(Store<V> store, Bijection<V, W> fn) {
 		this.store = store;
-		this.type = type;
 		this.fn = fn;
 	}
 
@@ -44,7 +54,7 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 
 	@Override
 	public Class<W> valueType() {
-		return type;
+		return fn.rangeType();
 	}
 
 	@Override
@@ -84,17 +94,12 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 
 	@Override
 	public Store<W> resizedCopy(int newSize) {
-		return new TransformedStore<>(store.resizedCopy(newSize), type, fn);
+		return new TransformedStore<>(store.resizedCopy(newSize), fn);
 	}
 
 	@Override
-	public Store<W> asTransformedBy(UnaryOperator<W> fn) {
-		return new TransformedStore<>(store, type, fn.compose(this.fn));
-	}
-
-	@Override
-	public <X> Store<X> asTransformedBy(Class<X> type, Function<W, X> fn) {
-		return new TransformedStore<>(store, type, fn.compose(this.fn));
+	public <X> Store<X> asTransformedBy(Mapping<W, X> fn) {
+		return new TransformedStore<>(store, oneWay(fn).compose(this.fn));
 	}
 
 	// mutable
@@ -128,12 +133,12 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 
 	@Override
 	public Store<W> immutableCopy() {
-		return new TransformedStore<V,W>(store.immutableCopy(), type, fn);
+		return new TransformedStore<V,W>(store.immutableCopy(), fn);
 	}
 
 	@Override
 	public Store<W> immutableView() {
-		return new TransformedStore<V,W>(store.immutableView(), type, fn);
+		return new TransformedStore<V,W>(store.immutableView(), fn);
 	}
 
 	// iterable methods
@@ -143,26 +148,4 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 		return new StoreIterator.Transformed<>(store, fn);
 	}
 
-	// inner classes
-
-	private static class OneWayBijection<V,W> implements Bijection<V, W> {
-
-		private final Function<V,W> fn;
-
-		OneWayBijection(Function<V,W> fn) {
-			this.fn = fn;
-		}
-
-		@Override
-		public W apply(V v) {
-			return fn.apply(v);
-		}
-
-		@Override
-		public V disapply(W w) {
-			if (w != null) throw new IllegalArgumentException("non-null value");
-			return null;
-		}
-
-	}
 }
