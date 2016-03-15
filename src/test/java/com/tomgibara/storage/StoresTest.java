@@ -18,8 +18,8 @@ package com.tomgibara.storage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.time.Month;
 import java.util.Optional;
@@ -37,13 +37,16 @@ public class StoresTest {
 
 	@Test
 	public void testPrimitiveNullability() {
-		try {
-			Stores.ints(1,2,3).set(0, null);
-			fail();
-		} catch (IllegalArgumentException e) {
-			/* expected */
+		{ // not supporting null
+			Store<Integer> ints = Stores.ints(1,2,3);
+			ints.set(0, null);
+			assertEquals(0, ints.get(0).intValue());
 		}
-		Stores.intsAndNull(1,2,3).set(0, null);
+		{ // supporting null
+			Store<Integer> ints = Stores.intsAndNull(1,2,3);
+			ints.set(0, null);
+			assertNull(ints.get(0));
+		}
 	}
 
 	@Test

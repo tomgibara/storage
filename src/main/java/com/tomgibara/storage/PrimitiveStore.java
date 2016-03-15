@@ -85,7 +85,6 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 	@Override
 	public V set(int index, V value) {
-		if (value == null) throw new IllegalArgumentException("null not allowed");
 		V previous = getImpl(index);
 		setImpl(index, value);
 		return previous;
