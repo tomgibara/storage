@@ -35,7 +35,7 @@ class NullEnumStorage<E extends Enum<E>> implements Storage<E> {
 		return new NullEnumStore(storage.newStore(size));
 	}
 
-	private final class NullEnumStore implements Store<E> {
+	private final class NullEnumStore extends AbstractStore<E> {
 
 		private final SmallValueStore store;
 

@@ -125,6 +125,8 @@ public class StorageTest {
 		assertEquals(Tri.ISOSCELES, s.set(0, Tri.EQUILATERAL));
 		assertEquals(Tri.EQUILATERAL, s.set(0, Tri.SCALENE));
 		s.fill(Tri.ISOSCELES);
+		assertEquals(s, s.mutableCopy());
+		assertEquals(s, s.immutableCopy());
 		assertEquals(Collections.nCopies(10, Tri.ISOSCELES), s.asList());
 		s.asList().set(0, null);
 		assertEquals(s.nullValue().get(), s.get(0));
@@ -141,6 +143,8 @@ public class StorageTest {
 		assertEquals(Tri.ISOSCELES, s.set(0, Tri.EQUILATERAL));
 		assertEquals(Tri.EQUILATERAL, s.set(0, Tri.SCALENE));
 		s.fill(Tri.ISOSCELES);
+		assertEquals(s, s.mutableCopy());
+		assertEquals(s, s.immutableCopy());
 		assertEquals(Collections.nCopies(10, Tri.ISOSCELES), s.asList());
 		assertFalse(s.isNull(0));
 		s.set(0, null);

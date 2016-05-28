@@ -56,7 +56,7 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		return new EnumStore(store);
 	}
 
-	private final class EnumStore implements Store<E> {
+	private final class EnumStore extends AbstractStore<E> {
 
 		private final SmallValueStore store;
 
