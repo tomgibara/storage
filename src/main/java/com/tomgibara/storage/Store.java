@@ -192,6 +192,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 		int i = 0; // index to read from
 		int j = 0; // index to write to
 		int count = count();
+		if (count == size()) return false; // this should be a cheap test
 		while (j < count) {
 			V value = get(i);
 			if (value != null) {
