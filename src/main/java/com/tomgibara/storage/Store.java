@@ -182,6 +182,32 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	}
 
 	/**
+	 * Moves every non-null values to the least available index.
+	 *
+	 * @return whether store was mutated as a consequence of calling this method
+	 */
+	default boolean condense() {
+		if (!isMutable()) throw new IllegalStateException("immutable");
+		if (nullValue().isPresent()) return false; // there can be no nulls
+		int i = 0; // index to read from
+		int j = 0; // index to write to
+		int count = count();
+		while (j < count) {
+			V value = get(i);
+			if (value != null) {
+				if (j < i) set(j, value);
+				j++;
+			}
+			i++; // skip forwards
+		}
+		if (i == j) return false;
+		while (j < i) {
+			set(j++, null);
+		}
+		return true;
+	}
+
+	/**
 	 * A mutable detached copy of this store with the specified size.
 	 * Detached means that changes to the returned store will not affect the
 	 * copied store. The new size may be smaller, larger or even the same as

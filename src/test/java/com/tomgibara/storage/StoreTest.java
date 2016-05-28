@@ -31,6 +31,7 @@ import org.junit.Test;
 import com.tomgibara.bits.BitStore;
 import com.tomgibara.bits.Bits;
 import com.tomgibara.fundament.Bijection;
+import com.tomgibara.storage.StorageTest.Tri;
 
 public class StoreTest {
 
@@ -157,5 +158,43 @@ public class StoreTest {
 		BitStore p = Bits.store(size);
 		s.forEach(i -> p.setBit(i, true));
 		assertEquals(p, s.population());
+	}
+
+	@Test
+	public void testCondense() {
+		testCondense(Stores.intsAndNull());
+		testCondense(Stores.intsAndNull(0,1,2,3));
+		testCondense(Stores.ints(0,1,2,3));
+		testCondense(Stores.intsAndNull(0,1).immutableView());
+		Store<Tri> tris = Storage.typed(Tri.class).newStore(4);
+		tris.set(0, Tri.EQUILATERAL);
+		tris.set(1, Tri.ISOSCELES);
+		tris.set(2, Tri.SCALENE);
+		tris.set(3, Tri.EQUILATERAL);
+		testCondense(tris);
+	}
+
+	// s is a full store of even length
+	private <E> void testCondense(Store<E> s) {
+		int size = s.size();
+		assertEquals(size, s.count());
+		assertEquals(0, size & 1);
+		if (!s.isMutable()) try {
+			s.condense();
+			fail("condensed immutable store");
+		} catch (IllegalStateException e) {
+			/* expected */
+			return;
+		}
+		Store<E> c = s.mutableCopy();
+		assertFalse(c.condense());
+		assertEquals(s, c);
+		if (c.nullValue().isPresent()) return; // cannot test more
+		for (int i = 0; i < c.size(); i += 2) c.set(i, null);
+		assertEquals(c.size() > 0, c.condense());
+		assertEquals(size / 2, c.count());
+		for (int i = 0; i < size; i++) {
+			assertEquals(i >= size / 2, c.isNull(i));
+		}
 	}
 }
