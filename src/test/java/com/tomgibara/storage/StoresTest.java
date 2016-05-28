@@ -66,4 +66,12 @@ public class StoresTest {
 		assertEquals(Optional.of(false), Stores.defaultNullValue(boolean.class));
 		assertEquals(Optional.of(Month.JANUARY), Stores.defaultNullValue(Month.class));
 	}
+
+	@Test
+	public void testInitialCount() {
+		assertEquals(4, Stores.ints(0,1,2,3).count());
+		assertEquals(4, Stores.intsAndNull(0,1,2,3).count());
+		assertEquals(0, Stores.ints().count());
+		assertEquals(0, Stores.intsAndNull().count());
+	}
 }
