@@ -186,7 +186,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 *
 	 * @return whether store was mutated as a consequence of calling this method
 	 */
-	default boolean condense() {
+	default boolean compact() {
 		if (!isMutable()) throw new IllegalStateException("immutable");
 		if (nullValue().isPresent()) return false; // there can be no nulls
 		int count = count();

@@ -161,47 +161,47 @@ public class StoreTest {
 	}
 
 	@Test
-	public void testCondense() {
-		testCondense(Stores.intsAndNull());
-		testCondense(Stores.intsAndNull(0,1,2,3));
-		testCondense(Stores.ints(0,1,2,3));
-		testCondense(Stores.intsAndNull(0,1).immutableView());
+	public void testCompact() {
+		testCompact(Stores.intsAndNull());
+		testCompact(Stores.intsAndNull(0,1,2,3));
+		testCompact(Stores.ints(0,1,2,3));
+		testCompact(Stores.intsAndNull(0,1).immutableView());
 
 		Store<Tri> tris = Storage.typed(Tri.class).newStore(4);
 		tris.set(0, Tri.EQUILATERAL);
 		tris.set(1, Tri.ISOSCELES);
 		tris.set(2, Tri.SCALENE);
 		tris.set(3, Tri.EQUILATERAL);
-		testCondense(tris);
+		testCompact(tris);
 
 		Store<String> strs = Stores.objectsAndNull("One", "Two", "Three", "Four", "Five", "Six");
-		testCondense(strs);
+		testCompact(strs);
 	}
 
 	// s is a full store of even length
-	private <E> void testCondense(Store<E> s) {
+	private <E> void testCompact(Store<E> s) {
 		int size = s.size();
 		assertEquals(size, s.count());
 		assertEquals(0, size & 1);
 		if (!s.isMutable()) try {
-			s.condense();
-			fail("condensed immutable store");
+			s.compact();
+			fail("compacted immutable store");
 		} catch (IllegalStateException e) {
 			/* expected */
 			return;
 		}
 		Store<E> c = s.mutableCopy();
-		assertFalse(c.condense());
+		assertFalse(c.compact());
 		assertEquals(s, c);
 		if (c.nullValue().isPresent()) return; // cannot test more
 		for (int i = 0; i < c.size(); i += 2) c.set(i, null);
-		assertEquals(c.size() > 0, c.condense());
+		assertEquals(c.size() > 0, c.compact());
 		assertEquals(size / 2, c.count());
 		for (int i = 0; i < size; i++) {
 			assertEquals(i >= size / 2, c.isNull(i));
 		}
 		Store<E> cc = c.mutableCopy();
-		cc.condense();
+		cc.compact();
 		assertEquals(c, cc);
 	}
 }

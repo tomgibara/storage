@@ -490,7 +490,7 @@ public final class Stores {
 		return vs;
 	}
 
-	static <V> boolean condense(V[] vs, int count) {
+	static <V> boolean compact(V[] vs, int count) {
 		if (count == vs.length) return false;
 		int i = 0; // index to read from
 		int j = 0; // index to write to

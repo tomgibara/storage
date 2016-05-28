@@ -73,7 +73,7 @@ public class SamplesTest {
 		ex1.fill(value);      // change all values
 		ex1.iterator();       // iterate over all non-null values
 		ex1.forEach(t -> {}); // act over all non-null values
-		ex1.condense();       // gather all non-null values
+		ex1.compact();       // gather all non-null values
 
 
 		// ADDITIONAL STORE FUNCTIONS
