@@ -91,6 +91,11 @@ class NullArrayStore<V> extends AbstractStore<V> {
 		count = value == null ? 0 : values.length;
 	}
 
+	@Override
+	public boolean condense() {
+		return Stores.condense(values, count);
+	}
+
 	// mutability
 
 	@Override

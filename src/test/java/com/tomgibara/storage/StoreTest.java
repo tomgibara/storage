@@ -166,12 +166,16 @@ public class StoreTest {
 		testCondense(Stores.intsAndNull(0,1,2,3));
 		testCondense(Stores.ints(0,1,2,3));
 		testCondense(Stores.intsAndNull(0,1).immutableView());
+
 		Store<Tri> tris = Storage.typed(Tri.class).newStore(4);
 		tris.set(0, Tri.EQUILATERAL);
 		tris.set(1, Tri.ISOSCELES);
 		tris.set(2, Tri.SCALENE);
 		tris.set(3, Tri.EQUILATERAL);
 		testCondense(tris);
+
+		Store<String> strs = Stores.objectsAndNull("One", "Two", "Three", "Four", "Five", "Six");
+		testCondense(strs);
 	}
 
 	// s is a full store of even length
@@ -196,5 +200,8 @@ public class StoreTest {
 		for (int i = 0; i < size; i++) {
 			assertEquals(i >= size / 2, c.isNull(i));
 		}
+		Store<E> cc = c.mutableCopy();
+		cc.condense();
+		assertEquals(c, cc);
 	}
 }

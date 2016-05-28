@@ -490,6 +490,25 @@ public final class Stores {
 		return vs;
 	}
 
+	static <V> boolean condense(V[] vs, int count) {
+		if (count == vs.length) return false;
+		int i = 0; // index to read from
+		int j = 0; // index to write to
+		while (j < count) {
+			V value = vs[i];
+			if (value != null) {
+				if (j < i) vs[j] = value;
+				j++;
+			}
+			i++; // skip forwards
+		}
+		if (i == j) return false;
+		while (j < i) {
+			vs[j++] = null;
+		}
+		return true;
+	}
+
 	// non-constructor
 
 	private Stores() {}

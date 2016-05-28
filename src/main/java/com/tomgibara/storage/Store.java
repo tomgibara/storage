@@ -189,10 +189,11 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	default boolean condense() {
 		if (!isMutable()) throw new IllegalStateException("immutable");
 		if (nullValue().isPresent()) return false; // there can be no nulls
-		int i = 0; // index to read from
-		int j = 0; // index to write to
 		int count = count();
 		if (count == size()) return false; // this should be a cheap test
+
+		int i = 0; // index to read from
+		int j = 0; // index to write to
 		while (j < count) {
 			V value = get(i);
 			if (value != null) {
@@ -201,6 +202,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 			}
 			i++; // skip forwards
 		}
+
 		if (i == j) return false;
 		while (j < i) {
 			set(j++, null);
