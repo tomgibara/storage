@@ -22,6 +22,33 @@ import java.util.Optional;
 
 class ArrayStore<V> extends AbstractStore<V> {
 
+	static <V> Storage<V> storage(Class<V> type, V nullValue) {
+		return new Storage<V>() {
+
+			@Override
+			public Store<V> newStore(int size) throws IllegalArgumentException {
+				return new ArrayStore<>(type, size, nullValue);
+			}
+
+			@Override
+			public Store<V> newMutableStore(@SuppressWarnings("unchecked") V... values) {
+				if (values == null) throw new IllegalArgumentException("null values");
+				values = Stores.typedArrayCopy(type, values);
+				Stores.replaceNulls(values, nullValue);
+				return new ArrayStore<>(values, nullValue);
+			}
+
+			@Override
+			public Store<V> newImmutableStore(@SuppressWarnings("unchecked") V... values) {
+				if (values == null) throw new IllegalArgumentException("null values");
+				values = Stores.typedArrayCopy(type, values);
+				Stores.replaceNulls(values, nullValue);
+				return new ImmutableArrayStore<>(values, nullValue);
+			}
+
+		};
+	}
+
 	final V[] values;
 	final V nullValue;
 

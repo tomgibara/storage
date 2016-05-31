@@ -32,6 +32,7 @@ package com.tomgibara.storage;
  * @param <V>
  *            the type of values to be stored
  */
+@FunctionalInterface
 public interface Storage<V> {
 
 	/**
@@ -65,9 +66,9 @@ public interface Storage<V> {
 	@SuppressWarnings("unchecked")
 	static <V> Storage<V> generic(V nullValue) {
 		if (nullValue == null) {
-			return size -> (Store<V>) new NullArrayStore<>(new Object[size], 0);
+			return (Storage<V>) NullArrayStore.objectStorage;
 		} else {
-			return size -> new ArrayStore<V>((Class<V>)Object.class, size, nullValue);
+			return (Storage<V>) ArrayStore.storage(Object.class, nullValue);
 		}
 	}
 
@@ -127,11 +128,11 @@ public interface Storage<V> {
 		if (nullValue == null) {
 			if (type.isEnum()) return new NullEnumStorage(type);
 			if (type.isPrimitive()) return size -> NullPrimitiveStore.newStore(type, size);
-			return size -> new NullArrayStore<>(type, size);
+			return NullArrayStore.storage(type);
 		} else {
 			if (type.isEnum()) return new EnumStorage(type, (Enum) nullValue);
 			if (type.isPrimitive()) return size -> PrimitiveStore.newStore(type, size, nullValue);
-			return size -> new ArrayStore<>(type, size, nullValue);
+			return ArrayStore.storage(type, nullValue);
 		}
 	}
 
@@ -206,7 +207,8 @@ public interface Storage<V> {
 	}
 
 	/**
-	 * Creates a new store with the requested size
+	 * Creates a new store with the requested size. The returned store is
+	 * mutable.
 	 *
 	 * @param size
 	 *            the required size
@@ -216,4 +218,41 @@ public interface Storage<V> {
 	 */
 	Store<V> newStore(int size) throws IllegalArgumentException;
 
+	/**
+	 * <p>
+	 * Creates a new mutable store containing values from the supplied array.
+	 * The size of the returned store will equal the length of the supplied
+	 * array and null values will be substituted with {@link Store#nullValue()}.
+	 * 
+	 * <p>
+	 * The returned store is an independent copy of the supplied array.
+	 * 
+	 * @param values an array of values
+	 * @return a mutable store containing the supplied values
+	 */
+	default Store<V> newMutableStore(@SuppressWarnings("unchecked") V... values) {
+		if (values == null) throw new IllegalArgumentException("null values");
+		Store<V> store = newStore(values.length);
+		for (int i = 0; i < values.length; i++) {
+			store.set(i, values[i]);
+		}
+		return store;
+	}
+
+	/**
+	 * <p>
+	 * Creates a new immutable store containing values from the supplied array.
+	 * The size of the returned store will equal the length of the supplied
+	 * array and null values will be substituted with {@link Store#nullValue()}.
+	 * 
+	 * <p>
+	 * The returned store is an independent copy of the supplied array.
+	 * 
+	 * @param values an array of values
+	 * @return a mutable store containing the supplied values
+	 */
+	default Store<V> newImmutableStore(@SuppressWarnings("unchecked") V... values) {
+		if (values == null) throw new IllegalArgumentException("null values");
+		return newMutableStore(values).immutableView();
+	}
 }

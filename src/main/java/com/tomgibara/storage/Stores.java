@@ -456,6 +456,24 @@ public final class Stores {
 		return sum;
 	}
 
+	static <V> void replaceNulls(V[] vs, V nullValue) {
+		for (int i = 0; i < vs.length; i++) {
+			if (vs[i] == null) vs[i] = nullValue;
+		}
+	}
+
+	static <V> V[] typedArrayCopy(Class<V> type, V[] vs) {
+		if (vs.getClass().getComponentType() == type) {
+			return vs.clone();
+		} else {
+			@SuppressWarnings("unchecked")
+			V[] copy = (V[]) Array.newInstance(type, vs.length);
+			System.arraycopy(vs, 0, copy, 0, vs.length);
+			return copy;
+		}
+
+	}
+
 	static <V> V[] toArray(Store<V> store) {
 		return toArray(store, store.size());
 	}

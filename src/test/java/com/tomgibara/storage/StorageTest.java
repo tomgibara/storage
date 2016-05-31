@@ -157,6 +157,28 @@ public class StorageTest {
 		assertNotNull(Storage.generic(new Object()).newStore(10).get(0));
 	}
 
+	@Test
+	public void testNewMutableStore() {
+		Store<String> muStr = Storage.typed(String.class, "").newMutableStore("One", "Two", "Three", null);
+		assertTrue(muStr.isMutable());
+		assertEquals("One", muStr.get(0));
+		assertEquals("", muStr.get(3));
+
+		Store<String> imStr = Storage.typed(String.class).newMutableStore("One", "Two", "Three", null);
+		assertTrue(imStr.isMutable());
+		assertEquals("One", imStr.get(0));
+		assertNull(imStr.get(3));
+
+		Store<String> muGen = Storage.<String>generic().newMutableStore("X", "Y", "Z");
+		assertEquals(Object.class, muGen.valueType());
+
+		Store<Integer> muInt = Storage.typed(int.class).newMutableStore(1,2,3,4);
+		assertTrue(imStr.isMutable());
+		assertEquals(1, muInt.get(0).intValue());
+		assertEquals(4, muInt.get(3).intValue());
+		assertEquals(int.class, muInt.valueType());
+	}
+	
 	enum Tri {
 
 		SCALENE,

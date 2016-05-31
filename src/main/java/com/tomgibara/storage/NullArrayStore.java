@@ -21,6 +21,31 @@ import java.util.Arrays;
 
 class NullArrayStore<V> extends AbstractStore<V> {
 
+	static <V> Storage<V> storage(Class<V> type) {
+		return new Storage<V>() {
+
+			@Override
+			public Store<V> newStore(int size) throws IllegalArgumentException {
+				return new NullArrayStore<>(type, size);
+			}
+
+			@Override
+			public Store<V> newMutableStore(@SuppressWarnings("unchecked") V... values) {
+				if (values == null) throw new IllegalArgumentException("null values");
+				return new NullArrayStore<>(Stores.typedArrayCopy(type, values));
+			}
+
+			@Override
+			public Store<V> newImmutableStore(@SuppressWarnings("unchecked") V... values) {
+				if (values == null) throw new IllegalArgumentException("null values");
+				return new ImmutableArrayStore<>(Stores.typedArrayCopy(type, values), Stores.countNonNulls(values));
+			}
+
+		};
+	}
+
+	static final Storage<Object> objectStorage = storage(Object.class);
+
 	final V[] values;
 	int count;
 
