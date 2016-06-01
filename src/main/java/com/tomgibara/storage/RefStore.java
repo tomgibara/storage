@@ -22,6 +22,13 @@ import java.util.Arrays;
 
 abstract class RefStore<V> extends AbstractStore<V> {
 
+	interface RefStorage<V> extends Storage<V> {
+		//TODO this is pretty smelly
+		@SuppressWarnings("unchecked")
+		@Override
+		public default Class<V> valueType() { return (Class<V>) Object.class; }
+	}
+
 	private final ReferenceQueue<V> queue = new ReferenceQueue<V>();
 	private final Reference<V>[] refs;
 	// counts number of references (cleared or not)

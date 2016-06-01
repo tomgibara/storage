@@ -103,7 +103,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 	}
 
-	static Storage<Integer> newNullStorage(int range) {
+	static NullSmallStorage newNullStorage(int range) {
 		switch (range) {
 		case 1:  return size -> new ZeroOrNullStore(checkedSize(size));
 		case 2:  return size -> new NullableStore(new TernaryStore(checkedSize(size)));
@@ -131,7 +131,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 	@Override
 	public Class<Integer> valueType() {
-		return Integer.class;
+		return int.class;
 	}
 
 	@Override
@@ -189,6 +189,9 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 	// inner classes
 
 	interface SmallValueStorage extends Storage<Integer> {
+
+		@Override
+		default public Class<Integer> valueType() { return int.class; }
 
 		@Override
 		public SmallValueStore newStore(int size);
@@ -639,6 +642,10 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 	}
 
 	// nullable stores
+
+	interface NullSmallStorage extends Storage<Integer> {
+		@Override default public Class<Integer> valueType() { return int.class; }
+	}
 
 	static class ZeroOrNullStore extends AbstractStore<Integer> {
 

@@ -31,6 +31,11 @@ class NullEnumStorage<E extends Enum<E>> implements Storage<E> {
 	}
 
 	@Override
+	public Class<E> valueType() {
+		return type;
+	}
+
+	@Override
 	public Store<E> newStore(int size) throws IllegalArgumentException {
 		return new NullEnumStore(storage.newStore(size));
 	}

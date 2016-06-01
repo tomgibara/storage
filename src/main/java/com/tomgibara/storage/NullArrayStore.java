@@ -40,6 +40,11 @@ class NullArrayStore<V> extends AbstractStore<V> {
 			}
 
 			@Override
+			public Class<V> valueType() {
+				return type;
+			}
+
+			@Override
 			public Store<V> newStore(int size) throws IllegalArgumentException {
 				return new NullArrayStore<>(type, size);
 			}
@@ -72,9 +77,14 @@ class NullArrayStore<V> extends AbstractStore<V> {
 			}
 
 			@Override
+			public Class<V> valueType() {
+				return type;
+			}
+
+			@Override
 			public Store<V> newStore(int size) throws IllegalArgumentException {
-				//TODO need constant store
-				return new NullArrayStore<>(type, size).immutableView();
+				if (size < 0L) throw new IllegalArgumentException("negative size");
+				return new NullConstantStore<V>(type, size);
 			}
 
 			@Override

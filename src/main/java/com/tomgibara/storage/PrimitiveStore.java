@@ -30,6 +30,93 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 	private static final int DOUBLE  = 11;
 	private static final int BOOLEAN = 12;
 
+	private static final Storage<Byte> byteStorage(byte nv) {
+		return new Storage<Byte>() {
+			private final Optional<Byte> nullValue = Optional.of(nv);
+			@Override public Class<Byte> valueType() { return byte.class; }
+			@Override public Optional<Byte> nullValue() { return nullValue; }
+			@Override public PrimitiveStore<Byte> newStore(int size) { return new ByteStore(size, nv); }
+		};
+	};
+
+	private static final Storage<Float> floatStorage(float nv) {
+		return new Storage<Float>() {
+			private final Optional<Float> nullValue = Optional.of(nv);
+			@Override public Class<Float> valueType() { return float.class; }
+			@Override public Optional<Float> nullValue() { return nullValue; }
+			@Override public PrimitiveStore<Float> newStore(int size) { return new FloatStore(size, nv); }
+		};
+	};
+
+	private static final Storage<Character> charStorage(char nv) {
+		return new Storage<Character>() {
+			private final Optional<Character> nullValue = Optional.of(nv);
+			@Override public Class<Character> valueType() { return char.class; }
+			@Override public Optional<Character> nullValue() { return nullValue; }
+			@Override public PrimitiveStore<Character> newStore(int size) { return new CharacterStore(size, nv); }
+		};
+	};
+
+	private static final Storage<Short> shortStorage(short nv) {
+		return new Storage<Short>() {
+			private final Optional<Short> nullValue = Optional.of(nv);
+			@Override public Class<Short> valueType() { return short.class; }
+			@Override public Optional<Short> nullValue() { return nullValue; }
+			@Override public PrimitiveStore<Short> newStore(int size) { return new ShortStore(size, nv); }
+		};
+	};
+
+	private static final Storage<Long> longStorage(long nv) {
+		return new Storage<Long>() {
+			private final Optional<Long> nullValue = Optional.of(nv);
+			@Override public Class<Long> valueType() { return long.class; }
+			@Override public Optional<Long> nullValue() { return nullValue; }
+			@Override public PrimitiveStore<Long> newStore(int size) { return new LongStore(size, nv); }
+		};
+	};
+
+	private static final Storage<Integer> intStorage(int nv) {
+		return new Storage<Integer>() {
+			private final Optional<Integer> nullValue = Optional.of(nv);
+			@Override public Class<Integer> valueType() { return int.class; }
+			@Override public Optional<Integer> nullValue() { return nullValue; }
+			@Override public PrimitiveStore<Integer> newStore(int size) { return new IntegerStore(size, nv); }
+		};
+	};
+
+	private static final Storage<Double> doubleStorage(double nv) {
+		return new Storage<Double>() {
+			private final Optional<Double> nullValue = Optional.of(nv);
+			@Override public Class<Double> valueType() { return double.class; }
+			@Override public Optional<Double> nullValue() { return nullValue; }
+			@Override public PrimitiveStore<Double> newStore(int size) { return new DoubleStore(size, nv); }
+		};
+	};
+
+	private static final Storage<Boolean> booleanStorage(boolean nv) {
+		return new Storage<Boolean>() {
+			private final Optional<Boolean> nullValue = Optional.of(nv);
+			@Override public Class<Boolean> valueType() { return boolean.class; }
+			@Override public Optional<Boolean> nullValue() { return nullValue; }
+			@Override public PrimitiveStore<Boolean> newStore(int size) { return new BooleanStore(size, nv); }
+		};
+	};
+
+	@SuppressWarnings("unchecked")
+	static <V> Storage<V> newStorage(Class<V> type, V nullValue) {
+		switch((type.getName().hashCode() >> 8) & 0xf) {
+		case Stores.BYTE:    return (Storage<V>) byteStorage   ((Byte)      nullValue);
+		case Stores.FLOAT:   return (Storage<V>) floatStorage  ((Float)     nullValue);
+		case Stores.CHAR:    return (Storage<V>) charStorage   ((Character) nullValue);
+		case Stores.SHORT:   return (Storage<V>) shortStorage  ((Short)     nullValue);
+		case Stores.LONG:    return (Storage<V>) longStorage   ((Long)      nullValue);
+		case Stores.INT:     return (Storage<V>) intStorage    ((Integer)   nullValue);
+		case Stores.DOUBLE:  return (Storage<V>) doubleStorage ((Double)    nullValue);
+		case Stores.BOOLEAN: return (Storage<V>) booleanStorage((Boolean)   nullValue);
+		default: throw new IllegalArgumentException(type.getName());
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	static <V> PrimitiveStore<V> newStore(Class<V> type, int size, V nullValue) {
 		switch((type.getName().hashCode() >> 8) & 0xf) {

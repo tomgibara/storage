@@ -170,6 +170,33 @@ public final class Stores {
 		return new ImmutableArrayStore<>(values, count);
 	}
 
+	//TODO this is unpleasant
+	@SuppressWarnings("unchecked")
+	public static <V> Store<V> constantStore(V value, int size) {
+		if (value == null) throw new IllegalArgumentException("null value");
+		if (size < 0L) throw new IllegalArgumentException("negative size");
+		return new ConstantStore<V>((Class<V>)Object.class, value, size);
+	}
+
+	public static <V> Store<V> constantStore(Class<V> type, V value, int size) {
+		if (type == null) throw new IllegalArgumentException("null type");
+		if (value == null) throw new IllegalArgumentException("null value");
+		if (size < 0L) throw new IllegalArgumentException("negative size");
+		return new ConstantStore<V>(type, value, size);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <V> Store<V> constantNullStore(int size) {
+		if (size < 0L) throw new IllegalArgumentException("negative size");
+		return new NullConstantStore<V>((Class<V>)Object.class, size);
+	}
+
+	public static <V> Store<V> constantNullStore(Class<V> type, int size) {
+		if (type == null) throw new IllegalArgumentException("null type");
+		if (size < 0L) throw new IllegalArgumentException("negative size");
+		return new NullConstantStore<V>(type, size);
+	}
+
 	/**
 	 * Creates a mutable store that wraps an existing byte array.
 	 *
@@ -449,6 +476,10 @@ public final class Stores {
 	}
 
 	// package scoped methods
+
+	static IllegalStateException immutableException() {
+		return new IllegalStateException("immutable");
+	}
 
 	static <V> int countNonNulls(V[] vs) {
 		int sum = 0;

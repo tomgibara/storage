@@ -16,7 +16,9 @@
  */
 package com.tomgibara.storage;
 
-class MutableStorage<V> implements Storage<V> {
+import java.util.Optional;
+
+final class MutableStorage<V> implements Storage<V> {
 
 	// immutable
 	private final Storage<V> storage;
@@ -33,6 +35,16 @@ class MutableStorage<V> implements Storage<V> {
 
 	@Override
 	public Storage<V> immutable() { return storage; }
+
+	@Override
+	public Class<V> valueType() {
+		return storage.valueType();
+	}
+
+	@Override
+	public Optional<V> nullValue() {
+		return storage.nullValue();
+	}
 
 	@Override
 	public Store<V> newStore(int size) throws IllegalArgumentException {

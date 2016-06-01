@@ -446,10 +446,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 		}
 	}
 
-	@Override
-	public default Spliterator<V> spliterator() {
-		return new StoreSpliterator<>(this);
-	}
+	//TODO implement spliterator
 
 	// transposable methods
 

@@ -22,8 +22,30 @@ import java.util.Optional;
 
 class ArrayStore<V> extends AbstractStore<V> {
 
+	private static abstract class ArrayStorage<V> implements Storage<V> {
+
+		private final Class<V> type;
+		private final Optional<V> nullValue;
+
+		ArrayStorage(Class<V> type, V nullValue) {
+			this.type = type;
+			this.nullValue = Optional.ofNullable(nullValue);
+		}
+
+		@Override
+		public Optional<V> nullValue() {
+			return nullValue;
+		}
+
+		@Override
+		public Class<V> valueType() {
+			return type;
+		}
+
+	}
+
 	static <V> Storage<V> mutableStorage(Class<V> type, V nullValue) {
-		return new Storage<V>() {
+		return new ArrayStorage<V>(type, nullValue) {
 
 			@Override
 			public boolean isStorageMutable() {
@@ -57,7 +79,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 	}
 
 	static <V> Storage<V> immutableStorage(Class<V> type, V nullValue) {
-		return new Storage<V>() {
+		return new ArrayStorage<V>(type, nullValue) {
 
 			@Override
 			public boolean isStorageMutable() {
@@ -76,8 +98,8 @@ class ArrayStore<V> extends AbstractStore<V> {
 
 			@Override
 			public Store<V> newStore(int size) throws IllegalArgumentException {
-				//TODO need a constant store
-				return new ArrayStore<>(type, size, nullValue).immutableView();
+				if (size < 0L) throw new IllegalArgumentException("negative size");
+				return new ConstantStore<V>(type, nullValue, size);
 			}
 
 			@Override

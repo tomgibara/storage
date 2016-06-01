@@ -23,6 +23,61 @@ import com.tomgibara.bits.Bits;
 
 abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 
+	private static final Storage<Byte> byteStorage = new Storage<Byte>() {
+		@Override public Class<Byte> valueType() { return byte.class; }
+		@Override public NullPrimitiveStore<Byte> newStore(int size) { return new ByteStore(size); }
+	};
+
+	private static final Storage<Float> floatStorage = new Storage<Float>() {
+		@Override public Class<Float> valueType() { return float.class; }
+		@Override public NullPrimitiveStore<Float> newStore(int size) { return new FloatStore(size); }
+	};
+
+	private static final Storage<Character> charStorage = new Storage<Character>() {
+		@Override public Class<Character> valueType() { return char.class; }
+		@Override public NullPrimitiveStore<Character> newStore(int size) { return new CharacterStore(size); }
+	};
+
+	private static final Storage<Short> shortStorage = new Storage<Short>() {
+		@Override public Class<Short> valueType() { return short.class; }
+		@Override public NullPrimitiveStore<Short> newStore(int size) { return new ShortStore(size); }
+	};
+
+	private static final Storage<Long> longStorage = new Storage<Long>() {
+		@Override public Class<Long> valueType() { return long.class; }
+		@Override public NullPrimitiveStore<Long> newStore(int size) { return new LongStore(size); }
+	};
+
+	private static final Storage<Integer> intStorage = new Storage<Integer>() {
+		@Override public Class<Integer> valueType() { return int.class; }
+		@Override public NullPrimitiveStore<Integer> newStore(int size) { return new IntegerStore(size); }
+	};
+
+	private static final Storage<Double> doubleStorage = new Storage<Double>() {
+		@Override public Class<Double> valueType() { return double.class; }
+		@Override public NullPrimitiveStore<Double> newStore(int size) { return new DoubleStore(size); }
+	};
+
+	private static final Storage<Boolean> booleanStorage = new Storage<Boolean>() {
+		@Override public Class<Boolean> valueType() { return boolean.class; }
+		@Override public NullPrimitiveStore<Boolean> newStore(int size) { return new BooleanStore(size); }
+	};
+
+	@SuppressWarnings("unchecked")
+	static <V> Storage<V> newStorage(Class<V> type) {
+		switch((type.getName().hashCode() >> 8) & 0xf) {
+		case Stores.BYTE:    return (Storage<V>) byteStorage;
+		case Stores.FLOAT:   return (Storage<V>) floatStorage;
+		case Stores.CHAR:    return (Storage<V>) charStorage;
+		case Stores.SHORT:   return (Storage<V>) shortStorage;
+		case Stores.LONG:    return (Storage<V>) longStorage;
+		case Stores.INT:     return (Storage<V>) intStorage;
+		case Stores.DOUBLE:  return (Storage<V>) doubleStorage;
+		case Stores.BOOLEAN: return (Storage<V>) booleanStorage;
+		default: throw new IllegalArgumentException(type.getName());
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	static <V> NullPrimitiveStore<V> newStore(Class<V> type, int size) {
 		switch((type.getName().hashCode() >> 8) & 0xf) {

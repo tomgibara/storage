@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import com.tomgibara.storage.SmallValueStore.SmallValueStorage;
 
+//TODO optimize storage methods
 class EnumStorage<E extends Enum<E>> implements Storage<E> {
 
 	private final Class<E> type;
@@ -47,6 +48,11 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		this.nullValue = nullValue.ordinal();
 		constants = type.getEnumConstants();
 		storage = SmallValueStore.newStorage(constants.length);
+	}
+
+	@Override
+	public Class<E> valueType() {
+		return type;
 	}
 
 	@Override

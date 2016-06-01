@@ -16,7 +16,9 @@
  */
 package com.tomgibara.storage;
 
-class ImmutableStorage<V> implements Storage<V> {
+import java.util.Optional;
+
+final class ImmutableStorage<V> implements Storage<V> {
 
 	// mutable
 	private final Storage<V> storage;
@@ -35,9 +37,18 @@ class ImmutableStorage<V> implements Storage<V> {
 	public Storage<V> immutable() { return this; }
 
 	@Override
+	public Class<V> valueType() {
+		return storage.valueType();
+	}
+
+	@Override
+	public Optional<V> nullValue() {
+		return storage.nullValue();
+	}
+
+	@Override
 	public Store<V> newStore(int size) throws IllegalArgumentException {
-		//TODO return a constant store
-		return storage.newStore(size).immutableView();
+		return new NullConstantStore<V>(storage.valueType(), size);
 	}
 
 	@Override
