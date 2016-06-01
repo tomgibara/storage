@@ -158,22 +158,22 @@ public class StorageTest {
 	}
 
 	@Test
-	public void testNewMutableStore() {
-		Store<String> muStr = Storage.typed(String.class, "").newMutableStore("One", "Two", "Three", null);
+	public void testNewStoreOf() {
+		Store<String> muStr = Storage.typed(String.class, "").mutable().newStoreOf("One", "Two", "Three", null);
 		assertTrue(muStr.isMutable());
 		assertEquals("One", muStr.get(0));
 		assertEquals("", muStr.get(3));
 
-		Store<String> imStr = Storage.typed(String.class).newMutableStore("One", "Two", "Three", null);
-		assertTrue(imStr.isMutable());
+		Store<String> imStr = Storage.typed(String.class).immutable().newStoreOf("One", "Two", "Three", null);
+		assertFalse(imStr.isMutable());
 		assertEquals("One", imStr.get(0));
 		assertNull(imStr.get(3));
 
-		Store<String> muGen = Storage.<String>generic().newMutableStore("X", "Y", "Z");
+		Store<String> muGen = Storage.<String>generic().mutable().newStoreOf("X", "Y", "Z");
 		assertEquals(Object.class, muGen.valueType());
 
-		Store<Integer> muInt = Storage.typed(int.class).newMutableStore(1,2,3,4);
-		assertTrue(imStr.isMutable());
+		Store<Integer> muInt = Storage.typed(int.class).mutable().newStoreOf(1,2,3,4);
+		assertTrue(muInt.isMutable());
 		assertEquals(1, muInt.get(0).intValue());
 		assertEquals(4, muInt.get(3).intValue());
 		assertEquals(int.class, muInt.valueType());

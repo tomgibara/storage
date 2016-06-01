@@ -21,8 +21,23 @@ import java.util.Arrays;
 
 class NullArrayStore<V> extends AbstractStore<V> {
 
-	static <V> Storage<V> storage(Class<V> type) {
+	static <V> Storage<V> mutableStorage(Class<V> type) {
 		return new Storage<V>() {
+
+			@Override
+			public boolean isStorageMutable() {
+				return true;
+			}
+
+			@Override
+			public Storage<V> mutable() {
+				return this;
+			}
+
+			@Override
+			public Storage<V> immutable() {
+				return immutableStorage(type);
+			}
 
 			@Override
 			public Store<V> newStore(int size) throws IllegalArgumentException {
@@ -30,13 +45,40 @@ class NullArrayStore<V> extends AbstractStore<V> {
 			}
 
 			@Override
-			public Store<V> newMutableStore(@SuppressWarnings("unchecked") V... values) {
+			public Store<V> newStoreOf(@SuppressWarnings("unchecked") V... values) {
 				if (values == null) throw new IllegalArgumentException("null values");
 				return new NullArrayStore<>(Stores.typedArrayCopy(type, values));
 			}
 
+		};
+	}
+
+	static <V> Storage<V> immutableStorage(Class<V> type) {
+		return new Storage<V>() {
+
 			@Override
-			public Store<V> newImmutableStore(@SuppressWarnings("unchecked") V... values) {
+			public boolean isStorageMutable() {
+				return true;
+			}
+
+			@Override
+			public Storage<V> mutable() {
+				return this;
+			}
+
+			@Override
+			public Storage<V> immutable() {
+				return immutableStorage(type);
+			}
+
+			@Override
+			public Store<V> newStore(int size) throws IllegalArgumentException {
+				//TODO need constant store
+				return new NullArrayStore<>(type, size).immutableView();
+			}
+
+			@Override
+			public Store<V> newStoreOf(@SuppressWarnings("unchecked") V... values) {
 				if (values == null) throw new IllegalArgumentException("null values");
 				return new ImmutableArrayStore<>(Stores.typedArrayCopy(type, values), Stores.countNonNulls(values));
 			}
@@ -44,7 +86,7 @@ class NullArrayStore<V> extends AbstractStore<V> {
 		};
 	}
 
-	static final Storage<Object> objectStorage = storage(Object.class);
+	static final Storage<Object> mutableObjectStorage = mutableStorage(Object.class);
 
 	final V[] values;
 	int count;

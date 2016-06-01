@@ -22,8 +22,23 @@ import java.util.Optional;
 
 class ArrayStore<V> extends AbstractStore<V> {
 
-	static <V> Storage<V> storage(Class<V> type, V nullValue) {
+	static <V> Storage<V> mutableStorage(Class<V> type, V nullValue) {
 		return new Storage<V>() {
+
+			@Override
+			public boolean isStorageMutable() {
+				return true;
+			}
+
+			@Override
+			public Storage<V> mutable() {
+				return this;
+			}
+
+			@Override
+			public Storage<V> immutable() {
+				return immutableStorage(type, nullValue);
+			}
 
 			@Override
 			public Store<V> newStore(int size) throws IllegalArgumentException {
@@ -31,15 +46,42 @@ class ArrayStore<V> extends AbstractStore<V> {
 			}
 
 			@Override
-			public Store<V> newMutableStore(@SuppressWarnings("unchecked") V... values) {
+			public Store<V> newStoreOf(@SuppressWarnings("unchecked") V... values) {
 				if (values == null) throw new IllegalArgumentException("null values");
 				values = Stores.typedArrayCopy(type, values);
 				Stores.replaceNulls(values, nullValue);
 				return new ArrayStore<>(values, nullValue);
 			}
 
+		};
+	}
+
+	static <V> Storage<V> immutableStorage(Class<V> type, V nullValue) {
+		return new Storage<V>() {
+
 			@Override
-			public Store<V> newImmutableStore(@SuppressWarnings("unchecked") V... values) {
+			public boolean isStorageMutable() {
+				return false;
+			}
+
+			@Override
+			public Storage<V> mutable() {
+				return mutableStorage(type, nullValue);
+			}
+
+			@Override
+			public Storage<V> immutable() {
+				return this;
+			}
+
+			@Override
+			public Store<V> newStore(int size) throws IllegalArgumentException {
+				//TODO need a constant store
+				return new ArrayStore<>(type, size, nullValue).immutableView();
+			}
+
+			@Override
+			public Store<V> newStoreOf(@SuppressWarnings("unchecked") V... values) {
 				if (values == null) throw new IllegalArgumentException("null values");
 				values = Stores.typedArrayCopy(type, values);
 				Stores.replaceNulls(values, nullValue);

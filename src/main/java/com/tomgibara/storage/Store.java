@@ -408,6 +408,11 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 		return new StoreIterator.BiTransformed<>(this, fn);
 	}
 
+	default Store<V> copiedBy(Storage<V> storage) {
+		if (storage == null) throw new IllegalArgumentException("null storage");
+		return storage.newCopyOf(this);
+	}
+
 	// iterable methods
 
 	/**

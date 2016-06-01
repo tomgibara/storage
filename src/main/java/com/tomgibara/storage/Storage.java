@@ -66,9 +66,9 @@ public interface Storage<V> {
 	@SuppressWarnings("unchecked")
 	static <V> Storage<V> generic(V nullValue) {
 		if (nullValue == null) {
-			return (Storage<V>) NullArrayStore.objectStorage;
+			return (Storage<V>) NullArrayStore.mutableObjectStorage;
 		} else {
-			return (Storage<V>) ArrayStore.storage(Object.class, nullValue);
+			return (Storage<V>) ArrayStore.mutableStorage(Object.class, nullValue);
 		}
 	}
 
@@ -128,11 +128,11 @@ public interface Storage<V> {
 		if (nullValue == null) {
 			if (type.isEnum()) return new NullEnumStorage(type);
 			if (type.isPrimitive()) return size -> NullPrimitiveStore.newStore(type, size);
-			return NullArrayStore.storage(type);
+			return NullArrayStore.mutableStorage(type);
 		} else {
 			if (type.isEnum()) return new EnumStorage(type, (Enum) nullValue);
 			if (type.isPrimitive()) return size -> PrimitiveStore.newStore(type, size, nullValue);
-			return ArrayStore.storage(type, nullValue);
+			return ArrayStore.mutableStorage(type, nullValue);
 		}
 	}
 
@@ -207,6 +207,35 @@ public interface Storage<V> {
 	}
 
 	/**
+	 * Whether the new stores created with this storage are mutable
+	 * 
+	 * @return true if newly created stores are mutable, false otherwise
+	 */
+	default boolean isStorageMutable() { return true; }
+
+	/**
+	 * A version of this storage that creates mutable stores, or the storage
+	 * itself if {@link #isStorageMutable()} is already {@code true}.
+	 * 
+	 * @return mutable storage
+	 * @see #isStorageMutable()
+	 */
+	default Storage<V> mutable() {
+		return isStorageMutable() ? this : new ImmutableStorage<>(this);
+	}
+
+	/**
+	 * A version of this storage that creates immutable stores, or the storage
+	 * itself if {@link #isStorageMutable()} is already {@code false}.
+	 * 
+	 * @return mutable storage
+	 * @see #isStorageMutable()
+	 */
+	default Storage<V> immutable() {
+		return isStorageMutable() ? new MutableStorage<>(this) : this;
+	}
+
+	/**
 	 * Creates a new store with the requested size. The returned store is
 	 * mutable.
 	 *
@@ -220,17 +249,18 @@ public interface Storage<V> {
 
 	/**
 	 * <p>
-	 * Creates a new mutable store containing values from the supplied array.
-	 * The size of the returned store will equal the length of the supplied
-	 * array and null values will be substituted with {@link Store#nullValue()}.
+	 * Creates a new store containing values from the supplied array. The size
+	 * of the returned store will equal the length of the supplied array and
+	 * null values will be substituted with {@link Store#nullValue()}.
 	 * 
 	 * <p>
 	 * The returned store is an independent copy of the supplied array.
 	 * 
-	 * @param values an array of values
+	 * @param values
+	 *            an array of values
 	 * @return a mutable store containing the supplied values
 	 */
-	default Store<V> newMutableStore(@SuppressWarnings("unchecked") V... values) {
+	default Store<V> newStoreOf(@SuppressWarnings("unchecked") V... values) {
 		if (values == null) throw new IllegalArgumentException("null values");
 		Store<V> store = newStore(values.length);
 		for (int i = 0; i < values.length; i++) {
@@ -240,19 +270,22 @@ public interface Storage<V> {
 	}
 
 	/**
-	 * <p>
-	 * Creates a new immutable store containing values from the supplied array.
-	 * The size of the returned store will equal the length of the supplied
-	 * array and null values will be substituted with {@link Store#nullValue()}.
-	 * 
-	 * <p>
-	 * The returned store is an independent copy of the supplied array.
-	 * 
-	 * @param values an array of values
-	 * @return a mutable store containing the supplied values
+	 * Creates a copy of the supplied store. The size of the returned store
+	 * equals the size of the supplied store and null values will be substituted
+	 * with {@link Store#nullValue()}. The returned store is an independent copy
+	 * of the one supplied.
+	 *
+	 * @param store
+	 *            the store to be copied
+	 * @return a copy of the supplied store.
 	 */
-	default Store<V> newImmutableStore(@SuppressWarnings("unchecked") V... values) {
-		if (values == null) throw new IllegalArgumentException("null values");
-		return newMutableStore(values).immutableView();
+	default Store<V> newCopyOf(Store<V> store) {
+		if (store == null) throw new IllegalArgumentException("null store");
+		Store<V> copy = newStore(store.size());
+		for (int i = 0; i < store.size(); i++) {
+			copy.set(i, store.get(i));
+		}
+		return copy;
 	}
+
 }
