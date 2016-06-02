@@ -52,7 +52,9 @@ final class MutableStorage<V> implements Storage<V> {
 	}
 
 	@Override
-	public Store<V> newStoreOf(@SuppressWarnings("unchecked") V... values) {
+	@SafeVarargs
+	// varargs safety assumes safey of delegate
+	final public Store<V> newStoreOf(V... values) {
 		return storage.newStoreOf(values).mutableCopy();
 	}
 

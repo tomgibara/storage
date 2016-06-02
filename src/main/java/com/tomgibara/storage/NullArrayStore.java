@@ -50,7 +50,8 @@ class NullArrayStore<V> extends AbstractStore<V> {
 			}
 
 			@Override
-			public Store<V> newStoreOf(@SuppressWarnings("unchecked") V... values) {
+			@SafeVarargs
+			final public Store<V> newStoreOf(V... values) {
 				if (values == null) throw new IllegalArgumentException("null values");
 				return new NullArrayStore<>(Stores.typedArrayCopy(type, values));
 			}
@@ -88,7 +89,8 @@ class NullArrayStore<V> extends AbstractStore<V> {
 			}
 
 			@Override
-			public Store<V> newStoreOf(@SuppressWarnings("unchecked") V... values) {
+			@SafeVarargs
+			final public Store<V> newStoreOf(V... values) {
 				if (values == null) throw new IllegalArgumentException("null values");
 				return new ImmutableArrayStore<>(Stores.typedArrayCopy(type, values), Stores.countNonNulls(values));
 			}
