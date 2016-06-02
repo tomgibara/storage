@@ -16,6 +16,8 @@
  */
 package com.tomgibara.storage;
 
+import static com.tomgibara.storage.Stores.immutableException;
+
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -260,7 +262,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		private void checkMutable() {
-			if (!mutable) throw new IllegalStateException("immutable");
+			if (!mutable) throw immutableException();
 		}
 
 		@Override

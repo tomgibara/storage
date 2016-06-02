@@ -16,6 +16,8 @@
  */
 package com.tomgibara.storage;
 
+import static com.tomgibara.storage.Stores.immutableException;
+
 import java.util.AbstractList;
 import java.util.Iterator;
 import java.util.List;
@@ -152,7 +154,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @return the previously stored value, or null
 	 */
 	default V set(int index, V value) {
-		throw new IllegalStateException("immutable");
+		throw immutableException();
 	}
 
 	/**
@@ -173,7 +175,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 */
 
 	default void fill(V value) {
-		if (!isMutable()) throw new IllegalStateException("immutable");
+		if (!isMutable()) throw immutableException();
 		if (value == null) clear();
 		int size = size();
 		for (int i = 0; i < size; i++) {
@@ -187,7 +189,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @return whether store was mutated as a consequence of calling this method
 	 */
 	default boolean compact() {
-		if (!isMutable()) throw new IllegalStateException("immutable");
+		if (!isMutable()) throw immutableException();
 		if (nullValue().isPresent()) return false; // there can be no nulls
 		int count = count();
 		if (count == size()) return false; // this should be a cheap test
@@ -280,13 +282,13 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 			@Override
 			public V set(int index, V element) {
-				if (!isMutable()) throw new IllegalStateException("immutable");
+				if (!isMutable()) throw immutableException();
 				return Store.this.set(index, element);
 			}
 
 			@Override
 			public void clear() {
-				if (!isMutable()) throw new IllegalStateException("immutable");
+				if (!isMutable()) throw immutableException();
 				Store.this.clear();
 			}
 

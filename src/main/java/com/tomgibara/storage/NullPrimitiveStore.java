@@ -16,6 +16,8 @@
  */
 package com.tomgibara.storage;
 
+import static com.tomgibara.storage.Stores.immutableException;
+
 import java.util.Arrays;
 
 import com.tomgibara.bits.BitStore;
@@ -133,7 +135,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		if (value == null) { // simple case
 			clear();
 		} else { // more complex case
-			if (!populated.isMutable()) throw new IllegalStateException("immutable");
+			if (!populated.isMutable()) throw immutableException();
 			// do this first in case filling fails due to class error
 			fillImpl(value);
 			populated.fill();

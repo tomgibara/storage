@@ -16,6 +16,8 @@
  */
 package com.tomgibara.storage;
 
+import static com.tomgibara.storage.Stores.immutableException;
+
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -151,7 +153,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 	@Override
 	public void fill(V value) {
-		if (!mutable) throw new IllegalStateException("immutable");
+		if (!mutable) throw immutableException();
 		if (value == null) {
 			clear();
 		} else {
