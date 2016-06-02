@@ -294,11 +294,14 @@ public interface Storage<V> {
 	 */
 	default Store<V> newStoreOf(@SuppressWarnings("unchecked") V... values) {
 		if (values == null) throw new IllegalArgumentException("null values");
-		Store<V> store = newStore(values.length);
-		for (int i = 0; i < values.length; i++) {
-			store.set(i, values[i]);
+		if (isStorageMutable()) {
+			Store<V> store = newStore(values.length);
+			for (int i = 0; i < values.length; i++) {
+				store.set(i, values[i]);
+			}
+			return store;
 		}
-		return store;
+		return mutable().newStoreOf(values).immutableView();
 	}
 
 	/**
@@ -313,11 +316,14 @@ public interface Storage<V> {
 	 */
 	default Store<V> newCopyOf(Store<V> store) {
 		if (store == null) throw new IllegalArgumentException("null store");
-		Store<V> copy = newStore(store.size());
-		for (int i = 0; i < store.size(); i++) {
-			copy.set(i, store.get(i));
+		if (isStorageMutable()) {
+			Store<V> copy = newStore(store.size());
+			for (int i = 0; i < store.size(); i++) {
+				copy.set(i, store.get(i));
+			}
+			return copy;
 		}
-		return copy;
+		return mutable().newCopyOf(store).immutableView();
 	}
 
 }

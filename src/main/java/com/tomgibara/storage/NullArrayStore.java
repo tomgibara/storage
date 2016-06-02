@@ -64,17 +64,17 @@ class NullArrayStore<V> extends AbstractStore<V> {
 
 			@Override
 			public boolean isStorageMutable() {
-				return true;
+				return false;
 			}
 
 			@Override
 			public Storage<V> mutable() {
-				return this;
+				return mutableStorage(type);
 			}
 
 			@Override
 			public Storage<V> immutable() {
-				return immutableStorage(type);
+				return this;
 			}
 
 			@Override
