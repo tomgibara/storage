@@ -22,6 +22,7 @@ import java.util.AbstractList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -443,6 +444,26 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 			for (int i = 0; i < size; i++) {
 				V v = get(i);
 				if (v != null) action.accept(v);
+			}
+		}
+	}
+
+	/**
+	 * Performs the given action over all non-null position values in the store.
+	 *
+	 * @param action
+	 *            the action to be performed for each non-null value
+	 */
+	public default void forEach(BiConsumer<Integer, ? super V> action) {
+		int size = size();
+		if (nullValue().isPresent()) {
+			for (int i = 0; i < size; i++) {
+				action.accept(i, get(size));
+			}
+		} else {
+			for (int i = 0; i < size; i++) {
+				V v = get(i);
+				if (v != null) action.accept(i, v);
 			}
 		}
 	}
