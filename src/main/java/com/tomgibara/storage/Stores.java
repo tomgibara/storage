@@ -55,6 +55,27 @@ public final class Stores {
 	// public scoped methods
 
 	/**
+	 * <p>
+	 * Returns a 'mutable' store of zero size. Though the store is ostensibly
+	 * mutable, its fixed zero size means that the store is immutable for all
+	 * practical purposes.
+	 *
+	 * <p>
+	 * Nevertheless, if the immutable status of the store is significant for the
+	 * application, the {@link Store#immutable()} method (or one of its
+	 * relations) may be invoked to produce an equivalent store that reports
+	 * itself as immutable.
+	 *
+	 * @param type
+	 *            the putative type of the store elements
+	 * @return a store of zero size
+	 */
+
+	public static <V> Store<V> empty(Class<V> type) {
+		return new EmptyStore<V>(type, true);
+	}
+
+	/**
 	 * Creates a mutable store that wraps an existing array. The returned store
 	 * supports null values if the <code>nullValue</code> optional parameter is
 	 * empty and in this case, supplying an array containing nulls is likely to
