@@ -21,7 +21,6 @@ import static com.tomgibara.storage.Stores.immutableException;
 import java.util.AbstractList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -102,66 +101,68 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 	/**
 	 * Retrieves a value held in the store. The method will return null if there
-	 * is no value associated with specified index.
+	 * is no value associated with specified index. In some store
+	 * implementations it may not be possible to associate no value with an
+	 * index and this method will never return null.
 	 *
 	 * @param index
 	 *            the index from which to retrieve the value
 	 * @return the value stored at the specified index
+	 * @see #nullity()
 	 */
 	V get(int index);
 
 	/**
 	 * Whether the value at the specified index is null. In many implementations
 	 * this method may be faster than calling {@link #get(int)} and checking for
-	 * null.
+	 * null. In some store implementations it may not be possible to store nulls
+	 * and this method will never return true.
 	 *
 	 * @param index
 	 *            the index of the value to be compared to null
 	 * @return true if and only if the value at the specified index is null
+	 * @see #nullity()
 	 */
 	default boolean isNull(int index) {
 		return get(index) != null;
 	}
 
-//	/**
-//	 * <p>
-//	 * The value that substitutes for null in this store. For stores that
-//	 * support the storage of null values this method will always return
-//	 * <em>empty</em>. Some stores do not support null values (for example,
-//	 * those backed by primitive arrays) in this instance the returned value may
-//	 * never be <em>empty</em>.
-//	 *
-//	 * <p>
-//	 * Note that the value returned by this method will by substituted for null
-//	 * in calls to {@link #set(int, Object)} and {@link #clear()} but
-//	 * occurrences of this value in the store will not be reported as null.
-//	 *
-//	 * @return the value that substitutes for null wrapped in an optional, or
-//	 *         empty
-//	 */
-//	default Optional<V> nullValue() {
-//		return Optional.empty();
-//	}
-
+	/**
+	 * Determines how null values are supported by this store
+	 * 
+	 * @return the support provided for null values
+	 */
 	default StoreNullity<V> nullity() {
 		return StoreNullity.settingNullAllowed();
 	}
+
 	/**
-	 * Stores a value in the store. Storing null will result in no value being
-	 * associated with the specified index
+	 * Stores a value in the store. In cases where the storage of null value is
+	 * supported, storing null will result in no value being associated with the
+	 * specified index. Some store implementations do not support null values,
+	 * in this case the null value may be substituted by an alternative value,
+	 * or simply rejected, as determined by the store nullity.
 	 *
 	 * @param index
 	 *            the index at which to store the value
 	 * @param value
 	 *            the value to store, or null to remove any previous value
 	 * @return the previously stored value, or null
+	 * @throws IllegalArgumentException
+	 *             if, in general, the value cannot be stored in this store, and
+	 *             in particular, if the value is null and the nullity disallows
+	 *             the setting of null values
+	 * @see #nullity()
 	 */
 	default V set(int index, V value) {
 		throw immutableException();
 	}
 
 	/**
-	 * Removes all stored values.
+	 * Removes all stored values. This operation may be prohibited or operate as
+	 * per {@link #fill(Object)}, as per the store nullity.
+	 * 
+	 * @see #nullity()
 	 */
 	default void clear() {
 		int size = size();
@@ -246,7 +247,9 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	/**
 	 * Bits indicating which values are null. A zero at an index indicates that
 	 * there is no value stored at that index. The returned bits are immutable
-	 * but will change as values are added and removed from the store.
+	 * but will change as values are added and removed from the store. In
+	 * stores for which {@link StoreNullity#nullGettable()} is false, all bits
+	 * are guaranteed to equal one.
 	 *
 	 * @return bits indicating the indices at which values are present
 	 */
@@ -268,10 +271,10 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	}
 
 	/**
-	 * Exposes the store as a list. The size of the list is equal to the
-	 * size of the store with 'unset' elements exposed as null. The list
-	 * supports value mutation via <code>set</code>, but not appending via
-	 * <code>add()</code>.
+	 * Exposes the store as a list. The size of the list is equal to the size of
+	 * the store. The list may contain null values if
+	 * {@link StoreNullity#nullGettable()} is true. The list supports value
+	 * mutation via <code>set</code>, but not appending via <code>add()</code>.
 	 *
 	 * @return a list backed by the values in the store.
 	 */
@@ -413,7 +416,21 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 		return new StoreIterator.BiTransformed<>(this, fn);
 	}
 
-	default Store<V> copiedBy(Storage<V> storage) {
+	/**
+	 * Copies the elements of this store into a new store created by the
+	 * supplied storage. If the storage of every value in this store is not
+	 * supported by the supplied storage, then an
+	 * <code>IllegalArgumentException</code> is thrown.
+	 * 
+	 * @param storage
+	 *            the storage used to create a copy of this store
+	 * @return a copy
+	 * @throws IllegalArgumentException
+	 *             if the supplied storage cannot accommodate all of the values
+	 *             in this store
+	 * @see Storage#newCopyOf(Store)
+	 */
+	default Store<V> copiedBy(Storage<V> storage) throws IllegalArgumentException {
 		if (storage == null) throw new IllegalArgumentException("null storage");
 		return storage.newCopyOf(this);
 	}
