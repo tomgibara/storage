@@ -80,7 +80,10 @@ public final class StoreNullity<V> {
 	@SuppressWarnings("unchecked")
 	public static <V> StoreNullity<V> defaultForType(Class<V> type) {
 		if (type == null) throw new IllegalArgumentException("null type");
-		if (type.isEnum()) return settingNullToValue((V) type.getEnumConstants()[0]);
+		if (type.isEnum()) {
+			V[] constants = type.getEnumConstants();
+			return constants.length == 0 ? settingNullAllowed() : settingNullToValue((V) constants[0]);
+		}
 		if (type.isPrimitive()) {
 			switch((type.getName().hashCode() >> 8) & 0xf) {
 			case Stores.BYTE:    return (StoreNullity<V>) BYTE;
@@ -104,7 +107,7 @@ public final class StoreNullity<V> {
 		case "java.lang.Integer"   : return (StoreNullity<V>) INT;
 		case "java.lang.Long"      : return (StoreNullity<V>) LONG;
 		}
-		return StoreNullity.settingNullAllowed();
+		return settingNullAllowed();
 	}
 
 	// fields
