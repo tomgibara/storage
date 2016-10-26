@@ -24,7 +24,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.time.Month;
-import java.util.Optional;
 
 import org.junit.Test;
 
@@ -62,11 +61,11 @@ public class StoresTest {
 
 	@Test
 	public void testDefaultNullValue() {
-		assertEquals("", Stores.defaultNullity(String.class).nullValue());
-		assertEquals(0, Stores.defaultNullity(int.class).nullValue().intValue());
-		assertEquals(0, Stores.defaultNullity(Integer.class).nullValue().intValue());
-		assertEquals(false, Stores.defaultNullity(boolean.class).nullValue().booleanValue());
-		assertEquals(Month.JANUARY, Stores.defaultNullity(Month.class).nullValue());
+		assertEquals("", StoreNullity.defaultForType(String.class).nullValue());
+		assertEquals(0, StoreNullity.defaultForType(int.class).nullValue().intValue());
+		assertEquals(0, StoreNullity.defaultForType(Integer.class).nullValue().intValue());
+		assertEquals(false, StoreNullity.defaultForType(boolean.class).nullValue().booleanValue());
+		assertEquals(Month.JANUARY, StoreNullity.defaultForType(Month.class).nullValue());
 	}
 
 	@Test

@@ -18,7 +18,6 @@ package com.tomgibara.storage;
 
 import static com.tomgibara.storage.StoreNullity.settingNullAllowed;
 import static com.tomgibara.storage.StoreNullity.settingNullDisallowed;
-import static com.tomgibara.storage.StoreNullity.settingNullToValue;
 
 import java.lang.reflect.Array;
 
@@ -29,19 +28,6 @@ import java.lang.reflect.Array;
  *
  */
 public final class Stores {
-
-	// private statics
-
-	private static final StoreNullity<Byte>      NULL_BYTE    = settingNullToValue((byte)   0);
-	private static final StoreNullity<Float>     NULL_FLOAT   = settingNullToValue((float)  0);
-	private static final StoreNullity<Character> NULL_CHAR    = settingNullToValue((char)   0);
-	private static final StoreNullity<Short>     NULL_SHORT   = settingNullToValue((short)  0);
-	private static final StoreNullity<Long>      NULL_LONG    = settingNullToValue((long)   0);
-	private static final StoreNullity<Integer>   NULL_INT     = settingNullToValue((int)    0);
-	private static final StoreNullity<Double>    NULL_DOUBLE  = settingNullToValue((double) 0);
-	private static final StoreNullity<Boolean>   NULL_BOOLEAN = settingNullToValue(     false);
-
-	private static final StoreNullity<String> NULL_STRING  = settingNullToValue("");
 
 	// package statics
 
@@ -434,85 +420,11 @@ public final class Stores {
 		return nullity.nullGettable() ? new NullPrimitiveStore.DoubleStore(values) : new PrimitiveStore.DoubleStore(values, nullity);
 	}
 
-	/**
-	 * <p>
-	 * Suggests a suitable null value for a specified type. This method may be
-	 * used to identify an appropriate null value for stores of common types.
-	 *
-	 * <p>
-	 * It returns optionals wrapping the following values for the types given.
-	 *
-	 * <dl>
-	 * <dt>primitive numeric types
-	 * <dd><code>0</code>
-	 * <dt><code>boolean</code>
-	 * <dd><code>false</code>
-	 * <dt><code>char</code>
-	 * <dd><code>'\0'</code>
-	 * <dt>primitive wrapper types
-	 * <dd><em>as per primitive types</dd>
-	 * <dt>enumerations
-	 * <dd>the enum constant with ordinal 0
-	 * <dt><code>java.lang.String</code>
-	 * <dd>the empty string <code>""</code>
-	 * </dl>
-	 *
-	 * <p>
-	 * For all other types, the method returns an empty optional. Future
-	 * implementations may return non-empty optionals for a greater number of
-	 * types.
-	 *
-	 * @param type
-	 *            a type of stored value
-	 * @return an optional null value
-	 */
-	@SuppressWarnings("unchecked")
-	public static <V> StoreNullity<V> defaultNullity(Class<V> type) {
-		if (type == null) throw new IllegalArgumentException("null type");
-		if (type.isEnum()) return settingNullToValue((V) type.getEnumConstants()[0]);
-		if (type.isPrimitive()) {
-			switch((type.getName().hashCode() >> 8) & 0xf) {
-			case Stores.BYTE:    return (StoreNullity<V>) NULL_BYTE;
-			case Stores.FLOAT:   return (StoreNullity<V>) NULL_FLOAT;
-			case Stores.CHAR:    return (StoreNullity<V>) NULL_CHAR;
-			case Stores.SHORT:   return (StoreNullity<V>) NULL_SHORT;
-			case Stores.LONG:    return (StoreNullity<V>) NULL_LONG;
-			case Stores.INT:     return (StoreNullity<V>) NULL_INT;
-			case Stores.DOUBLE:  return (StoreNullity<V>) NULL_DOUBLE;
-			case Stores.BOOLEAN: return (StoreNullity<V>) NULL_BOOLEAN;
-			}
-		}
-		switch (type.getName()) {
-		case "java.lang.String"    : return (StoreNullity<V>) NULL_STRING;
-		case "java.lang.Boolean"   : return (StoreNullity<V>) NULL_BOOLEAN;
-		case "java.lang.Character" : return (StoreNullity<V>) NULL_CHAR;
-		case "java.lang.Float"     : return (StoreNullity<V>) NULL_FLOAT;
-		case "java.lang.Double"    : return (StoreNullity<V>) NULL_DOUBLE;
-		case "java.lang.Byte"      : return (StoreNullity<V>) NULL_BYTE;
-		case "java.lang.Short"     : return (StoreNullity<V>) NULL_SHORT;
-		case "java.lang.Integer"   : return (StoreNullity<V>) NULL_INT;
-		case "java.lang.Long"      : return (StoreNullity<V>) NULL_LONG;
-		}
-		return StoreNullity.settingNullAllowed();
-	}
-
 	// package scoped methods
 
 	static IllegalStateException immutableException() {
 		return new IllegalStateException("immutable");
 	}
-
-//	static <V> int countNonNulls(V[] vs) {
-//		int sum = 0;
-//		for (V v : vs) if (v != null) sum++;
-//		return sum;
-//	}
-
-//	static <V> void replaceNulls(V[] vs, V nullValue) {
-//		for (int i = 0; i < vs.length; i++) {
-//			if (vs[i] == null) vs[i] = nullValue;
-//		}
-//	}
 
 	static <V> V[] typedArrayCopy(Class<V> type, V[] vs) {
 		if (vs.getClass().getComponentType() == type) {
@@ -547,14 +459,6 @@ public final class Stores {
 	static void checkValuesNotNull(Object values) {
 		if (values == null) throw new IllegalArgumentException("null values");
 	}
-
-//	static <V> V[] resizedCopyOf(V[] vs, int newSize, V v) {
-//		if (v == null) return Arrays.copyOf(vs, newSize);
-//		int oldSize = vs.length;
-//		vs = Arrays.copyOf(vs, newSize);
-//		if (newSize > oldSize) Arrays.fill(vs, oldSize, newSize, v);
-//		return vs;
-//	}
 
 	static <V> boolean compact(V[] vs, int count) {
 		if (count == vs.length) return false;
