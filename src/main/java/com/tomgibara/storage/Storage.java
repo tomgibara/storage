@@ -42,9 +42,10 @@ public interface Storage<V> {
 
 	/**
 	 * Genericized storage backed by <code>Object</code> arrays. The storage
-	 * returned by this method <em>will</em> support null values. This is a
-	 * convenience method that is equivalent to calling
-	 * {@link #generic(Class, Object)} with an empty null value.
+	 * returned by this method supports setting and getting null values. This is
+	 * a convenience method that is equivalent to calling
+	 * {@link #generic(Class, Object)} with
+	 * {@link StoreNullity#settingNullAllowed()}.
 	 *
 	 * @param <V>
 	 *            the type of values to be stored
@@ -56,14 +57,10 @@ public interface Storage<V> {
 
 	/**
 	 * Genericized storage backed by <code>Object</code> arrays. The storage
-	 * returned by this method <em>will</em> support null values <em>if</em> the
-	 * supplied <code>nullValue</code> is null, otherwise it <em>will not</em>
-	 * allow null values and the initial value at every index will be the
-	 * specified <code>nullValue</code>.
+	 * returned by this method supports null values as per the supplied nullity.
 	 *
-	 * @param nullValue
-	 *            the value that stands-in for absent values in the store, never
-	 *            itself null
+	 * @param nullity
+	 *            determines how null values are handled by the stores
 	 * @param <V>
 	 *            the type of values to be stored
 	 * @return genericized storage
@@ -80,8 +77,9 @@ public interface Storage<V> {
 	/**
 	 * <p>
 	 * Storage backed by typed arrays. The storage returned by this method
-	 * <em>will</em> support null values. This is a convenience method that is
-	 * equivalent to calling {@link #typed(Class, Object)} with a null value.
+	 * supports setting and getting null values. This is a convenience method
+	 * that is equivalent to calling {@link #typed(Class, Object)} with
+	 * {@link StoreNullity#settingNullAllowed()}.
 	 *
 	 * <p>
 	 * Specifying a primitive type will result in storage backed by arrays of
@@ -104,11 +102,8 @@ public interface Storage<V> {
 
 	/**
 	 * <p>
-	 * Storage backed by typed arrays. The storage returned by this method
-	 * <em>will</em> support null values <em>if</em> the supplied
-	 * <code>nullValue</code> is null, otherwise it <em>will not</em> allow
-	 * null values and the initial value at every index will be the specified
-	 * <code>nullValue</code>.
+	 * Storage backed by typed arrays. The storage
+	 * returned by this method supports null values as per the supplied nullity.
 	 *
 	 * <p>
 	 * Specifying a primitive type will result in storage backed by arrays of
@@ -118,9 +113,8 @@ public interface Storage<V> {
 	 *
 	 * @param type
 	 *            the type of the values to be stored
-	 * @param nullValue
-	 *            the value that stands-in for absent values in the store, or
-	 *            null
+	 * @param nullity
+	 *            determines how null values are handled by the stores
 	 * @param <V>
 	 *            the type of values to be stored
 	 * @throws IllegalArgumentException
@@ -240,25 +234,11 @@ public interface Storage<V> {
 		return isStorageMutable() ? new MutableStorage<>(this) : this;
 	}
 
-//	/**
-//	 * <p>
-//	 * The value that substitutes for null in this storage. For storage that
-//	 * supports null values this method will always return <em>empty</em>. Some
-//	 * stores do not support null values (for example, those backed by primitive
-//	 * arrays) in this instance the returned value may never be <em>empty</em>.
-//	 *
-//	 * <p>
-//	 * Note that the value returned by this method will by substituted for null
-//	 * in calls to {@link Store#set(int, Object)} and {@link Store#clear()} but
-//	 * occurrences of this value in the store will not be reported as null.
-//	 *
-//	 * @return the value that substitutes for null wrapped in an optional, or
-//	 *         empty
-//	 */
-//	default Optional<V> nullValue() {
-//		return Optional.empty();
-//	}
-
+	/**
+	 * The constraints that apply to stores created with this storage.
+	 * 
+	 * @return the nullability that applies to stores
+	 */
 	default StoreNullity<V> nullity() {
 		return StoreNullity.settingNullAllowed();
 	}
@@ -313,8 +293,8 @@ public interface Storage<V> {
 	/**
 	 * Creates a copy of the supplied store. The size of the returned store
 	 * equals the size of the supplied store and null values will be substituted
-	 * with {@link Store#nullValue()}. The returned store is an independent copy
-	 * of the one supplied.
+	 * with {@link StoreNullity#nullValue()} if necessary. The returned store is
+	 * an independent copy of the one supplied.
 	 *
 	 * @param store
 	 *            the store to be copied
