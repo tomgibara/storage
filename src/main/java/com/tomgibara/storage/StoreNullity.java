@@ -60,6 +60,8 @@ public final class StoreNullity<V> {
 	 * returns true) but will not allow nulls to be returned from it (
 	 * {@link #nullGettable()} returns false).
 	 * 
+	 * @param <V>
+	 *            the type of any null-substituting value
 	 * @param value
 	 *            the value to be substituted for null
 	 * @throws IllegalArgumentException
@@ -75,6 +77,8 @@ public final class StoreNullity<V> {
 	 * A nullity that permits nulls to be stored and retrieved. Both
 	 * {@link #nullSettable()} and {@link #nullGettable()} return true.
 	 * 
+	 * @param <V>
+	 *            the generic type of the returned nullity
 	 * @return a nullity that permits null values
 	 */
 	@SuppressWarnings("unchecked")
@@ -86,6 +90,8 @@ public final class StoreNullity<V> {
 	 * A nullity that does not permit nulls to be stored or retrieved. Both
 	 * {@link #nullSettable()} and {@link #nullGettable()} return false.
 	 * 
+	 * @param <V>
+	 *            the generic type of the returned nullity
 	 * @return a nullity that prohibits null values
 	 */
 	@SuppressWarnings("unchecked")
@@ -111,7 +117,7 @@ public final class StoreNullity<V> {
 	 * <dt><code>char</code>
 	 * <dd><code>'\0'</code>
 	 * <dt>primitive wrapper types
-	 * <dd><em>as per primitive types</dd>
+	 * <dd><em>as per primitive types</em></dd>
 	 * <dt>enumerations
 	 * <dd>the enum constant with ordinal 0 (if it exists)
 	 * <dt><code>java.lang.String</code>
@@ -123,6 +129,8 @@ public final class StoreNullity<V> {
 	 * Future implementations may return null-replacing instances for a greater
 	 * number of types.
 	 *
+	 * @param <V>
+	 *            the generic type of the returned nullity
 	 * @param type
 	 *            a type of stored value
 	 * @return an optional null value

@@ -54,6 +54,8 @@ public final class Stores {
 	 * relations) may be invoked to produce an equivalent store that reports
 	 * itself as immutable.
 	 *
+	 * @param <V>
+	 *            the storage type
 	 * @param type
 	 *            the putative type of the store elements
 	 * @return a store of zero size
@@ -184,6 +186,8 @@ public final class Stores {
 	 * <em>value</em>. The advantage of using this method is that memory does
 	 * not need to be allocated for each instance of the value.
 	 * 
+	 * @param <V>
+	 *            the storage type
 	 * @param value
 	 *            the value to be stored, possibly null
 	 * @param size

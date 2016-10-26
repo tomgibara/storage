@@ -44,7 +44,7 @@ public interface Storage<V> {
 	 * Genericized storage backed by <code>Object</code> arrays. The storage
 	 * returned by this method supports setting and getting null values. This is
 	 * a convenience method that is equivalent to calling
-	 * {@link #generic(Class, Object)} with
+	 * {@link #generic(StoreNullity)} with
 	 * {@link StoreNullity#settingNullAllowed()}.
 	 *
 	 * @param <V>
@@ -78,7 +78,7 @@ public interface Storage<V> {
 	 * <p>
 	 * Storage backed by typed arrays. The storage returned by this method
 	 * supports setting and getting null values. This is a convenience method
-	 * that is equivalent to calling {@link #typed(Class, Object)} with
+	 * that is equivalent to calling {@link #typed(Class, StoreNullity)} with
 	 * {@link StoreNullity#settingNullAllowed()}.
 	 *
 	 * <p>
@@ -94,7 +94,7 @@ public interface Storage<V> {
 	 * @throws IllegalArgumentException
 	 *             if the supplied type is null
 	 * @return typed storage
-	 * @see #typed(Class, Optional)
+	 * @see #typed(Class, StoreNullity)
 	 */
 	static <V> Storage<V> typed(Class<V> type) throws IllegalArgumentException {
 		return typed(type, settingNullAllowed());
@@ -269,7 +269,7 @@ public interface Storage<V> {
 	 * <p>
 	 * Creates a new store containing values from the supplied array. The size
 	 * of the returned store will equal the length of the supplied array and
-	 * null values will be substituted with {@link Store#nullValue()}.
+	 * null values will be handled as per {@link #nullity()}.
 	 * 
 	 * <p>
 	 * The returned store is an independent copy of the supplied array.

@@ -335,8 +335,8 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @return a view of this store under the specified operator
 	 * @see #asTransformedBy(Mapping)
 	 */
-	default Store<V> asTransformedBy(UnaryOperator<V> fn) {
-		return asTransformedBy(Mapping.fromUnaryOperator(valueType(), fn));
+	default Store<V> asTransformedBy(UnaryOperator<V> op) {
+		return asTransformedBy(Mapping.fromUnaryOperator(valueType(), op));
 	}
 
 	/**
@@ -352,7 +352,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @param fn
 	 *            a mapping over the store elements
 	 * @param <W>
-	 *            the type of value in the returned store
+	 *            the type of values in the returned store
 	 *
 	 * @return a view of this store under the specified mapping
 	 * @see #asTransformedBy(UnaryOperator)
@@ -369,17 +369,19 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * provides a live view of the original store. The mutability of the
 	 * returned store matches the mutability of this store. Bijectivity of the
 	 * supplied transforming function has the consequence that values may be set
-	 * on the store in contrast to {@link #asTransformedBy(Function)}.
+	 * on the store in contrast to {@link #asTransformedBy(Mapping)}.
 	 *
 	 * <p>
 	 * Note that the supplied function must preserve null. That is
 	 * <code>fn(a) == null</code> if and only if <code>a == null</code>.
 	 *
+	 * @param <W>
+	 *            the type of values in the returned store
 	 * @param fn
 	 *            a bijective function over the store elements
 	 *
 	 * @return a view of this store under the specified function
-	 * @see #asTransformedBy(Function)
+	 * @see #asTransformedBy(Mapping)
 	 */
 	default <W> Store<W> asTransformedBy(Bijection<V, W> fn) {
 		if (fn == null) throw new IllegalArgumentException("null fn");
@@ -391,7 +393,8 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * of the supplied function. On mutable stores the returned iterator
 	 * supports element removal.
 	 *
-	 *
+	 * @param <W>
+	 *            the type of values in the transformed iterator
 	 * @param fn
 	 *            a transforming function
 	 * @return an iterator over transformed non-null values
@@ -407,6 +410,8 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * the index of the value in the store and the second argument is the value
 	 * itself. On mutable stores the returned iterator supports element removal.
 	 *
+	 * @param <W>
+	 *            the type of values in the transformed iterator
 	 * @param fn
 	 *            a transforming function over index and value
 	 * @return an iterator over transformed non-null values
