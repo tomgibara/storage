@@ -65,28 +65,7 @@ public final class Stores {
 
 	/**
 	 * Creates a mutable store that wraps an existing array. The returned store
-	 * supports null values if the <code>nullValue</code> optional parameter is
-	 * empty and in this case, supplying an array containing nulls is likely to
-	 * cause malfunction.
-	 *
-	 * @param values
-	 *            the values of the store
-	 * @param nullValue
-	 *            the contains the value substituted for null on mutation, or is
-	 *            empty if the store should support null values
-	 * @param <V>
-	 *            the type of values to be stored
-	 * @return a store that mediates access to the array
-	 */
-	@SafeVarargs
-	public static <V> Store<V> objectsWithNullity(StoreNullity<V> nullity, V... values) {
-		checkValuesNotNull(values);
-		return nullity.nullGettable() ? new NullArrayStore<>(values) : new ArrayStore<>(values, nullity);
-	}
-
-	/**
-	 * Creates a mutable store that wraps an existing array. The returned store
-	 * supports null values.
+	 * supports setting and getting null values.
 	 *
 	 * @param values
 	 *            the values of the store
@@ -98,6 +77,27 @@ public final class Stores {
 	public static <V> Store<V> objects(V... values) {
 		checkValuesNotNull(values);
 		return new NullArrayStore<>(values);
+	}
+
+	/**
+	 * Creates a mutable store that wraps an existing array. The returned store
+	 * supports null values as per the specified nullity. For reasons of
+	 * performance, the supplied values are <em>not</em> checked for consistency
+	 * with the specified nullity; supplying an array containing nulls where
+	 * they are prohibited is likely to cause malfunction.
+	 *
+	 * @param nullity
+	 *            how null values are to be supported
+	 * @param values
+	 *            the values of the store
+	 * @param <V>
+	 *            the type of values to be stored
+	 * @return a store that mediates access to the array
+	 */
+	@SafeVarargs
+	public static <V> Store<V> objectsWithNullity(StoreNullity<V> nullity, V... values) {
+		checkValuesNotNull(values);
+		return nullity.nullGettable() ? new NullArrayStore<>(values) : new ArrayStore<>(values, nullity);
 	}
 
 	/**
@@ -122,16 +122,16 @@ public final class Stores {
 
 	/**
 	 * Creates an immutable store that returns values from an existing array.
-	 * The returned store supports null values if the <code>nullValue</code>
-	 * optional parameter is empty and in this case, supplying an array
-	 * containing nulls is likely to cause malfunction. The supplied array is
-	 * not copied and must not be modified.
+	 * The returned store supports null values as per the specified nullity. For
+	 * reasons of performance, the supplied values are <em>not</em> checked for
+	 * consistency with the specified nullity; supplying an array containing
+	 * nulls where they are prohibited is likely to cause malfunction. The
+	 * supplied array is not copied and must not be modified.
 	 *
 	 * @param values
 	 *            the values of the store
-	 * @param nullValue
-	 *            the contains the value substituted for null in any mutable
-	 *            copies, or is empty if the store should support null values
+	 * @param nullity
+	 *            how null values are to be supported
 	 * @param <V>
 	 *            the type of values to be stored
 	 * @return a store that returns values from array
@@ -164,6 +164,8 @@ public final class Stores {
 	 * used if the size (the number of non-null values) is already known.
 	 * Supplying an incorrect size is likely to cause malfunction.
 	 *
+	 * @param <V>
+	 *            the storage type
 	 * @param values
 	 *            the values of the store
 	 * @param count
@@ -177,35 +179,54 @@ public final class Stores {
 		return new ImmutableArrayStore<>(values, count);
 	}
 
-	//TODO this is unpleasant
-	@SuppressWarnings("unchecked")
+	/**
+	 * Returns an immutable store consisting of <em>size</em> copies of
+	 * <em>value</em>. The advantage of using this method is that memory does
+	 * not need to be allocated for each instance of the value.
+	 * 
+	 * @param value
+	 *            the value to be stored, possibly null
+	 * @param size
+	 *            the number of copies stored, possibly zero
+	 * @return a store consisting of multiple copies of a single value
+	 * @see #constantStore(Class, Object, int)
+	 */
 	public static <V> Store<V> constantStore(V value, int size) {
-		if (value == null) throw new IllegalArgumentException("null value");
-		if (size < 0L) throw new IllegalArgumentException("negative size");
-		return new ConstantStore<V>((Class<V>)Object.class, value, size);
-	}
-
-	public static <V> Store<V> constantStore(Class<V> type, V value, int size) {
-		if (type == null) throw new IllegalArgumentException("null type");
-		if (value == null) throw new IllegalArgumentException("null value");
-		if (size < 0L) throw new IllegalArgumentException("negative size");
-		return new ConstantStore<V>(type, value, size);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <V> Store<V> constantNullStore(int size) {
-		if (size < 0L) throw new IllegalArgumentException("negative size");
-		return new NullConstantStore<V>((Class<V>)Object.class, size);
-	}
-
-	public static <V> Store<V> constantNullStore(Class<V> type, int size) {
-		if (type == null) throw new IllegalArgumentException("null type");
-		if (size < 0L) throw new IllegalArgumentException("negative size");
-		return new NullConstantStore<V>(type, size);
+		if (size < 0) throw new IllegalArgumentException("negative size");
+		@SuppressWarnings("unchecked")
+		Class<V> clss = (Class<V>)Object.class;
+		return value == null ?
+				new NullConstantStore<V>(clss, size) :
+				new ConstantStore<V>(clss, value, size);
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing byte array.
+	 * Returns an immutable store consisting of <em>size</em> copies of
+	 * <em>value</em>. The advantage of using this method is that memory does
+	 * not need to be allocated for each instance of the value.
+	 * 
+	 * @param <V>
+	 *            the storage type
+	 * @param type
+	 *            the declared storage type
+	 * @param value
+	 *            the value to be stored, possibly null
+	 * @param size
+	 *            the number of copies stored, possibly zero
+	 * @return a store consisting of multiple copies of a single value
+	 * @see #constantStore(Object, int)
+	 */
+	public static <V> Store<V> constantStore(Class<V> type, V value, int size) {
+		if (type == null) throw new IllegalArgumentException("null type");
+		if (size < 0) throw new IllegalArgumentException("negative size");
+		return value == null ?
+				new NullConstantStore<V>(type, size) :
+				new ConstantStore<V>(type, value, size);
+	}
+
+	/**
+	 * Creates a mutable store that wraps an existing byte array. Null values
+	 * are not supported by the returned store.
 	 *
 	 * @param values
 	 *            the values of the store
@@ -217,11 +238,14 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing byte array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing byte array. Where the
+	 * permitted by the specified nullity, values may subsequently be removed
+	 * from the store by setting an index value to null. Such operations will
+	 * not modify the wrapped array; the null status of an index may be obtained
+	 * from the {@link Store#population()}.
 	 *
+	 * @param nullity
+	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -232,7 +256,8 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing short array.
+	 * Creates a mutable store that wraps an existing short array. Null values
+	 * are not supported by the returned store.
 	 *
 	 * @param values
 	 *            the values of the store
@@ -244,11 +269,14 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing short array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing short array. Where the
+	 * permitted by the specified nullity, values may subsequently be removed
+	 * from the store by setting an index value to null. Such operations will
+	 * not modify the wrapped array; the null status of an index may be obtained
+	 * from the {@link Store#population()}.
 	 *
+	 * @param nullity
+	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -259,7 +287,8 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing integer array.
+	 * Creates a mutable store that wraps an existing integer array. Null values
+	 * are not supported by the returned store.
 	 *
 	 * @param values
 	 *            the values of the store
@@ -271,11 +300,14 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing integer array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing integer array. Where the
+	 * permitted by the specified nullity, values may subsequently be removed
+	 * from the store by setting an index value to null. Such operations will
+	 * not modify the wrapped array; the null status of an index may be obtained
+	 * from the {@link Store#population()}.
 	 *
+	 * @param nullity
+	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -286,7 +318,8 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing long array.
+	 * Creates a mutable store that wraps an existing long array. Null values
+	 * are not supported by the returned store.
 	 *
 	 * @param values
 	 *            the values of the store
@@ -298,11 +331,14 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing long array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing long array. Where the
+	 * permitted by the specified nullity, values may subsequently be removed
+	 * from the store by setting an index value to null. Such operations will
+	 * not modify the wrapped array; the null status of an index may be obtained
+	 * from the {@link Store#population()}.
 	 *
+	 * @param nullity
+	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -313,7 +349,8 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing boolean array
+	 * Creates a mutable store that wraps an existing boolean array. Null values
+	 * are not supported by the returned store.
 	 *
 	 * @param values
 	 *            the values of the store
@@ -325,11 +362,14 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing boolean array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing boolean array. Where the
+	 * permitted by the specified nullity, values may subsequently be removed
+	 * from the store by setting an index value to null. Such operations will
+	 * not modify the wrapped array; the null status of an index may be obtained
+	 * from the {@link Store#population()}.
 	 *
+	 * @param nullity
+	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -340,7 +380,8 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing char array.
+	 * Creates a mutable store that wraps an existing char array. Null values
+	 * are not supported by the returned store.
 	 *
 	 * @param values
 	 *            the values of the store
@@ -352,11 +393,14 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing char array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing char array. Where the
+	 * permitted by the specified nullity, values may subsequently be removed
+	 * from the store by setting an index value to null. Such operations will
+	 * not modify the wrapped array; the null status of an index may be obtained
+	 * from the {@link Store#population()}.
 	 *
+	 * @param nullity
+	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -367,7 +411,8 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing float array.
+	 * Creates a mutable store that wraps an existing float array. Null values
+	 * are not supported by the returned store.
 	 *
 	 * @param values
 	 *            the values of the store
@@ -379,11 +424,14 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing float array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing float array. Where the
+	 * permitted by the specified nullity, values may subsequently be removed
+	 * from the store by setting an index value to null. Such operations will
+	 * not modify the wrapped array; the null status of an index may be obtained
+	 * from the {@link Store#population()}.
 	 *
+	 * @param nullity
+	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
@@ -394,7 +442,8 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing double array.
+	 * Creates a mutable store that wraps an existing double array. Null values
+	 * are not supported by the returned store.
 	 *
 	 * @param values
 	 *            the values of the store
@@ -406,11 +455,14 @@ public final class Stores {
 	}
 
 	/**
-	 * Creates a mutable store that wraps an existing double array. Values may
-	 * subsequently be removed from the store by setting an index value to null.
-	 * Such operations will not modify the wrapped array; the null status of an
-	 * index may be obtained from the {@link Store#population()}.
+	 * Creates a mutable store that wraps an existing double array. Where the
+	 * permitted by the specified nullity, values may subsequently be removed
+	 * from the store by setting an index value to null. Such operations will
+	 * not modify the wrapped array; the null status of an index may be obtained
+	 * from the {@link Store#population()}.
 	 *
+	 * @param nullity
+	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
