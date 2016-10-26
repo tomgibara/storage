@@ -17,7 +17,6 @@
 package com.tomgibara.storage;
 
 import java.util.Iterator;
-import java.util.Optional;
 
 import com.tomgibara.bits.BitStore;
 import com.tomgibara.fundament.Bijection;
@@ -63,9 +62,8 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 	}
 
 	@Override
-	public Optional<W> nullValue() {
-		Optional<V> nv = store.nullValue();
-		return nv.isPresent() ? Optional.of(fn.apply(nv.get())) : Optional.empty();
+	public StoreNullity<W> nullity() {
+		return store.nullity().map(fn);
 	}
 
 	@Override

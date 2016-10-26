@@ -16,9 +16,11 @@
  */
 package com.tomgibara.storage;
 
+import static com.tomgibara.storage.StoreNullity.settingNullAllowed;
+import static com.tomgibara.storage.StoreNullity.settingNullDisallowed;
+import static com.tomgibara.storage.StoreNullity.settingNullToValue;
+
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Optional;
 
 /**
  * Collects static methods for creating new stores that wrap existing arrays.
@@ -30,16 +32,16 @@ public final class Stores {
 
 	// private statics
 
-	private static final Optional<Byte>      OPT_BYTE    = Optional.of((byte)   0);
-	private static final Optional<Float>     OPT_FLOAT   = Optional.of((float)  0);
-	private static final Optional<Character> OPT_CHAR    = Optional.of((char)   0);
-	private static final Optional<Short>     OPT_SHORT   = Optional.of((short)  0);
-	private static final Optional<Long>      OPT_LONG    = Optional.of((long)   0);
-	private static final Optional<Integer>   OPT_INT     = Optional.of((int)    0);
-	private static final Optional<Double>    OPT_DOUBLE  = Optional.of((double) 0);
-	private static final Optional<Boolean>   OPT_BOOLEAN = Optional.of(     false);
+	private static final StoreNullity<Byte>      NULL_BYTE    = settingNullToValue((byte)   0);
+	private static final StoreNullity<Float>     NULL_FLOAT   = settingNullToValue((float)  0);
+	private static final StoreNullity<Character> NULL_CHAR    = settingNullToValue((char)   0);
+	private static final StoreNullity<Short>     NULL_SHORT   = settingNullToValue((short)  0);
+	private static final StoreNullity<Long>      NULL_LONG    = settingNullToValue((long)   0);
+	private static final StoreNullity<Integer>   NULL_INT     = settingNullToValue((int)    0);
+	private static final StoreNullity<Double>    NULL_DOUBLE  = settingNullToValue((double) 0);
+	private static final StoreNullity<Boolean>   NULL_BOOLEAN = settingNullToValue(     false);
 
-	private static final Optional<String> OPT_STRING  = Optional.of("");
+	private static final StoreNullity<String> NULL_STRING  = settingNullToValue("");
 
 	// package statics
 
@@ -91,10 +93,9 @@ public final class Stores {
 	 * @return a store that mediates access to the array
 	 */
 	@SafeVarargs
-	public static <V> Store<V> objects(Optional<V> nullValue, V... values) {
-		checkNullValueNotNull(values);
+	public static <V> Store<V> objectsWithNullity(StoreNullity<V> nullity, V... values) {
 		checkValuesNotNull(values);
-		return nullValue.isPresent() ? new ArrayStore<>(values, nullValue.get()) : new NullArrayStore<>(values);
+		return nullity.nullGettable() ? new NullArrayStore<>(values) : new ArrayStore<>(values, nullity);
 	}
 
 	/**
@@ -108,7 +109,7 @@ public final class Stores {
 	 * @return a store that mediates access to the array
 	 */
 	@SafeVarargs
-	public static <V> Store<V> objectsAndNull(V... values) {
+	public static <V> Store<V> objects(V... values) {
 		checkValuesNotNull(values);
 		return new NullArrayStore<>(values);
 	}
@@ -150,10 +151,9 @@ public final class Stores {
 	 * @return a store that returns values from array
 	 */
 	@SafeVarargs
-	public static <V> Store<V> immutableObjects(Optional<V> nullValue, V... values) {
-		checkNullValueNotNull(values);
+	public static <V> Store<V> immutableObjectsWithNullity(StoreNullity<V> nullity, V... values) {
 		checkValuesNotNull(values);
-		return new ImmutableArrayStore<>(values, nullValue.orElse(null));
+		return new ImmutableArrayStore<>(values, nullity);
 	}
 
 	/**
@@ -167,9 +167,9 @@ public final class Stores {
 	 * @return a store that returns values from array
 	 */
 	@SafeVarargs
-	public static <V> Store<V> immutableObjectsAndNull(V... values) {
+	public static <V> Store<V> immutableObjects(V... values) {
 		checkValuesNotNull(values);
-		return new ImmutableArrayStore<>(values, null);
+		return new ImmutableArrayStore<>(values, settingNullAllowed());
 	}
 
 	/**
@@ -227,7 +227,7 @@ public final class Stores {
 	 */
 	public static Store<Byte> bytes(byte... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.ByteStore(values, (byte) 0);
+		return new PrimitiveStore.ByteStore(values, settingNullDisallowed());
 	}
 
 	/**
@@ -240,9 +240,9 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Byte> bytesAndNull(byte... values) {
+	public static Store<Byte> bytesWithNullity(StoreNullity<Byte> nullity, byte... values) {
 		checkValuesNotNull(values);
-		return new NullPrimitiveStore.ByteStore(values);
+		return nullity.nullGettable() ? new NullPrimitiveStore.ByteStore(values) : new PrimitiveStore.ByteStore(values, nullity);
 	}
 
 	/**
@@ -254,7 +254,7 @@ public final class Stores {
 	 */
 	public static Store<Short> shorts(short... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.ShortStore(values, (short) 0);
+		return new PrimitiveStore.ShortStore(values, settingNullDisallowed());
 	}
 
 	/**
@@ -267,9 +267,9 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Short> shortsAndNull(short... values) {
+	public static Store<Short> shortsWithNullity(StoreNullity<Short> nullity, short... values) {
 		checkValuesNotNull(values);
-		return new NullPrimitiveStore.ShortStore(values);
+		return nullity.nullGettable() ? new NullPrimitiveStore.ShortStore(values) : new PrimitiveStore.ShortStore(values, nullity);
 	}
 
 	/**
@@ -281,7 +281,7 @@ public final class Stores {
 	 */
 	public static Store<Integer> ints(int... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.IntegerStore(values, (int) 0);
+		return new PrimitiveStore.IntegerStore(values, settingNullDisallowed());
 	}
 
 	/**
@@ -294,9 +294,9 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Integer> intsAndNull(int... values) {
+	public static Store<Integer> intsWithNullity(StoreNullity<Integer> nullity, int... values) {
 		checkValuesNotNull(values);
-		return new NullPrimitiveStore.IntegerStore(values);
+		return nullity.nullGettable() ? new NullPrimitiveStore.IntegerStore(values) : new PrimitiveStore.IntegerStore(values, nullity);
 	}
 
 	/**
@@ -308,7 +308,7 @@ public final class Stores {
 	 */
 	public static Store<Long> longs(long... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.LongStore(values, (long) 0);
+		return new PrimitiveStore.LongStore(values, settingNullDisallowed());
 	}
 
 	/**
@@ -321,9 +321,9 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Long> longAndNull(long... values) {
+	public static Store<Long> longsWithNullity(StoreNullity<Long> nullity, long... values) {
 		checkValuesNotNull(values);
-		return new NullPrimitiveStore.LongStore(values);
+		return nullity.nullGettable() ? new NullPrimitiveStore.LongStore(values) : new PrimitiveStore.LongStore(values, nullity);
 	}
 
 	/**
@@ -335,7 +335,7 @@ public final class Stores {
 	 */
 	public static Store<Boolean> booleans(boolean... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.BooleanStore(values, false);
+		return new PrimitiveStore.BooleanStore(values, settingNullDisallowed());
 	}
 
 	/**
@@ -348,9 +348,9 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Boolean> booleansAndNull(boolean... values) {
+	public static Store<Boolean> booleansWithNullity(StoreNullity<Boolean> nullity, boolean... values) {
 		checkValuesNotNull(values);
-		return new NullPrimitiveStore.BooleanStore(values);
+		return nullity.nullGettable() ? new NullPrimitiveStore.BooleanStore(values) : new PrimitiveStore.BooleanStore(values, nullity);
 	}
 
 	/**
@@ -362,7 +362,7 @@ public final class Stores {
 	 */
 	public static Store<Character> chars(char... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.CharacterStore(values, (char) 0);
+		return new PrimitiveStore.CharacterStore(values, settingNullDisallowed());
 	}
 
 	/**
@@ -375,9 +375,9 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Character> charsAndNull(char... values) {
+	public static Store<Character> charsWithNullity(StoreNullity<Character> nullity, char... values) {
 		checkValuesNotNull(values);
-		return new NullPrimitiveStore.CharacterStore(values);
+		return nullity.nullGettable() ? new NullPrimitiveStore.CharacterStore(values) : new PrimitiveStore.CharacterStore(values, nullity);
 	}
 
 	/**
@@ -389,7 +389,7 @@ public final class Stores {
 	 */
 	public static Store<Float> floats(float... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.FloatStore(values, (float) 0);
+		return new PrimitiveStore.FloatStore(values, settingNullDisallowed());
 	}
 
 	/**
@@ -402,9 +402,9 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Float> floatsAndNull(float... values) {
+	public static Store<Float> floatsWithNullity(StoreNullity<Float> nullity, float... values) {
 		checkValuesNotNull(values);
-		return new NullPrimitiveStore.FloatStore(values);
+		return nullity.nullGettable() ? new NullPrimitiveStore.FloatStore(values) : new PrimitiveStore.FloatStore(values, nullity);
 	}
 
 	/**
@@ -416,7 +416,7 @@ public final class Stores {
 	 */
 	public static Store<Double> doubles(double... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.DoubleStore(values, (double) 0);
+		return new PrimitiveStore.DoubleStore(values, settingNullDisallowed());
 	}
 
 	/**
@@ -429,9 +429,9 @@ public final class Stores {
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Double> doublesAndNull(double... values) {
+	public static Store<Double> doublesWithNullity(StoreNullity<Double> nullity, double... values) {
 		checkValuesNotNull(values);
-		return new NullPrimitiveStore.DoubleStore(values);
+		return nullity.nullGettable() ? new NullPrimitiveStore.DoubleStore(values) : new PrimitiveStore.DoubleStore(values, nullity);
 	}
 
 	/**
@@ -467,33 +467,33 @@ public final class Stores {
 	 * @return an optional null value
 	 */
 	@SuppressWarnings("unchecked")
-	public static <V> Optional<V> defaultNullValue(Class<V> type) {
+	public static <V> StoreNullity<V> defaultNullity(Class<V> type) {
 		if (type == null) throw new IllegalArgumentException("null type");
-		if (type.isEnum()) return Optional.of((V) type.getEnumConstants()[0]);
+		if (type.isEnum()) return settingNullToValue((V) type.getEnumConstants()[0]);
 		if (type.isPrimitive()) {
 			switch((type.getName().hashCode() >> 8) & 0xf) {
-			case Stores.BYTE:    return (Optional<V>) OPT_BYTE;
-			case Stores.FLOAT:   return (Optional<V>) OPT_FLOAT;
-			case Stores.CHAR:    return (Optional<V>) OPT_CHAR;
-			case Stores.SHORT:   return (Optional<V>) OPT_SHORT;
-			case Stores.LONG:    return (Optional<V>) OPT_LONG;
-			case Stores.INT:     return (Optional<V>) OPT_INT;
-			case Stores.DOUBLE:  return (Optional<V>) OPT_DOUBLE;
-			case Stores.BOOLEAN: return (Optional<V>) OPT_BOOLEAN;
+			case Stores.BYTE:    return (StoreNullity<V>) NULL_BYTE;
+			case Stores.FLOAT:   return (StoreNullity<V>) NULL_FLOAT;
+			case Stores.CHAR:    return (StoreNullity<V>) NULL_CHAR;
+			case Stores.SHORT:   return (StoreNullity<V>) NULL_SHORT;
+			case Stores.LONG:    return (StoreNullity<V>) NULL_LONG;
+			case Stores.INT:     return (StoreNullity<V>) NULL_INT;
+			case Stores.DOUBLE:  return (StoreNullity<V>) NULL_DOUBLE;
+			case Stores.BOOLEAN: return (StoreNullity<V>) NULL_BOOLEAN;
 			}
 		}
 		switch (type.getName()) {
-		case "java.lang.String"    : return (Optional<V>) OPT_STRING;
-		case "java.lang.Boolean"   : return (Optional<V>) OPT_BOOLEAN;
-		case "java.lang.Character" : return (Optional<V>) OPT_CHAR;
-		case "java.lang.Float"     : return (Optional<V>) OPT_FLOAT;
-		case "java.lang.Double"    : return (Optional<V>) OPT_DOUBLE;
-		case "java.lang.Byte"      : return (Optional<V>) OPT_BYTE;
-		case "java.lang.Short"     : return (Optional<V>) OPT_SHORT;
-		case "java.lang.Integer"   : return (Optional<V>) OPT_INT;
-		case "java.lang.Long"      : return (Optional<V>) OPT_LONG;
+		case "java.lang.String"    : return (StoreNullity<V>) NULL_STRING;
+		case "java.lang.Boolean"   : return (StoreNullity<V>) NULL_BOOLEAN;
+		case "java.lang.Character" : return (StoreNullity<V>) NULL_CHAR;
+		case "java.lang.Float"     : return (StoreNullity<V>) NULL_FLOAT;
+		case "java.lang.Double"    : return (StoreNullity<V>) NULL_DOUBLE;
+		case "java.lang.Byte"      : return (StoreNullity<V>) NULL_BYTE;
+		case "java.lang.Short"     : return (StoreNullity<V>) NULL_SHORT;
+		case "java.lang.Integer"   : return (StoreNullity<V>) NULL_INT;
+		case "java.lang.Long"      : return (StoreNullity<V>) NULL_LONG;
 		}
-		return Optional.empty();
+		return StoreNullity.settingNullAllowed();
 	}
 
 	// package scoped methods
@@ -502,17 +502,17 @@ public final class Stores {
 		return new IllegalStateException("immutable");
 	}
 
-	static <V> int countNonNulls(V[] vs) {
-		int sum = 0;
-		for (V v : vs) if (v != null) sum++;
-		return sum;
-	}
+//	static <V> int countNonNulls(V[] vs) {
+//		int sum = 0;
+//		for (V v : vs) if (v != null) sum++;
+//		return sum;
+//	}
 
-	static <V> void replaceNulls(V[] vs, V nullValue) {
-		for (int i = 0; i < vs.length; i++) {
-			if (vs[i] == null) vs[i] = nullValue;
-		}
-	}
+//	static <V> void replaceNulls(V[] vs, V nullValue) {
+//		for (int i = 0; i < vs.length; i++) {
+//			if (vs[i] == null) vs[i] = nullValue;
+//		}
+//	}
 
 	static <V> V[] typedArrayCopy(Class<V> type, V[] vs) {
 		if (vs.getClass().getComponentType() == type) {
@@ -548,17 +548,13 @@ public final class Stores {
 		if (values == null) throw new IllegalArgumentException("null values");
 	}
 
-	static void checkNullValueNotNull(Object nullValue) {
-		if (nullValue == null) throw new IllegalArgumentException("null nullValue");
-	}
-
-	static <V> V[] resizedCopyOf(V[] vs, int newSize, V v) {
-		if (v == null) return Arrays.copyOf(vs, newSize);
-		int oldSize = vs.length;
-		vs = Arrays.copyOf(vs, newSize);
-		if (newSize > oldSize) Arrays.fill(vs, oldSize, newSize, v);
-		return vs;
-	}
+//	static <V> V[] resizedCopyOf(V[] vs, int newSize, V v) {
+//		if (v == null) return Arrays.copyOf(vs, newSize);
+//		int oldSize = vs.length;
+//		vs = Arrays.copyOf(vs, newSize);
+//		if (newSize > oldSize) Arrays.fill(vs, oldSize, newSize, v);
+//		return vs;
+//	}
 
 	static <V> boolean compact(V[] vs, int count) {
 		if (count == vs.length) return false;

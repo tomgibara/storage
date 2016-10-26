@@ -16,6 +16,7 @@
  */
 package com.tomgibara.storage;
 
+import static com.tomgibara.storage.StoreNullity.settingNullAllowed;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -38,8 +39,8 @@ public class StoreTest {
 	@Test
 	public void testTransformedBy() {
 
-		Store<Integer> s = Stores.intsAndNull(1,2,3);
-		assertFalse(s.nullValue().isPresent());
+		Store<Integer> s = Stores.intsWithNullity(settingNullAllowed(),1,2,3);
+		assertTrue(s.nullity().nullGettable());
 		Store<Integer> t = s.asTransformedBy(i -> 2 * i);
 		assertEquals(s.count(), t.count());
 		for (int i = 0; i < s.count(); i++) {
@@ -74,7 +75,7 @@ public class StoreTest {
 
 	@Test
 	public void testTransformedByBijection() {
-		Store<Integer> s = Stores.intsAndNull(1,2,3);
+		Store<Integer> s = Stores.intsWithNullity(settingNullAllowed(),1,2,3);
 		Bijection<Integer, String> fn = Bijection.fromFunctions(Integer.class, String.class, i -> i.toString(), t -> Integer.parseInt(t));
 		Store<String> t = s.asTransformedBy(fn);
 		assertEquals("1", t.get(0));
@@ -84,10 +85,10 @@ public class StoreTest {
 	}
 
 	public void testNullableResizedCopy() {
-		Store<Integer> s = Stores.intsAndNull(1,2,3);
+		Store<Integer> s = Stores.intsWithNullity(settingNullAllowed(),1,2,3);
 		Store<Integer> t = s.resizedCopy(5);
 		assertTrue(t.isMutable());
-		assertFalse(t.nullValue().isPresent());
+		assertTrue(s.nullity().nullGettable());
 		assertEquals(asList(1,2,3,null,null), t.asList());
 		Store<Integer> u = s.immutableCopy();
 		t.set(0, 0);
@@ -103,7 +104,8 @@ public class StoreTest {
 		Store<Integer> s = Stores.ints(1,2,3);
 		Store<Integer> t = s.resizedCopy(5);
 		assertTrue(t.isMutable());
-		assertTrue(t.nullValue().isPresent());
+		assertFalse(s.nullity().nullSettable());
+		assertFalse(s.nullity().nullGettable());
 		assertEquals(asList(1,2,3,0,0), t.asList());
 		Store<Integer> u = s.immutableCopy();
 		t.set(0, 4);
@@ -117,8 +119,8 @@ public class StoreTest {
 	@Test
 	public void testObjectMethods() {
 		Store<Integer> s = Stores.ints(1, 2, 3);
-		Store<Integer> t = Stores.intsAndNull(1, 2, 3);
-		Store<Object> u = Stores.objects(Optional.empty(), new Object[] {1,2,3});
+		Store<Integer> t = Stores.intsWithNullity(settingNullAllowed(), 1, 2, 3);
+		Store<Object> u = Stores.objects(new Object[] {1,2,3});
 		Store<Integer> v = Stores.ints(1, 2, 4);
 
 		assertTrue(s.equals(s));
@@ -135,7 +137,7 @@ public class StoreTest {
 
 	@Test
 	public void testIterator() {
-		Store<Integer> s = Stores.intsAndNull(0,2,4,6,8);
+		Store<Integer> s = Stores.intsWithNullity(settingNullAllowed(),0,2,4,6,8);
 		s.set(1, null);
 		s.set(3, null);
 		Iterator<Integer> i = s.iterator();
@@ -151,7 +153,7 @@ public class StoreTest {
 
 	@Test
 	public void testForEach() {
-		Store<Integer> s = Stores.intsAndNull(0,1,2,3,4,5,6);
+		Store<Integer> s = Stores.intsWithNullity(settingNullAllowed(),0,1,2,3,4,5,6);
 		int size = s.size();
 		s.set(3, null);
 		s.set(6, null);
@@ -162,10 +164,10 @@ public class StoreTest {
 
 	@Test
 	public void testCompact() {
-		testCompact(Stores.intsAndNull());
-		testCompact(Stores.intsAndNull(0,1,2,3));
+		testCompact(Stores.intsWithNullity(settingNullAllowed()));
+		testCompact(Stores.intsWithNullity(settingNullAllowed(),0,1,2,3));
 		testCompact(Stores.ints(0,1,2,3));
-		testCompact(Stores.intsAndNull(0,1).immutableView());
+		testCompact(Stores.intsWithNullity(settingNullAllowed(),0,1).immutableView());
 
 		Store<Tri> tris = Storage.typed(Tri.class).newStore(4);
 		tris.set(0, Tri.EQUILATERAL);
@@ -174,7 +176,7 @@ public class StoreTest {
 		tris.set(3, Tri.EQUILATERAL);
 		testCompact(tris);
 
-		Store<String> strs = Stores.objectsAndNull("One", "Two", "Three", "Four", "Five", "Six");
+		Store<String> strs = Stores.objects("One", "Two", "Three", "Four", "Five", "Six");
 		testCompact(strs);
 	}
 
@@ -193,7 +195,7 @@ public class StoreTest {
 		Store<E> c = s.mutableCopy();
 		assertFalse(c.compact());
 		assertEquals(s, c);
-		if (c.nullValue().isPresent()) return; // cannot test more
+		if (!c.nullity().nullGettable()) return; // cannot test more
 		for (int i = 0; i < c.size(); i += 2) c.set(i, null);
 		assertEquals(c.size() > 0, c.compact());
 		assertEquals(size / 2, c.count());

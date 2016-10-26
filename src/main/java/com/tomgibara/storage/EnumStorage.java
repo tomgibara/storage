@@ -26,26 +26,13 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 	private final Class<E> type;
 	private final E[] constants;
 	private final int nullValue;
+	private final StoreNullity<E> nullity;
 	private final SmallValueStorage storage;
 
-	EnumStorage(Class<E> type) {
+	EnumStorage(Class<E> type, StoreNullity<E> nullity) {
 		this.type = type;
-		constants = type.getEnumConstants();
-		if (constants.length == 0) throw new IllegalArgumentException("no enum values");
-		nullValue = 0;
-		storage = SmallValueStore.newStorage(constants.length);
-	}
-
-	EnumStorage(E nullValue) {
-		type = nullValue.getDeclaringClass();
-		constants = type.getEnumConstants();
-		this.nullValue = nullValue.ordinal();
-		storage = SmallValueStore.newStorage(constants.length);
-	}
-
-	EnumStorage(Class<E> type, E nullValue) {
-		this.type = type;
-		this.nullValue = nullValue.ordinal();
+		this.nullity = nullity;
+		this.nullValue = nullity.nullSettable() ? nullity.nullValue().ordinal() : 0;
 		constants = type.getEnumConstants();
 		storage = SmallValueStore.newStorage(constants.length);
 	}
@@ -76,8 +63,8 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		}
 
 		@Override
-		public Optional<E> nullValue() {
-			return Optional.of( constant(nullValue) );
+		public StoreNullity<E> nullity() {
+			return nullity;
 		}
 
 		@Override
@@ -137,7 +124,11 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		// private utility methods
 
 		private int value(E e) {
-			return e == null ? nullValue : e.ordinal();
+			if (e == null) {
+				nullity.checkNull();
+				return nullValue;
+			}
+			return e.ordinal();
 		}
 
 		private E constant(int i) {

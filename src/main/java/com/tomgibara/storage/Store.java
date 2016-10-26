@@ -123,26 +123,29 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 		return get(index) != null;
 	}
 
-	/**
-	 * <p>
-	 * The value that substitutes for null in this store. For stores that
-	 * support the storage of null values this method will always return
-	 * <em>empty</em>. Some stores do not support null values (for example,
-	 * those backed by primitive arrays) in this instance the returned value may
-	 * never be <em>empty</em>.
-	 *
-	 * <p>
-	 * Note that the value returned by this method will by substituted for null
-	 * in calls to {@link #set(int, Object)} and {@link #clear()} but
-	 * occurrences of this value in the store will not be reported as null.
-	 *
-	 * @return the value that substitutes for null wrapped in an optional, or
-	 *         empty
-	 */
-	default Optional<V> nullValue() {
-		return Optional.empty();
-	}
+//	/**
+//	 * <p>
+//	 * The value that substitutes for null in this store. For stores that
+//	 * support the storage of null values this method will always return
+//	 * <em>empty</em>. Some stores do not support null values (for example,
+//	 * those backed by primitive arrays) in this instance the returned value may
+//	 * never be <em>empty</em>.
+//	 *
+//	 * <p>
+//	 * Note that the value returned by this method will by substituted for null
+//	 * in calls to {@link #set(int, Object)} and {@link #clear()} but
+//	 * occurrences of this value in the store will not be reported as null.
+//	 *
+//	 * @return the value that substitutes for null wrapped in an optional, or
+//	 *         empty
+//	 */
+//	default Optional<V> nullValue() {
+//		return Optional.empty();
+//	}
 
+	default StoreNullity<V> nullity() {
+		return StoreNullity.settingNullAllowed();
+	}
 	/**
 	 * Stores a value in the store. Storing null will result in no value being
 	 * associated with the specified index
@@ -190,7 +193,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 */
 	default boolean compact() {
 		if (!isMutable()) throw immutableException();
-		if (nullValue().isPresent()) return false; // there can be no nulls
+		if (!nullity().nullGettable()) return false; // there can be no nulls
 		int count = count();
 		if (count == size()) return false; // this should be a cheap test
 
@@ -225,10 +228,10 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @see #mutableCopy()
 	 */
 	default Store<V> resizedCopy(int newSize) {
-		Optional<V> nv = nullValue();
-		return nv.isPresent() ?
-				new ArrayStore<>(Stores.toArray(this, newSize), nv.get()) :
-				new NullArrayStore<>(Stores.toArray(this, newSize), count());
+		StoreNullity<V> nullity = nullity();
+		return nullity.nullGettable() ?
+				new NullArrayStore<>(Stores.toArray(this, newSize), count()) :
+				new ArrayStore<>(Stores.toArray(this, newSize), nullity);
 	}
 
 	/**
@@ -248,7 +251,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @return bits indicating the indices at which values are present
 	 */
 	default BitStore population() {
-		if (nullValue().isPresent()) return Bits.oneBits(size());
+		if (!nullity().nullGettable()) return Bits.oneBits(size());
 		return new AbstractBitStore() {
 
 			@Override
@@ -436,14 +439,14 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	@Override
 	public default void forEach(Consumer<? super V> action) {
 		int size = size();
-		if (nullValue().isPresent()) {
-			for (int i = 0; i < size; i++) {
-				action.accept(get(size));
-			}
-		} else {
+		if (nullity().nullGettable()) {
 			for (int i = 0; i < size; i++) {
 				V v = get(i);
 				if (v != null) action.accept(v);
+			}
+		} else {
+			for (int i = 0; i < size; i++) {
+				action.accept(get(size));
 			}
 		}
 	}
@@ -456,14 +459,14 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 */
 	public default void forEach(BiConsumer<Integer, ? super V> action) {
 		int size = size();
-		if (nullValue().isPresent()) {
-			for (int i = 0; i < size; i++) {
-				action.accept(i, get(size));
-			}
-		} else {
+		if (nullity().nullGettable()) {
 			for (int i = 0; i < size; i++) {
 				V v = get(i);
 				if (v != null) action.accept(i, v);
+			}
+		} else {
+			for (int i = 0; i < size; i++) {
+				action.accept(i, get(size));
 			}
 		}
 	}

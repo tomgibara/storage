@@ -1,13 +1,13 @@
 package com.tomgibara.storage.sample;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.Test;
 
 import com.tomgibara.bits.BitStore;
 import com.tomgibara.storage.Storage;
 import com.tomgibara.storage.Store;
+import com.tomgibara.storage.StoreNullity;
 import com.tomgibara.storage.Stores;
 
 public class SamplesTest {
@@ -35,7 +35,7 @@ public class SamplesTest {
 
 		/* Creating storage backed by String arrays
 		   in which nulls are replaced by empty string. */
-		Store<String> ex3 = Storage.typed(String.class, "").newStore(size);
+		Store<String> ex3 = Storage.typed(String.class, StoreNullity.settingNullToValue("")).newStore(size);
 
 		/* Creating storage backed by weak references. */
 		Store<T> ex4 = Storage.<T>weak().newStore(size);
@@ -54,13 +54,13 @@ public class SamplesTest {
 
 		/* Wrapping a primitive array as a store,
 		   adding support for null values. */
-		Store<Double> ex8 = Stores.doublesAndNull(1.0,2.0,3.0);
+		Store<Double> ex8 = Stores.doublesWithNullity(StoreNullity.settingNullAllowed(), 1.0,2.0,3.0);
 
 		/* Wrapping an object array permitting null values. */
-		Store<Object> ex9 = Stores.objects(Optional.empty(), new Object[size]);
+		Store<Object> ex9 = Stores.objects(new Object[size]);
 
 		/* Wrapping an object array, not permitting null values. */
-		Store<String> exa = Stores.objects(Optional.of(""), "Zippy", "Bungle", "George");
+		Store<String> exa = Stores.objectsWithNullity(StoreNullity.settingNullDisallowed(), "Zippy", "Bungle", "George");
 
 
 		// BASIC STORE FUNCTIONS

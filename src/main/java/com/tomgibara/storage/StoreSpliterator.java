@@ -29,10 +29,10 @@ class StoreSpliterator<V> implements Spliterator<V> {
 
 	StoreSpliterator(Store<V> store) {
 		this.store = store;
-		if (store.nullValue().isPresent()) {
-			chi = store.isMutable() ? ORDERED | SIZED | SUBSIZED | NONNULL : ORDERED | SIZED | SUBSIZED | NONNULL | IMMUTABLE;
-		} else {
+		if (store.nullity().nullGettable()) {
 			chi = store.isMutable() ? ORDERED : ORDERED | IMMUTABLE;
+		} else {
+			chi = store.isMutable() ? ORDERED | SIZED | SUBSIZED | NONNULL : ORDERED | SIZED | SUBSIZED | NONNULL | IMMUTABLE;
 		}
 		from = 0;
 		to = store.size();

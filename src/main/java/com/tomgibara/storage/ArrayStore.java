@@ -18,23 +18,22 @@ package com.tomgibara.storage;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Optional;
 
 class ArrayStore<V> extends AbstractStore<V> {
 
 	private static abstract class ArrayStorage<V> implements Storage<V> {
 
 		private final Class<V> type;
-		private final Optional<V> nullValue;
+		private final StoreNullity<V> nullity;
 
-		ArrayStorage(Class<V> type, V nullValue) {
+		ArrayStorage(Class<V> type, StoreNullity<V> nullity) {
 			this.type = type;
-			this.nullValue = Optional.ofNullable(nullValue);
+			this.nullity = nullity;
 		}
 
 		@Override
-		public Optional<V> nullValue() {
-			return nullValue;
+		public StoreNullity<V> nullity() {
+			return nullity;
 		}
 
 		@Override
@@ -44,8 +43,8 @@ class ArrayStore<V> extends AbstractStore<V> {
 
 	}
 
-	static <V> Storage<V> mutableStorage(Class<V> type, V nullValue) {
-		return new ArrayStorage<V>(type, nullValue) {
+	static <V> Storage<V> mutableStorage(Class<V> type, StoreNullity<V> nullity) {
+		return new ArrayStorage<V>(type, nullity) {
 
 			@Override
 			public boolean isStorageMutable() {
@@ -59,12 +58,12 @@ class ArrayStore<V> extends AbstractStore<V> {
 
 			@Override
 			public Storage<V> immutable() {
-				return immutableStorage(type, nullValue);
+				return immutableStorage(type, nullity);
 			}
 
 			@Override
 			public Store<V> newStore(int size) throws IllegalArgumentException {
-				return new ArrayStore<>(type, size, nullValue);
+				return new ArrayStore<>(type, size, nullity);
 			}
 
 			@Override
@@ -72,15 +71,15 @@ class ArrayStore<V> extends AbstractStore<V> {
 			final public Store<V> newStoreOf(V... values) {
 				if (values == null) throw new IllegalArgumentException("null values");
 				values = Stores.typedArrayCopy(type, values);
-				Stores.replaceNulls(values, nullValue);
-				return new ArrayStore<>(values, nullValue);
+				nullity.checkValues(values);
+				return new ArrayStore<>(values, nullity);
 			}
 
 		};
 	}
 
-	static <V> Storage<V> immutableStorage(Class<V> type, V nullValue) {
-		return new ArrayStorage<V>(type, nullValue) {
+	static <V> Storage<V> immutableStorage(Class<V> type, StoreNullity<V> nullity) {
+		return new ArrayStorage<V>(type, nullity) {
 
 			@Override
 			public boolean isStorageMutable() {
@@ -89,7 +88,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 
 			@Override
 			public Storage<V> mutable() {
-				return mutableStorage(type, nullValue);
+				return mutableStorage(type, nullity);
 			}
 
 			@Override
@@ -99,8 +98,10 @@ class ArrayStore<V> extends AbstractStore<V> {
 
 			@Override
 			public Store<V> newStore(int size) throws IllegalArgumentException {
-				if (size < 0L) throw new IllegalArgumentException("negative size");
-				return new ConstantStore<V>(type, nullValue, size);
+				if (size < 0) throw new IllegalArgumentException("negative size");
+				if (nullity.nullSettable()) return new ConstantStore<V>(type, nullity.nullValue(), size);
+				if (size == 0) return new EmptyStore<>(type, false);
+				throw new IllegalArgumentException("null disallowed");
 			}
 
 			@Override
@@ -108,19 +109,20 @@ class ArrayStore<V> extends AbstractStore<V> {
 			final public Store<V> newStoreOf(V... values) {
 				if (values == null) throw new IllegalArgumentException("null values");
 				values = Stores.typedArrayCopy(type, values);
-				Stores.replaceNulls(values, nullValue);
-				return new ImmutableArrayStore<>(values, nullValue);
+				nullity.checkValues(values);
+				return new ImmutableArrayStore<>(values, nullity);
 			}
 
 		};
 	}
 
 	final V[] values;
-	final V nullValue;
+	final StoreNullity<V> nullity;
 
 	@SuppressWarnings("unchecked")
-	ArrayStore(Class<V> type, int size, V nullValue) {
-		if (nullValue == null) throw new IllegalArgumentException("null initialValue");
+	ArrayStore(Class<V> type, int size, StoreNullity<V> nullity) {
+		V nullValue = nullity.nullValue();
+		if (nullValue == null) throw new IllegalArgumentException("null allowed");
 		if (type == Object.class) {
 			values = (V[]) new Object[size];
 		} else try {
@@ -129,12 +131,12 @@ class ArrayStore<V> extends AbstractStore<V> {
 			throw new IllegalArgumentException("negative size", e);
 		}
 		Arrays.fill(values, nullValue);
-		this.nullValue = nullValue;
+		this.nullity = nullity;
 	}
 
-	ArrayStore(V[] values, V nullValue) {
+	ArrayStore(V[] values, StoreNullity<V> nullity) {
 		this.values = values;
-		this.nullValue = nullValue;
+		this.nullity = nullity;
 	}
 
 	@Override
@@ -165,7 +167,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 
 	@Override
 	public V set(int index, V value) {
-		if (value == null) value = nullValue;
+		value = nullity.checkedValue(value);
 		V old = values[index];
 		values[index] = value;
 		return old;
@@ -173,13 +175,13 @@ class ArrayStore<V> extends AbstractStore<V> {
 
 	@Override
 	public void fill(V value) {
-		if (value == null) value = nullValue;
+		value = nullity.checkedValue(value);
 		Arrays.fill(values, value);
 	}
 
 	@Override
-	public Optional<V> nullValue() {
-		return Optional.of(nullValue);
+	public StoreNullity<V> nullity() {
+		return nullity;
 	}
 
 	// mutability
@@ -188,7 +190,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 	public boolean isMutable() { return true; }
 
 	@Override
-	public Store<V> mutableCopy() { return new ArrayStore<V>(values.clone(), nullValue); }
+	public Store<V> mutableCopy() { return new ArrayStore<V>(values.clone(), nullity); }
 
 	@Override
 	public Store<V> immutableCopy() { return new ImmutableArrayStore<>(values.clone(), values.length); }

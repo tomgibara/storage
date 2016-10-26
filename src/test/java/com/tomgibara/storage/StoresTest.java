@@ -16,6 +16,8 @@
  */
 package com.tomgibara.storage;
 
+import static com.tomgibara.storage.StoreNullity.settingNullAllowed;
+import static com.tomgibara.storage.StoreNullity.settingNullToValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -30,20 +32,20 @@ public class StoresTest {
 
 	@Test
 	public void testIsNullable() {
-		assertFalse( Stores.objects(Optional.empty()).nullValue().isPresent() );
-		assertTrue( Stores.objects(Optional.of(new Object())).nullValue().isPresent() );
-		assertFalse( Stores.objectsAndNull(Optional.of(new Object())).nullValue().isPresent() );
+//		assertFalse( Stores.objects(Optional.empty()).nullValue().isPresent() );
+//		assertTrue( Stores.objects(Optional.of(new Object())).nullValue().isPresent() );
+//		assertFalse( Stores.objectsAndNull(Optional.of(new Object())).nullValue().isPresent() );
 	}
 
 	@Test
 	public void testPrimitiveNullability() {
 		{ // not supporting null
-			Store<Integer> ints = Stores.ints(1,2,3);
+			Store<Integer> ints = Stores.intsWithNullity(settingNullToValue(0),1,2,3);
 			ints.set(0, null);
 			assertEquals(0, ints.get(0).intValue());
 		}
 		{ // supporting null
-			Store<Integer> ints = Stores.intsAndNull(1,2,3);
+			Store<Integer> ints = Stores.intsWithNullity(settingNullAllowed(),1,2,3);
 			ints.set(0, null);
 			assertNull(ints.get(0));
 		}
@@ -52,7 +54,7 @@ public class StoresTest {
 	@Test
 	public void testPrimitiveIsNull() {
 		assertFalse( Stores.ints(1,2,3).isNull(0) );
-		Store<Integer> ints = Stores.intsAndNull(1,2,3);
+		Store<Integer> ints = Stores.intsWithNullity(settingNullAllowed(),1,2,3);
 		ints.set(0, null);
 		assertTrue( ints.isNull(0) );
 		assertFalse( ints.isNull(1) );
@@ -60,18 +62,18 @@ public class StoresTest {
 
 	@Test
 	public void testDefaultNullValue() {
-		assertEquals(Optional.of(""), Stores.defaultNullValue(String.class));
-		assertEquals(Optional.of(0), Stores.defaultNullValue(int.class));
-		assertEquals(Optional.of(0), Stores.defaultNullValue(Integer.class));
-		assertEquals(Optional.of(false), Stores.defaultNullValue(boolean.class));
-		assertEquals(Optional.of(Month.JANUARY), Stores.defaultNullValue(Month.class));
+		assertEquals("", Stores.defaultNullity(String.class).nullValue());
+		assertEquals(0, Stores.defaultNullity(int.class).nullValue().intValue());
+		assertEquals(0, Stores.defaultNullity(Integer.class).nullValue().intValue());
+		assertEquals(false, Stores.defaultNullity(boolean.class).nullValue().booleanValue());
+		assertEquals(Month.JANUARY, Stores.defaultNullity(Month.class).nullValue());
 	}
 
 	@Test
 	public void testInitialCount() {
 		assertEquals(4, Stores.ints(0,1,2,3).count());
-		assertEquals(4, Stores.intsAndNull(0,1,2,3).count());
+		assertEquals(4, Stores.intsWithNullity(settingNullAllowed(),0,1,2,3).count());
 		assertEquals(0, Stores.ints().count());
-		assertEquals(0, Stores.intsAndNull().count());
+		assertEquals(0, Stores.intsWithNullity(settingNullAllowed()).count());
 	}
 }

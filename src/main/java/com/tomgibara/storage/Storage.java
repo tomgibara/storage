@@ -16,6 +16,8 @@
  */
 package com.tomgibara.storage;
 
+import static com.tomgibara.storage.StoreNullity.settingNullAllowed;
+
 import java.util.Optional;
 
 import com.tomgibara.storage.RefStore.RefStorage;
@@ -49,7 +51,7 @@ public interface Storage<V> {
 	 * @return genericized storage
 	 */
 	static <V> Storage<V> generic() {
-		return generic(null);
+		return generic(settingNullAllowed());
 	}
 
 	/**
@@ -67,11 +69,11 @@ public interface Storage<V> {
 	 * @return genericized storage
 	 */
 	@SuppressWarnings("unchecked")
-	static <V> Storage<V> generic(V nullValue) {
-		if (nullValue == null) {
+	static <V> Storage<V> generic(StoreNullity<V> nullity) {
+		if (nullity.nullGettable()) {
 			return (Storage<V>) NullArrayStore.mutableObjectStorage;
 		} else {
-			return (Storage<V>) ArrayStore.mutableStorage(Object.class, nullValue);
+			return ArrayStore.mutableStorage((Class<V>) Object.class, nullity);
 		}
 	}
 
@@ -97,7 +99,7 @@ public interface Storage<V> {
 	 * @see #typed(Class, Optional)
 	 */
 	static <V> Storage<V> typed(Class<V> type) throws IllegalArgumentException {
-		return typed(type, null);
+		return typed(type, settingNullAllowed());
 	}
 
 	/**
@@ -126,16 +128,16 @@ public interface Storage<V> {
 	 * @return typed storage
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	static <V> Storage<V> typed(Class<V> type, V nullValue) throws IllegalArgumentException {
+	static <V> Storage<V> typed(Class<V> type, StoreNullity<V> nullity) throws IllegalArgumentException {
 		if (type == null) throw new IllegalArgumentException("null type");
-		if (nullValue == null) {
+		if (nullity.nullGettable()) {
 			if (type.isEnum()) return new NullEnumStorage(type);
 			if (type.isPrimitive()) return NullPrimitiveStore.newStorage(type);
 			return NullArrayStore.mutableStorage(type);
 		} else {
-			if (type.isEnum()) return new EnumStorage(type, (Enum) nullValue);
-			if (type.isPrimitive()) return PrimitiveStore.newStorage(type, nullValue);
-			return ArrayStore.mutableStorage(type, nullValue);
+			if (type.isEnum()) return new EnumStorage(type, nullity);
+			if (type.isPrimitive()) return PrimitiveStore.newStorage(type, nullity);
+			return ArrayStore.mutableStorage(type, nullity);
 		}
 	}
 
@@ -238,23 +240,27 @@ public interface Storage<V> {
 		return isStorageMutable() ? new MutableStorage<>(this) : this;
 	}
 
-	/**
-	 * <p>
-	 * The value that substitutes for null in this storage. For storage that
-	 * supports null values this method will always return <em>empty</em>. Some
-	 * stores do not support null values (for example, those backed by primitive
-	 * arrays) in this instance the returned value may never be <em>empty</em>.
-	 *
-	 * <p>
-	 * Note that the value returned by this method will by substituted for null
-	 * in calls to {@link Store#set(int, Object)} and {@link Store#clear()} but
-	 * occurrences of this value in the store will not be reported as null.
-	 *
-	 * @return the value that substitutes for null wrapped in an optional, or
-	 *         empty
-	 */
-	default Optional<V> nullValue() {
-		return Optional.empty();
+//	/**
+//	 * <p>
+//	 * The value that substitutes for null in this storage. For storage that
+//	 * supports null values this method will always return <em>empty</em>. Some
+//	 * stores do not support null values (for example, those backed by primitive
+//	 * arrays) in this instance the returned value may never be <em>empty</em>.
+//	 *
+//	 * <p>
+//	 * Note that the value returned by this method will by substituted for null
+//	 * in calls to {@link Store#set(int, Object)} and {@link Store#clear()} but
+//	 * occurrences of this value in the store will not be reported as null.
+//	 *
+//	 * @return the value that substitutes for null wrapped in an optional, or
+//	 *         empty
+//	 */
+//	default Optional<V> nullValue() {
+//		return Optional.empty();
+//	}
+
+	default StoreNullity<V> nullity() {
+		return StoreNullity.settingNullAllowed();
 	}
 
 	/**

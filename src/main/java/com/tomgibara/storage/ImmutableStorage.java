@@ -16,7 +16,6 @@
  */
 package com.tomgibara.storage;
 
-import java.util.Optional;
 
 final class ImmutableStorage<V> implements Storage<V> {
 
@@ -42,8 +41,8 @@ final class ImmutableStorage<V> implements Storage<V> {
 	}
 
 	@Override
-	public Optional<V> nullValue() {
-		return storage.nullValue();
+	public StoreNullity<V> nullity() {
+		return storage.nullity();
 	}
 
 	@Override

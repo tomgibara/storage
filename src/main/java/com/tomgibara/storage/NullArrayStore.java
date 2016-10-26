@@ -19,6 +19,7 @@ package com.tomgibara.storage;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
+// must be null allowed
 class NullArrayStore<V> extends AbstractStore<V> {
 
 	static <V> Storage<V> mutableStorage(Class<V> type) {
@@ -92,7 +93,7 @@ class NullArrayStore<V> extends AbstractStore<V> {
 			@SafeVarargs
 			final public Store<V> newStoreOf(V... values) {
 				if (values == null) throw new IllegalArgumentException("null values");
-				return new ImmutableArrayStore<>(Stores.typedArrayCopy(type, values), Stores.countNonNulls(values));
+				return new ImmutableArrayStore<>(Stores.typedArrayCopy(type, values), nullity().countNonNulls(values));
 			}
 
 		};
@@ -115,7 +116,7 @@ class NullArrayStore<V> extends AbstractStore<V> {
 
 	NullArrayStore(V[] values) {
 		this.values = values;
-		count = Stores.countNonNulls(values);
+		count = nullity().countNonNulls(values);
 	}
 
 	NullArrayStore(V[] values, int count) {

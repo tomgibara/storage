@@ -16,6 +16,7 @@
  */
 package com.tomgibara.storage;
 
+import static com.tomgibara.storage.StoreNullity.settingNullToValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -117,7 +118,7 @@ public class StorageTest {
 	@Test
 	public void testEnumStorage() {
 
-		Storage<Tri> t = Storage.typed(Tri.class, Tri.SCALENE);
+		Storage<Tri> t = Storage.typed(Tri.class, settingNullToValue(Tri.SCALENE));
 		Store<Tri> s = t.newStore(10);
 		assertEquals(Tri.SCALENE, s.get(0));
 		assertEquals(Tri.SCALENE, s.get(9));
@@ -129,9 +130,9 @@ public class StorageTest {
 		assertEquals(s, s.immutableCopy());
 		assertEquals(Collections.nCopies(10, Tri.ISOSCELES), s.asList());
 		s.asList().set(0, null);
-		assertEquals(s.nullValue().get(), s.get(0));
+		assertEquals(s.nullity().nullValue(), s.get(0));
 
-		assertEquals(Tri.ISOSCELES, Storage.typed(Tri.class, Tri.ISOSCELES).newStore(1).get(0));
+		assertEquals(Tri.ISOSCELES, Storage.typed(Tri.class, settingNullToValue(Tri.ISOSCELES)).newStore(1).get(0));
 	}
 
 	@Test
@@ -153,13 +154,13 @@ public class StorageTest {
 
 	@Test
 	public void testNonNullStorage() {
-		assertNotNull(Storage.typed(String.class, "").newStore(10).get(0));
-		assertNotNull(Storage.generic(new Object()).newStore(10).get(0));
+		assertNotNull(Storage.typed(String.class, settingNullToValue("")).newStore(10).get(0));
+		assertNotNull(Storage.generic(settingNullToValue(new Object())).newStore(10).get(0));
 	}
 
 	@Test
 	public void testNewStoreOf() {
-		Store<String> muStr = Storage.typed(String.class, "").mutable().newStoreOf("One", "Two", "Three", null);
+		Store<String> muStr = Storage.typed(String.class, settingNullToValue("")).mutable().newStoreOf("One", "Two", "Three", null);
 		assertTrue(muStr.isMutable());
 		assertEquals("One", muStr.get(0));
 		assertEquals("", muStr.get(3));

@@ -17,24 +17,23 @@
 package com.tomgibara.storage;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 final class ImmutableArrayStore<V> extends AbstractStore<V> {
 
 	private final V[] values;
 	private final int count;
-	private final V nullValue;
+	private final StoreNullity<V> nullity;
 
 	ImmutableArrayStore(V[] values, int count) {
 		this.values = values;
 		this.count = count;
-		nullValue = null;
+		nullity = StoreNullity.settingNullAllowed();
 	}
 
-	ImmutableArrayStore(V[] values, V nullValue) {
+	ImmutableArrayStore(V[] values, StoreNullity<V> nullity) {
 		this.values = values;
-		count = Stores.countNonNulls(values);
-		this.nullValue = nullValue;
+		count = nullity.countNonNulls(values);
+		this.nullity = nullity;
 	}
 
 	@Override
@@ -59,38 +58,39 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 
 	@Override
 	public Store<V> resizedCopy(int newSize) {
-		return nullValue == null ?
+		return nullity.nullGettable() ?
 				new NullArrayStore<>(Arrays.copyOf(values, newSize), count) :
-				new ArrayStore<>(Stores.resizedCopyOf(values, newSize, nullValue), nullValue);
+				new ArrayStore<>(nullity.resizedCopyOf(values, newSize), nullity);
 	}
 
-
 	@Override
-	public Optional<V> nullValue() {
-		return Optional.ofNullable(nullValue);
+	public StoreNullity<V> nullity() {
+		return nullity;
 	}
 
 	// mutability
 
 	@Override
 	public Store<V> mutableCopy() {
-		return nullValue == null ?
+		return nullity.nullGettable() ?
 				new NullArrayStore<>(values.clone(), count) :
-				new ArrayStore<>(values.clone(), nullValue);
+				new ArrayStore<>(values.clone(), nullity);
 		}
 
 	@Override
 	public Store<V> immutableCopy() {
-		return nullValue == null ?
+		return nullity.nullGettable() ?
 				new ImmutableArrayStore<>(values.clone(), count) :
-				new ImmutableArrayStore<>(values.clone(), nullValue);
+					//TODO seems inefficient: count already known
+				new ImmutableArrayStore<>(values.clone(), nullity);
 		}
 
 	@Override
 	public Store<V> immutableView() {
-		return nullValue == null ?
+		return nullity.nullGettable() ?
 				new ImmutableArrayStore<>(values, count):
-				new ImmutableArrayStore<>(values, nullValue);
+					//TODO seems inefficient: count already known
+				new ImmutableArrayStore<>(values, nullity);
 	}
 
 }
