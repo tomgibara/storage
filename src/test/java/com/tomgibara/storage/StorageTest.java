@@ -22,6 +22,7 @@ import static org.junit.Assert.*;
 
 import java.util.Collections;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class StorageTest {
@@ -130,6 +131,24 @@ public class StorageTest {
 		assertEquals(s.nullity().nullValue(), s.get(0));
 
 		assertEquals(Tri.ISOSCELES, Storage.typed(Tri.class, settingNullToValue(Tri.ISOSCELES)).newStore(1).get(0));
+
+		testEnumStorageConstruction(t);
+		testEnumStorageConstruction(Storage.typed(Tri.class, settingNullDisallowed()));
+	}
+
+	private void testEnumStorageConstruction(Storage<Tri> t) {
+		{
+			Store<Tri> orig = Stores.objects(Tri.EQUILATERAL, Tri.ISOSCELES, Tri.SCALENE);
+			assertEquals(orig, t.newCopyOf(orig));
+		}
+		{
+			Store<Tri> orig = Stores.objectsWithNullity(settingNullDisallowed(), Tri.EQUILATERAL, Tri.ISOSCELES, Tri.SCALENE);
+			assertEquals(orig, t.newCopyOf(orig));
+		}
+		{
+			Tri[] arr = { Tri.EQUILATERAL, Tri.ISOSCELES, Tri.SCALENE };
+			Assert.assertArrayEquals(arr, t.newStoreOf(arr).asList().toArray());
+		}
 	}
 
 	@Test

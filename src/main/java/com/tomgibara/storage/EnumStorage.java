@@ -18,8 +18,7 @@ package com.tomgibara.storage;
 
 import com.tomgibara.storage.SmallValueStore.SmallValueStorage;
 
-//TODO optimize storage methods
-class EnumStorage<E extends Enum<E>> implements Storage<E> {
+final class EnumStorage<E extends Enum<E>> implements Storage<E> {
 
 	private final Class<E> type;
 	private final E[] constants;
@@ -47,6 +46,34 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		SmallValueStore store = storage.newStore(size);
 		if (nullValue != 0) store.fillInt(nullValue);
 		return new EnumStore(store);
+	}
+
+	@Override
+	public Store<E> newStoreOf(@SuppressWarnings("unchecked") E... values) {
+		if (values == null) throw new IllegalArgumentException("null values");
+		int size = values.length;
+		SmallValueStore store = storage.newStore(size);
+		for (int i = 0; i < size; i++) {
+			store.set(i, nullity.checkedValue(values[i]).ordinal());
+		}
+		return new EnumStore(store);
+	}
+
+	@Override
+	public Store<E> newCopyOf(Store<E> store) {
+		if (store == null) throw new IllegalArgumentException("null store");
+		int size = store.size();
+		SmallValueStore s = storage.newStore(size);
+		if (store.nullity().nullGettable()) {
+			for (int i = 0; i < size; i++) {
+				s.set(i, nullity.checkedValue(store.get(i)).ordinal());
+			}
+		} else {
+			for (int i = 0; i < size; i++) {
+				s.set(i, store.get(i).ordinal());
+			}
+		}
+		return new EnumStore(s);
 	}
 
 	private final class EnumStore extends AbstractStore<E> {
