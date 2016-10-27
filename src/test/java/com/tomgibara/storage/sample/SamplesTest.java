@@ -17,6 +17,7 @@ public class SamplesTest {
 	int size = 100;
 	int newSize = 200;
 	boolean nullsAllowed = false;
+	Storage<T> storage = Storage.generic();
 	int i = 0;
 	int j = 1;
 	T value = new T();
@@ -65,15 +66,16 @@ public class SamplesTest {
 
 		// BASIC STORE FUNCTIONS
 
-		ex1.set(i, value);    // set a value
-		ex1.get(i);           // get a value
-		ex1.isNull(i);        // check if a value is null
-		ex1.transpose(i, j);  // swap two values
-		ex1.clear();          // clear all values
-		ex1.fill(value);      // change all values
-		ex1.iterator();       // iterate over all non-null values
-		ex1.forEach(t -> {}); // act over all non-null values
-		ex1.compact();       // gather all non-null values
+		ex1.set(i, value);        // set a value
+		ex1.get(i);               // get a value
+		ex1.isNull(i);            // check if a value is null
+		ex1.transpose(i, j);      // swap two values
+		ex1.clear();              // clear all values
+		ex1.fill(value);          // change all values
+		ex1.iterator();           // iterate over all non-null values
+		ex1.forEach(t -> {});     // act over all non-null values
+		ex1.resizedCopy(newSize); // create a resized copy
+		ex1.compact();            // gather all non-null values
 
 
 		// ADDITIONAL STORE FUNCTIONS
@@ -87,8 +89,8 @@ public class SamplesTest {
 		/* An immutable view over the store. */
 		Store<T> view = ex4.immutableView();
 
-		/* A resized copy of an existing store. */
-		Store<T> copy = ex5.resizedCopy(newSize);
+		/* Copy a store into alternative storage. */ 
+		Store<T> copy = ex5.copiedBy(storage);
 
 		/* A store as a list. */
 		List<Integer> list = ex6.asList();
