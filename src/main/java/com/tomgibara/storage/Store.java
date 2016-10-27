@@ -21,6 +21,7 @@ import static com.tomgibara.storage.Stores.immutableException;
 import java.util.AbstractList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -506,7 +507,10 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 		}
 	}
 
-	//TODO implement spliterator
+	@Override
+	public default Spliterator<V> spliterator() {
+		return new StoreSpliterator<>(this);
+	}
 
 	// transposable methods
 

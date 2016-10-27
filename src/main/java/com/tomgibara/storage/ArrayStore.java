@@ -18,6 +18,8 @@ package com.tomgibara.storage;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Spliterator;
+import java.util.Spliterators;
 
 class ArrayStore<V> extends AbstractStore<V> {
 
@@ -182,6 +184,11 @@ class ArrayStore<V> extends AbstractStore<V> {
 	@Override
 	public StoreNullity<V> nullity() {
 		return nullity;
+	}
+
+	@Override
+	public Spliterator<V> spliterator() {
+		return Spliterators.spliterator(values, Spliterator.ORDERED | Spliterator.NONNULL);
 	}
 
 	// mutability

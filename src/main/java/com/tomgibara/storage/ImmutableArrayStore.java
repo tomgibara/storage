@@ -17,6 +17,8 @@
 package com.tomgibara.storage;
 
 import java.util.Arrays;
+import java.util.Spliterator;
+import java.util.Spliterators;
 
 final class ImmutableArrayStore<V> extends AbstractStore<V> {
 
@@ -66,6 +68,13 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 	@Override
 	public StoreNullity<V> nullity() {
 		return nullity;
+	}
+
+	@Override
+	public Spliterator<V> spliterator() {
+		return nullity.nullGettable() ?
+				new StoreSpliterator<>(this) :
+				Spliterators.spliterator(values, Spliterator.ORDERED | Spliterator.NONNULL);
 	}
 
 	// mutability

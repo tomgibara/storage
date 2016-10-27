@@ -19,27 +19,25 @@ package com.tomgibara.storage;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
-// only for non-null stores
 class StoreSpliterator<V> implements Spliterator<V> {
 
 	private final Store<V> store;
+	private final boolean nonNull;
 	private final int chi;
 	private int from;
 	private int to;
 
 	StoreSpliterator(Store<V> store) {
 		this.store = store;
-		if (store.nullity().nullGettable()) {
-			chi = store.isMutable() ? ORDERED : ORDERED | IMMUTABLE;
-		} else {
-			chi = store.isMutable() ? ORDERED | SIZED | SUBSIZED | NONNULL : ORDERED | SIZED | SUBSIZED | NONNULL | IMMUTABLE;
-		}
+		nonNull = !store.nullity().nullGettable();
+		chi = nonNull ? ORDERED | SIZED | SUBSIZED | NONNULL : ORDERED;
 		from = 0;
 		to = store.size();
 	}
 
 	StoreSpliterator(StoreSpliterator<V> splitter) {
 		store = splitter.store;
+		nonNull = splitter.nonNull;
 		chi = splitter.chi;
 		from = (splitter.from + splitter.to) >> 1;
 		to = splitter.to;
@@ -49,7 +47,7 @@ class StoreSpliterator<V> implements Spliterator<V> {
 
 	@Override
 	public boolean tryAdvance(Consumer<? super V> action) {
-		if ((chi & NONNULL) != 0) {
+		if (nonNull) {
 			if (from == to) return false;
 			action.accept(store.get(from++));
 			return true;
@@ -65,6 +63,20 @@ class StoreSpliterator<V> implements Spliterator<V> {
 	}
 
 	@Override
+	public void forEachRemaining(Consumer<? super V> action) {
+		if (nonNull) {
+			for (; from < to; from++) {
+				action.accept(store.get(from));
+			}
+		} else {
+			for (; from < to; from++) {
+				V v = store.get(from);
+				if (v != null) action.accept(v);
+			}
+		}
+	}
+
+	@Override
 	public Spliterator<V> trySplit() {
 		if (from >= to - 1) return null;
 		return new StoreSpliterator<>(this);
@@ -73,6 +85,11 @@ class StoreSpliterator<V> implements Spliterator<V> {
 	@Override
 	public long estimateSize() {
 		return to - from;
+	}
+
+	@Override
+	public long getExactSizeIfKnown() {
+		return nonNull ? to - from : -1L;
 	}
 
 	@Override

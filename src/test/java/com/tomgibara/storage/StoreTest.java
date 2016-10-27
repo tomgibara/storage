@@ -27,7 +27,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Spliterator;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.junit.Test;
 
@@ -232,6 +237,86 @@ public class StoreTest {
 		assertEquals(org.count(), cpy.count());
 		assertFalse(cpy.isMutable());
 		assertNotSame(org, cpy);
+	}
+
+	@Test
+	public void testSpliterator() {
+		{
+			Store<String> strs = Stores.objects("A", "B", null, "D");
+			Spliterator<String> s = strs.spliterator();
+			s.tryAdvance(v -> assertEquals("A", v));
+			s.tryAdvance(v -> assertEquals("B", v));
+			s.tryAdvance(v -> assertEquals("D", v));
+			assertFalse(s.tryAdvance(v -> fail()));
+			testSpliterator(strs);
+			testSpliterator(strs.immutable());
+		}
+		{
+			Store<String> strs = Stores.objectsWithNullity(settingNullDisallowed(), "A", "B", "C", "D");
+			Spliterator<String> s = strs.spliterator();
+			assertEquals(4L, s.getExactSizeIfKnown());
+			s.tryAdvance(v -> assertEquals("A", v));
+			s.tryAdvance(v -> assertEquals("B", v));
+			s.tryAdvance(v -> assertEquals("C", v));
+			s.tryAdvance(v -> assertEquals("D", v));
+			assertFalse(s.tryAdvance(v -> fail()));
+			testSpliterator(strs);
+			testSpliterator(strs.immutable());
+		}
+		{
+			Store<Integer> ints = Stores.ints(1,2,3,4);
+			Spliterator<Integer> s = ints.spliterator();
+			assertEquals(4L, s.getExactSizeIfKnown());
+			for (int i = 1; i <= 4; i++) {
+				final int e = i;
+				s.tryAdvance(v -> assertEquals(e, v.intValue()));
+			}
+			assertFalse(s.tryAdvance(v -> fail()));
+			testSpliterator(ints);
+		}
+		{
+			Store<Double> doubles = Stores.doubles(1.0,2.0,3.0,4.0);
+			Spliterator<Double> s = doubles.spliterator();
+			assertEquals(4L, s.getExactSizeIfKnown());
+			for (int i = 1; i <= 4; i++) {
+				final double e = i;
+				s.tryAdvance(v -> assertEquals(e, v.doubleValue(), 0.0));
+			}
+			assertFalse(s.tryAdvance(v -> fail()));
+			testSpliterator(doubles);
+		}
+		{
+			Store<Long> longs = Stores.longs(1L,2L,3L,4L);
+			Spliterator<Long> s = longs.spliterator();
+			assertEquals(4L, s.getExactSizeIfKnown());
+			for (int i = 1; i <= 4; i++) {
+				final long e = i;
+				s.tryAdvance(v -> assertEquals(e, v.intValue()));
+			}
+			assertFalse(s.tryAdvance(v -> fail()));
+			testSpliterator(longs);
+		}
+		{
+			Store<String> xs = Stores.constantStore("X", 11);
+			Spliterator<String> s = xs.spliterator();
+			assertEquals(11L, s.getExactSizeIfKnown());
+			for (int i = 0; i < 11; i++) {
+				s.tryAdvance(v -> assertEquals("X", v));
+			}
+			testSpliterator(xs);
+		}
+		{
+			Store<Object> none = Stores.constantStore(null, 4);
+			Spliterator<Object> s = none.spliterator();
+			assertFalse(s.tryAdvance(v -> fail()));
+			testSpliterator(none);
+		}
+	}
+
+	private <V> void testSpliterator(Store<V> s) {
+		List<V> expected = new ArrayList<>(s.asList());
+		expected.removeIf(v -> v == null);
+		assertEquals(expected, StreamSupport.stream(s.spliterator(), false).collect(Collectors.toList()));
 	}
 
 	private void checkIAE(Runnable r) {

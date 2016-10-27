@@ -19,6 +19,8 @@ package com.tomgibara.storage;
 import static com.tomgibara.storage.Stores.immutableException;
 
 import java.util.Arrays;
+import java.util.Spliterator;
+import java.util.Spliterators;
 
 abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
@@ -613,6 +615,10 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			return newNullity(nullSettable, nullValue);
 		}
 
+		@Override
+		public Spliterator.OfLong spliterator() {
+			return Spliterators.spliterator(values, Spliterator.ORDERED | Spliterator.NONNULL);
+		}
 	}
 
 	final static class IntegerStore extends PrimitiveStore<Integer> {
@@ -691,6 +697,10 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			return newNullity(nullSettable, nullValue);
 		}
 
+		@Override
+		public Spliterator.OfInt spliterator() {
+			return Spliterators.spliterator(values, Spliterator.ORDERED | Spliterator.NONNULL);
+		}
 	}
 
 	final static class DoubleStore extends PrimitiveStore<Double> {
@@ -769,6 +779,10 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			return newNullity(nullSettable, nullValue);
 		}
 
+		@Override
+		public Spliterator.OfDouble spliterator() {
+			return Spliterators.spliterator(values, Spliterator.ORDERED | Spliterator.NONNULL);
+		}
 	}
 
 	final static class BooleanStore extends PrimitiveStore<Boolean> {
