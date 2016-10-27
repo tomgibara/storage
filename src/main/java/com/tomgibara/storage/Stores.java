@@ -20,6 +20,7 @@ import static com.tomgibara.storage.StoreNullity.settingNullAllowed;
 import static com.tomgibara.storage.StoreNullity.settingNullDisallowed;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 
 /**
  * Collects static methods for creating new stores that wrap existing arrays.
@@ -495,19 +496,23 @@ public final class Stores {
 	}
 
 	static <V> V[] toArray(Store<V> store) {
-		return toArray(store, store.size());
+		return toArray(store, store.size(), null);
 	}
 
-	static<V> V[] toArray(Store<V> store, int length) {
+	static<V> V[] toArray(Store<V> store, int length, V nullValue) {
 		@SuppressWarnings("unchecked")
 		V[] vs = (V[]) Array.newInstance(store.valueType(), length);
-		return copyIntoArray(store, vs);
+		return copyIntoArray(store, vs, nullValue);
 	}
 
-	static<V> V[] copyIntoArray(Store<V> store, V[] vs) {
-		int limit = Math.min( store.size(), vs.length );
+	static<V> V[] copyIntoArray(Store<V> store, V[] vs, V nullValue) {
+		int length = vs.length;
+		int limit = Math.min( store.size(), length);
 		for (int i = 0; i < limit; i++) {
 			vs[i] = store.get(i);
+		}
+		if (limit < length && nullValue != null) {
+			Arrays.fill(vs, limit, length, nullValue);
 		}
 		return vs;
 	}

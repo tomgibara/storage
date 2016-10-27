@@ -17,6 +17,8 @@
 package com.tomgibara.storage;
 
 import static com.tomgibara.storage.StoreNullity.settingNullAllowed;
+import static com.tomgibara.storage.StoreNullity.settingNullDisallowed;
+import static com.tomgibara.storage.StoreNullity.settingNullToValue;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -101,12 +103,20 @@ public class StoreTest {
 
 	@Test
 	public void testResizedCopy() {
-		try {
-			Stores.ints(1,2,3).resizedCopy(5);
-			fail("allowed to grow");
-		} catch (IllegalArgumentException e) {
-			/* expected */
-		}
+		// check prohibition on enlarging non-nullable stores
+		checkIAE(() -> Stores.immutableObjectsWithNullity(settingNullDisallowed(),"A","B","C").resizedCopy(4));
+		checkIAE(() -> Storage.generic(settingNullDisallowed()).newStore(0).resizedCopy(1));
+		checkIAE(() -> Storage.typed(String.class, settingNullDisallowed()).newStore(0).resizedCopy(1));
+		checkIAE(() -> Storage.typed(Tri.class, settingNullDisallowed()).newStore(0).resizedCopy(1));
+		checkIAE(() -> Storage.typed(int.class, settingNullDisallowed()).newStore(0).resizedCopy(1));
+		// check enlarging stores with null values
+		assertEquals("", Stores.immutableObjectsWithNullity(settingNullToValue(""),"A","B","C").resizedCopy(4).get(3));
+		assertEquals("", Storage.generic(settingNullToValue("")).newStore(0).resizedCopy(1).get(0));
+		assertEquals("Moo", Storage.typed(String.class, settingNullToValue("Moo")).newStore(0).resizedCopy(1).get(0));
+		assertEquals(Tri.EQUILATERAL, Storage.typed(Tri.class, settingNullToValue(Tri.EQUILATERAL)).newStore(0).resizedCopy(1).get(0));
+		assertEquals(4, Storage.typed(int.class, settingNullToValue(4)).newStore(0).resizedCopy(1).get(0).intValue());
+		// check with ints
+		checkIAE(() -> Stores.ints(1,2,3).resizedCopy(5));
 		Store<Integer> s = Stores.intsWithNullity(StoreNullity.settingNullToValue(0),1,2,3);
 		Store<Integer> t = s.resizedCopy(5);
 		assertTrue(t.isMutable());
@@ -212,4 +222,14 @@ public class StoreTest {
 		cc.compact();
 		assertEquals(c, cc);
 	}
+
+	private void checkIAE(Runnable r) {
+		try {
+			r.run();
+			fail("expected IAE");
+		} catch (IllegalArgumentException e) {
+			/* expected */
+		}
+	}
+
 }

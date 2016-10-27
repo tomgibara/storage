@@ -217,11 +217,18 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	}
 
 	/**
-	 * A mutable detached copy of this store with the specified size.
-	 * Detached means that changes to the returned store will not affect the
-	 * copied store. The new size may be smaller, larger or even the same as
-	 * the copied store. This is an analogue of the
+	 * <p>
+	 * A mutable detached copy of this store with the specified size. Detached
+	 * means that changes to the returned store will not affect the copied
+	 * store. The new size may be smaller, larger or even the same as the copied
+	 * store. This is an analogue of the
 	 * <code>Arrays.copyOf(original, length)</code>.
+	 * 
+	 * <p>
+	 * It is not possible to create enlarged copies of stores on which null
+	 * values cannot be set. However, enlarged copies can be created from stores
+	 * that substitute non-null values for null; indices beyond the original
+	 * store size are filled with the substitute value.
 	 *
 	 * @param newSize
 	 *            the size required in the new store
@@ -230,9 +237,13 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 */
 	default Store<V> resizedCopy(int newSize) {
 		StoreNullity<V> nullity = nullity();
-		return nullity.nullGettable() ?
-				new NullArrayStore<>(Stores.toArray(this, newSize), count()) :
-				new ArrayStore<>(Stores.toArray(this, newSize), nullity);
+		if (nullity.nullGettable()) {
+			return new NullArrayStore<>(Stores.toArray(this, newSize, null), count());
+		}
+		if (!nullity.nullSettable() && newSize > size()) {
+			throw new IllegalArgumentException("cannot create copy with greater size, no null value");
+		}
+		return new ArrayStore<>(Stores.toArray(this, newSize, nullity.nullValue()), nullity);
 	}
 
 	/**
