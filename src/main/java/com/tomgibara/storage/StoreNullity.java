@@ -55,22 +55,26 @@ public final class StoreNullity<V> {
 	// public statics
 
 	/**
+	 * <p>
 	 * A nullity that substitutes nulls with the specified value. The returned
 	 * nullity allows nulls to be set on a store ({@link #nullSettable()}
 	 * returns true) but will not allow nulls to be returned from it (
 	 * {@link #nullGettable()} returns false).
 	 * 
+	 * <p>
+	 * The exception to this is when a null value is supplied to the method
+	 * (indicating that nulls should not be substituted). In this case, the
+	 * method returns a nullity which is equivalent to that returned by
+	 * {@link #settingNullAllowed()}.
+	 * 
 	 * @param <V>
 	 *            the type of any null-substituting value
 	 * @param value
 	 *            the value to be substituted for null
-	 * @throws IllegalArgumentException
-	 *             if the substitute value is itself null
 	 * @return a nullity that substitutes nulls
 	 */
 	public static <V> StoreNullity<V> settingNullToValue(V value) {
-		if (value == null) throw new IllegalArgumentException("null value");
-		return new StoreNullity<>(value);
+		return value == null ? settingNullAllowed() : new StoreNullity<>(value);
 	}
 
 	/**

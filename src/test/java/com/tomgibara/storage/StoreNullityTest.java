@@ -26,6 +26,7 @@ public class StoreNullityTest {
 		assertFalse(StoreNullity.settingNullDisallowed().nullGettable());
 		assertTrue(StoreNullity.settingNullToValue("").nullSettable());
 		assertFalse(StoreNullity.settingNullToValue("").nullGettable());
-		
+		assertTrue(StoreNullity.settingNullToValue(null).nullSettable());
+		assertTrue(StoreNullity.settingNullToValue(null).nullGettable());
 	}
 }
