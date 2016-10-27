@@ -31,6 +31,10 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 	private static final int DOUBLE  = 11;
 	private static final int BOOLEAN = 12;
 
+	private static void failGrowCopy() {
+		throw new IllegalArgumentException("cannot increase size, null not settable");
+	}
+
 	private static final <T> StoreNullity<T> newNullity(boolean nullSettable, T nullValue) {
 		return nullSettable ? StoreNullity.settingNullToValue(nullValue) : StoreNullity.settingNullDisallowed();
 	}
@@ -213,6 +217,12 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		return duplicate(true, false);
 	}
 
+	// helper methods
+
+	void checkSize(int size) {
+		if (!nullSettable && size > 0) throw new IllegalArgumentException("no null value with which to populate store");
+	}
+
 	// inner classes
 
 	final static class ByteStore extends PrimitiveStore<Byte> {
@@ -222,6 +232,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		ByteStore(int size, StoreNullity<Byte> nullity) {
 			super(nullity.nullSettable());
+			checkSize(size);
 			values = new byte[size];
 			this.nullValue = nullSettable ? nullity.nullValue() : (byte) 0;
 			if (nullValue != (byte) 0) Arrays.fill(values, nullValue);
@@ -277,11 +288,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected ByteStore resize(int newSize) {
+			int oldSize = values.length;
+			boolean growing = newSize > oldSize;
+			if (growing && !nullSettable) failGrowCopy();
 			byte[] newValues = Arrays.copyOf(values, newSize);
-			if (nullValue != (byte) 0) {
-				int oldSize = values.length;
-				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
-			}
+			if (growing && nullValue != (byte) 0) Arrays.fill(newValues, oldSize, newSize, nullValue);
 			return new ByteStore(newValues, nullValue, nullSettable);
 		}
 
@@ -299,6 +310,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		FloatStore(int size, StoreNullity<Float> nullity) {
 			super(nullity.nullSettable());
+			checkSize(size);
 			this.values = new float[size];
 			this.nullValue = nullSettable ? nullity.nullValue() : 0.0f;
 			if (nullValue != (float) 0) Arrays.fill(values, nullValue);
@@ -354,11 +366,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected FloatStore resize(int newSize) {
+			int oldSize = values.length;
+			boolean growing = newSize > oldSize;
+			if (growing && !nullSettable) failGrowCopy();
 			float[] newValues = Arrays.copyOf(values, newSize);
-			if (nullValue != (float) 0) {
-				int oldSize = values.length;
-				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
-			}
+			if (growing && nullValue != 0.0f) Arrays.fill(newValues, oldSize, newSize, nullValue);
 			return new FloatStore(newValues, nullValue, nullSettable);
 		}
 
@@ -376,6 +388,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		CharacterStore(int size, StoreNullity<Character> nullity) {
 			super(nullity.nullSettable());
+			checkSize(size);
 			this.values = new char[size];
 			this.nullValue = nullSettable ? nullity.nullValue() : '\0';
 			if (nullValue != (char) 0) Arrays.fill(values, nullValue);
@@ -431,11 +444,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected CharacterStore resize(int newSize) {
+			int oldSize = values.length;
+			boolean growing = newSize > oldSize;
+			if (growing && !nullSettable) failGrowCopy();
 			char[] newValues = Arrays.copyOf(values, newSize);
-			if (nullValue != (char) 0) {
-				int oldSize = values.length;
-				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
-			}
+			if (growing && nullValue != '\0') Arrays.fill(newValues, oldSize, newSize, nullValue);
 			return new CharacterStore(newValues, nullValue, nullSettable);
 		}
 
@@ -453,6 +466,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		ShortStore(int size, StoreNullity<Short> nullity) {
 			super(nullity.nullSettable());
+			checkSize(size);
 			this.values = new short[size];
 			this.nullValue = nullSettable ? nullity.nullValue() : (short) 0;
 			if (nullValue != (short) 0) Arrays.fill(values, nullValue);
@@ -508,11 +522,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected ShortStore resize(int newSize) {
+			int oldSize = values.length;
+			boolean growing = newSize > oldSize;
+			if (growing && !nullSettable) failGrowCopy();
 			short[] newValues = Arrays.copyOf(values, newSize);
-			if (nullValue != (short) 0) {
-				int oldSize = values.length;
-				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
-			}
+			if (growing && nullValue != (short) 0) Arrays.fill(newValues, oldSize, newSize, nullValue);
 			return new ShortStore(newValues, nullValue, nullSettable);
 		}
 
@@ -530,6 +544,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		LongStore(int size, StoreNullity<Long> nullity) {
 			super(nullity.nullSettable());
+			checkSize(size);
 			this.values = new long[size];
 			this.nullValue = nullSettable ? nullity.nullValue() : 0L;
 			if (nullValue != (long) 0) Arrays.fill(values, nullValue);
@@ -585,11 +600,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected LongStore resize(int newSize) {
+			int oldSize = values.length;
+			boolean growing = newSize > oldSize;
+			if (growing && !nullSettable) failGrowCopy();
 			long[] newValues = Arrays.copyOf(values, newSize);
-			if (nullValue != (long) 0) {
-				int oldSize = values.length;
-				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
-			}
+			if (growing && nullValue != 0L) Arrays.fill(newValues, oldSize, newSize, nullValue);
 			return new LongStore(newValues, nullValue, nullSettable);
 		}
 
@@ -607,6 +622,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		IntegerStore(int size, StoreNullity<Integer> nullity) {
 			super(nullity.nullSettable());
+			checkSize(size);
 			this.values = new int[size];
 			this.nullValue = nullSettable ? nullity.nullValue() : 0;
 			if (nullValue != (int) 0) Arrays.fill(values, nullValue);
@@ -662,11 +678,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected IntegerStore resize(int newSize) {
+			int oldSize = values.length;
+			boolean growing = newSize > oldSize;
+			if (growing && !nullSettable) failGrowCopy();
 			int[] newValues = Arrays.copyOf(values, newSize);
-			if (nullValue != (int) 0) {
-				int oldSize = values.length;
-				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
-			}
+			if (growing && nullValue != 0) Arrays.fill(newValues, oldSize, newSize, nullValue);
 			return new IntegerStore(newValues, nullValue, nullSettable);
 		}
 
@@ -684,6 +700,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		DoubleStore(int size, StoreNullity<Double> nullity) {
 			super(nullity.nullSettable());
+			checkSize(size);
 			this.values = new double[size];
 			this.nullValue = nullSettable ? nullity.nullValue() : 0.0;
 			if (nullValue != (double) 0) Arrays.fill(values, nullValue);
@@ -739,11 +756,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected DoubleStore resize(int newSize) {
+			int oldSize = values.length;
+			boolean growing = newSize > oldSize;
+			if (growing && !nullSettable) failGrowCopy();
 			double[] newValues = Arrays.copyOf(values, newSize);
-			if (nullValue != (double) 0) {
-				int oldSize = values.length;
-				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
-			}
+			if (growing && nullValue != 0L) Arrays.fill(newValues, oldSize, newSize, nullValue);
 			return new DoubleStore(newValues, nullValue, nullSettable);
 		}
 
@@ -761,6 +778,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		BooleanStore(int size, StoreNullity<Boolean> nullity) {
 			super(nullity.nullSettable());
+			checkSize(size);
 			this.values = new boolean[size];
 			this.nullValue = nullSettable && nullity.nullValue();
 			if (nullValue) Arrays.fill(values, nullValue);
@@ -816,11 +834,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 		@Override
 		protected BooleanStore resize(int newSize) {
+			int oldSize = values.length;
+			boolean growing = newSize > oldSize;
+			if (growing && !nullSettable) failGrowCopy();
 			boolean[] newValues = Arrays.copyOf(values, newSize);
-			if (nullValue) {
-				int oldSize = values.length;
-				if (newSize > oldSize) Arrays.fill(newValues, oldSize, newSize, nullValue);
-			}
+			if (growing && nullValue) Arrays.fill(newValues, oldSize, newSize, nullValue);
 			return new BooleanStore(newValues, nullValue, nullSettable);
 		}
 

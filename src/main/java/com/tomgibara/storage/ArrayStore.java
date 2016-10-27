@@ -122,7 +122,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 	@SuppressWarnings("unchecked")
 	ArrayStore(Class<V> type, int size, StoreNullity<V> nullity) {
 		V nullValue = nullity.nullValue();
-		if (nullValue == null) throw new IllegalArgumentException("null allowed");
+		if (size > 0 && nullValue == null) throw new IllegalArgumentException("nullity has no nullValue");
 		if (type == Object.class) {
 			values = (V[]) new Object[size];
 		} else try {

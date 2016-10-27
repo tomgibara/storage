@@ -101,11 +101,17 @@ public class StoreTest {
 
 	@Test
 	public void testResizedCopy() {
-		Store<Integer> s = Stores.ints(1,2,3);
+		try {
+			Stores.ints(1,2,3).resizedCopy(5);
+			fail("allowed to grow");
+		} catch (IllegalArgumentException e) {
+			/* expected */
+		}
+		Store<Integer> s = Stores.intsWithNullity(StoreNullity.settingNullToValue(0),1,2,3);
 		Store<Integer> t = s.resizedCopy(5);
 		assertTrue(t.isMutable());
-		assertFalse(s.nullity().nullSettable());
-		assertFalse(s.nullity().nullGettable());
+		assertTrue(t.nullity().nullSettable());
+		assertFalse(t.nullity().nullGettable());
 		assertEquals(asList(1,2,3,0,0), t.asList());
 		Store<Integer> u = s.immutableCopy();
 		t.set(0, 4);

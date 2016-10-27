@@ -16,8 +16,6 @@
  */
 package com.tomgibara.storage;
 
-import java.util.Optional;
-
 import com.tomgibara.storage.SmallValueStore.SmallValueStorage;
 
 //TODO optimize storage methods
@@ -44,6 +42,8 @@ class EnumStorage<E extends Enum<E>> implements Storage<E> {
 
 	@Override
 	public Store<E> newStore(int size) throws IllegalArgumentException {
+		if (size < 0) throw new IllegalArgumentException("negative size");
+		if (size > 0 && !nullity.nullSettable()) throw new IllegalArgumentException("no null value with which to populate store");
 		SmallValueStore store = storage.newStore(size);
 		if (nullValue != 0) store.fillInt(nullValue);
 		return new EnumStore(store);

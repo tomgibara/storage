@@ -16,12 +16,9 @@
  */
 package com.tomgibara.storage;
 
+import static com.tomgibara.storage.StoreNullity.settingNullDisallowed;
 import static com.tomgibara.storage.StoreNullity.settingNullToValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Collections;
 
@@ -179,7 +176,59 @@ public class StorageTest {
 		assertEquals(4, muInt.get(3).intValue());
 		assertEquals(int.class, muInt.valueType());
 	}
-	
+
+	@Test
+	public void testNewStore() throws Exception {
+		// generic
+		assertEquals(0, Storage.generic().newStore(0).size());
+		assertEquals(5, Storage.generic().newStore(5).size());
+		assertEquals(0, Storage.generic().newStore(5).count());
+		assertEquals(0, Storage.generic(settingNullDisallowed()).newStore(0).size());
+		checkIAE(() -> Storage.generic(settingNullDisallowed()).newStore(5));
+		assertEquals(5, Storage.generic(settingNullToValue("")).newStore(5).size());
+		assertEquals(5, Storage.generic(settingNullToValue("")).newStore(5).count());
+		// typed regular
+		assertEquals(0, Storage.typed(String.class).newStore(0).size());
+		assertEquals(5, Storage.typed(String.class).newStore(5).size());
+		assertEquals(0, Storage.typed(String.class).newStore(5).count());
+		assertEquals(0, Storage.typed(String.class, settingNullDisallowed()).newStore(0).size());
+		checkIAE(() -> Storage.typed(String.class, settingNullDisallowed()).newStore(5));
+		assertEquals(5, Storage.typed(String.class, settingNullToValue("")).newStore(5).size());
+		assertEquals(5, Storage.typed(String.class, settingNullToValue("")).newStore(5).count());
+		// typed primitive
+		assertEquals(0, Storage.typed(int.class).newStore(0).size());
+		assertEquals(5, Storage.typed(int.class).newStore(5).size());
+		assertEquals(0, Storage.typed(int.class).newStore(5).count());
+		assertEquals(0, Storage.typed(int.class, settingNullDisallowed()).newStore(0).size());
+		checkIAE(() ->  Storage.typed(int.class, settingNullDisallowed()).newStore(5));
+		assertEquals(5, Storage.typed(int.class, settingNullToValue(0)).newStore(5).size());
+		assertEquals(5, Storage.typed(int.class, settingNullToValue(0)).newStore(5).count());
+		// typed enum
+		assertEquals(0, Storage.typed(Tri.class).newStore(0).size());
+		assertEquals(5, Storage.typed(Tri.class).newStore(5).size());
+		assertEquals(0, Storage.typed(Tri.class).newStore(5).count());
+		assertEquals(0, Storage.typed(Tri.class, settingNullDisallowed()).newStore(0).size());
+		checkIAE(() ->  Storage.typed(Tri.class, settingNullDisallowed()).newStore(5));
+		assertEquals(5, Storage.typed(Tri.class, settingNullToValue(Tri.SCALENE)).newStore(5).size());
+		assertEquals(5, Storage.typed(Tri.class, settingNullToValue(Tri.SCALENE)).newStore(5).count());
+		// small value
+		assertEquals(0, Storage.smallValues(4,true).newStore(0).size());
+		assertEquals(5, Storage.smallValues(4,true).newStore(5).size());
+		assertEquals(0, Storage.smallValues(4,true).newStore(5).count());
+		assertEquals(0, Storage.smallValues(4,false).newStore(0).size());
+		assertEquals(5, Storage.smallValues(4,false).newStore(5).size());
+		assertEquals(5, Storage.smallValues(4,false).newStore(5).count());
+	}
+
+	private void checkIAE(Runnable r) {
+		try {
+			r.run();
+			fail("expected IAE");
+		} catch (IllegalArgumentException e) {
+			/* expected */
+		}
+	}
+
 	enum Tri {
 
 		SCALENE,
