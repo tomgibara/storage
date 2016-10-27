@@ -22,12 +22,12 @@ import static com.tomgibara.storage.StoreNullity.settingNullToValue;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Iterator;
-import java.util.Optional;
 
 import org.junit.Test;
 
@@ -86,6 +86,7 @@ public class StoreTest {
 		assertEquals(1000, s.get(0).intValue());
 	}
 
+	@Test
 	public void testNullableResizedCopy() {
 		Store<Integer> s = Stores.intsWithNullity(settingNullAllowed(),1,2,3);
 		Store<Integer> t = s.resizedCopy(5);
@@ -221,6 +222,16 @@ public class StoreTest {
 		Store<E> cc = c.mutableCopy();
 		cc.compact();
 		assertEquals(c, cc);
+	}
+
+	@Test
+	public void testImmutableCopy() {
+		Store<String> org = Stores.immutableObjects("A", "B", "C", null);
+		Store<String> cpy = org.immutableCopy();
+		assertEquals(org, cpy);
+		assertEquals(org.count(), cpy.count());
+		assertFalse(cpy.isMutable());
+		assertNotSame(org, cpy);
 	}
 
 	private void checkIAE(Runnable r) {

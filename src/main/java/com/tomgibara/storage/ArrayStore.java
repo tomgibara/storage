@@ -193,6 +193,6 @@ class ArrayStore<V> extends AbstractStore<V> {
 	public Store<V> mutableCopy() { return new ArrayStore<V>(values.clone(), nullity); }
 
 	@Override
-	public Store<V> immutableCopy() { return new ImmutableArrayStore<>(values.clone(), values.length); }
+	public Store<V> immutableCopy() { return new ImmutableArrayStore<>(values.clone(), nullity); }
 
 }

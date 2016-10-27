@@ -93,7 +93,7 @@ class NullArrayStore<V> extends AbstractStore<V> {
 			@SafeVarargs
 			final public Store<V> newStoreOf(V... values) {
 				if (values == null) throw new IllegalArgumentException("null values");
-				return new ImmutableArrayStore<>(Stores.typedArrayCopy(type, values), nullity().countNonNulls(values));
+				return new ImmutableArrayStore<>(Stores.typedArrayCopy(type, values), nullity());
 			}
 
 		};
@@ -185,6 +185,6 @@ class NullArrayStore<V> extends AbstractStore<V> {
 	public Store<V> mutableCopy() { return new NullArrayStore<>(values.clone(), count); }
 
 	@Override
-	public Store<V> immutableCopy() { return new ImmutableArrayStore<>(values.clone(), count); }
+	public Store<V> immutableCopy() { return new ImmutableArrayStore<>(values.clone(), count, nullity()); }
 
 }

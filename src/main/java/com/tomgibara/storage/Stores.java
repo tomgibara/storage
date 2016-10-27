@@ -179,7 +179,7 @@ public final class Stores {
 	public static <V> Store<V> immutableObjectsAndNullCount(int count, V... values) {
 		if (count < 0) throw new IllegalArgumentException("negative size");
 		checkValuesNotNull(values);
-		return new ImmutableArrayStore<>(values, count);
+		return new ImmutableArrayStore<>(values, count, settingNullAllowed());
 	}
 
 	/**

@@ -127,7 +127,7 @@ abstract class RefStore<V> extends AbstractStore<V> {
 			vs[i] = value;
 			count++;
 		}
-		return new ImmutableArrayStore<>(vs, count);
+		return new ImmutableArrayStore<>(vs, count, nullity());
 	}
 
 	abstract Reference<V> newReference(V referent, ReferenceQueue<V> queue, int index);

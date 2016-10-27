@@ -24,10 +24,10 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 	private final int count;
 	private final StoreNullity<V> nullity;
 
-	ImmutableArrayStore(V[] values, int count) {
+	ImmutableArrayStore(V[] values, int count, StoreNullity<V> nullity) {
 		this.values = values;
 		this.count = count;
-		nullity = StoreNullity.settingNullAllowed();
+		this.nullity = nullity;
 	}
 
 	ImmutableArrayStore(V[] values, StoreNullity<V> nullity) {
@@ -79,18 +79,12 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 
 	@Override
 	public Store<V> immutableCopy() {
-		return nullity.nullGettable() ?
-				new ImmutableArrayStore<>(values.clone(), count) :
-					//TODO seems inefficient: count already known
-				new ImmutableArrayStore<>(values.clone(), nullity);
-		}
+		return new ImmutableArrayStore<>(values.clone(), count, nullity);
+	}
 
 	@Override
 	public Store<V> immutableView() {
-		return nullity.nullGettable() ?
-				new ImmutableArrayStore<>(values, count):
-					//TODO seems inefficient: count already known
-				new ImmutableArrayStore<>(values, nullity);
+		return new ImmutableArrayStore<>(values.clone(), count, nullity);
 	}
 
 }

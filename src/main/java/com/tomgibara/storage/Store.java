@@ -79,6 +79,8 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 	// store methods
 
+	Object imm = null;
+
 	/**
 	 * The type of values stored by this store. Some store implementations may
 	 * store their values as primitives and may choose to report primitive
@@ -530,7 +532,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 	@Override
 	default Store<V> immutableCopy() {
-		return new ImmutableArrayStore<>(Stores.toArray(this), count());
+		return new ImmutableArrayStore<>(Stores.toArray(this), count(), nullity());
 	}
 
 	@Override
