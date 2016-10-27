@@ -190,7 +190,7 @@ final class ConstantStore<V> implements Store<V> {
 		}
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
 		switch (size) {

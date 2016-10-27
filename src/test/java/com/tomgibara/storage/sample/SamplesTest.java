@@ -89,7 +89,7 @@ public class SamplesTest {
 		/* An immutable view over the store. */
 		Store<T> view = ex4.immutableView();
 
-		/* Copy a store into alternative storage. */ 
+		/* Copy a store into alternative storage. */
 		Store<T> copy = ex5.copiedBy(storage);
 
 		/* A store as a list. */

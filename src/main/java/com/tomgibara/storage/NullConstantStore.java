@@ -192,7 +192,7 @@ final class NullConstantStore<V> implements Store<V> {
 		Store<?> that = (Store<?>) obj;
 		return this.size == that.size() && that.count() == 0;
 	}
-	
+
 	@Override
 	public String toString() {
 		switch (size) {

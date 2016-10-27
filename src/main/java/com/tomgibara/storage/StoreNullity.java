@@ -22,7 +22,7 @@ import com.tomgibara.fundament.Bijection;
 
 /**
  * Instances of this class dictate how null values are treated by stores.
- * 
+ *
  * @author Tom Gibara
  *
  * @param <V> the type of any null-substituting value that applies
@@ -60,13 +60,13 @@ public final class StoreNullity<V> {
 	 * nullity allows nulls to be set on a store ({@link #nullSettable()}
 	 * returns true) but will not allow nulls to be returned from it (
 	 * {@link #nullGettable()} returns false).
-	 * 
+	 *
 	 * <p>
 	 * The exception to this is when a null value is supplied to the method
 	 * (indicating that nulls should not be substituted). In this case, the
 	 * method returns a nullity which is equivalent to that returned by
 	 * {@link #settingNullAllowed()}.
-	 * 
+	 *
 	 * @param <V>
 	 *            the type of any null-substituting value
 	 * @param value
@@ -80,7 +80,7 @@ public final class StoreNullity<V> {
 	/**
 	 * A nullity that permits nulls to be stored and retrieved. Both
 	 * {@link #nullSettable()} and {@link #nullGettable()} return true.
-	 * 
+	 *
 	 * @param <V>
 	 *            the generic type of the returned nullity
 	 * @return a nullity that permits null values
@@ -93,7 +93,7 @@ public final class StoreNullity<V> {
 	/**
 	 * A nullity that does not permit nulls to be stored or retrieved. Both
 	 * {@link #nullSettable()} and {@link #nullGettable()} return false.
-	 * 
+	 *
 	 * @param <V>
 	 *            the generic type of the returned nullity
 	 * @return a nullity that prohibits null values
@@ -195,7 +195,7 @@ public final class StoreNullity<V> {
 	 * stores will raise an <code>IllegalArgumentException</code> if any attempt
 	 * is made to introduce a null value into the store. A false value returned
 	 * from this method indicates the latter.
-	 * 
+	 *
 	 * @return true if null values may be set on the store, false if not
 	 * @see Store#set(int, Object)
 	 */
@@ -209,7 +209,7 @@ public final class StoreNullity<V> {
 	 * other stores will raise an exception if any attempt is made to introduce
 	 * a null value into the store. A true value returned from this method
 	 * indicates the former.
-	 * 
+	 *
 	 * @return true if it is possible to get null values from the store, false
 	 *         if not
 	 * @see Store#get(int)
@@ -223,13 +223,13 @@ public final class StoreNullity<V> {
 	 * Returns the value passed to {@link #settingNullToValue(Object)}, or null.
 	 * This value will replace null in any operation that attempts to introduce
 	 * nulls into a store to which this nullity applies.
-	 * 
+	 *
 	 * <p>
 	 * Note that any non-null value returned by this method will by substituted
 	 * for null in calls to {@link Store#set(int, Object)} and
 	 * {@link Store#clear()} but occurrences of the value in the store will not
 	 * be reported as null.
-	 * 
+	 *
 	 * @return the value substituted for null, or null if no substitution is
 	 *         performed
 	 * @see #settingNullToValue(Object)

@@ -36,7 +36,7 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 			@Override public boolean isInRange(Object obj) { return obj == null || rangeType.isInstance(obj); }
 		};
 	}
-	
+
 	private final Store<V> store;
 	private final Bijection<V, W> fn;
 

@@ -207,7 +207,7 @@ public interface Storage<V> {
 
 	/**
 	 * Whether the new stores created with this storage are mutable
-	 * 
+	 *
 	 * @return true if newly created stores are mutable, false otherwise
 	 */
 	default boolean isStorageMutable() { return true; }
@@ -215,7 +215,7 @@ public interface Storage<V> {
 	/**
 	 * A version of this storage that creates mutable stores, or the storage
 	 * itself if {@link #isStorageMutable()} is already {@code true}.
-	 * 
+	 *
 	 * @return mutable storage
 	 * @see #isStorageMutable()
 	 */
@@ -226,7 +226,7 @@ public interface Storage<V> {
 	/**
 	 * A version of this storage that creates immutable stores, or the storage
 	 * itself if {@link #isStorageMutable()} is already {@code false}.
-	 * 
+	 *
 	 * @return mutable storage
 	 * @see #isStorageMutable()
 	 */
@@ -236,7 +236,7 @@ public interface Storage<V> {
 
 	/**
 	 * The constraints that apply to stores created with this storage.
-	 * 
+	 *
 	 * @return the nullability that applies to stores
 	 */
 	default StoreNullity<V> nullity() {
@@ -270,10 +270,10 @@ public interface Storage<V> {
 	 * Creates a new store containing values from the supplied array. The size
 	 * of the returned store will equal the length of the supplied array and
 	 * null values will be handled as per {@link #nullity()}.
-	 * 
+	 *
 	 * <p>
 	 * The returned store is an independent copy of the supplied array.
-	 * 
+	 *
 	 * @param values
 	 *            an array of values
 	 * @return a mutable store containing the supplied values

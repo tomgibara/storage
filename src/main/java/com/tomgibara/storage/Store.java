@@ -132,7 +132,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 	/**
 	 * Determines how null values are supported by this store
-	 * 
+	 *
 	 * @return the support provided for null values
 	 */
 	default StoreNullity<V> nullity() {
@@ -164,7 +164,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	/**
 	 * Removes all stored values. This operation may be prohibited or operate as
 	 * per {@link #fill(Object)}, as per the store nullity.
-	 * 
+	 *
 	 * @see #nullity()
 	 */
 	default void clear() {
@@ -226,7 +226,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * store. The new size may be smaller, larger or even the same as the copied
 	 * store. This is an analogue of the
 	 * <code>Arrays.copyOf(original, length)</code>.
-	 * 
+	 *
 	 * <p>
 	 * It is not possible to create enlarged copies of stores on which null
 	 * values cannot be set. However, enlarged copies can be created from stores
@@ -440,7 +440,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * supplied storage. If the storage of every value in this store is not
 	 * supported by the supplied storage, then an
 	 * <code>IllegalArgumentException</code> is thrown.
-	 * 
+	 *
 	 * @param storage
 	 *            the storage used to create a copy of this store
 	 * @return a copy

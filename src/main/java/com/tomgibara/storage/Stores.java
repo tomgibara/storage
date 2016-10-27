@@ -186,7 +186,7 @@ public final class Stores {
 	 * Returns an immutable store consisting of <em>size</em> copies of
 	 * <em>value</em>. The advantage of using this method is that memory does
 	 * not need to be allocated for each instance of the value.
-	 * 
+	 *
 	 * @param <V>
 	 *            the storage type
 	 * @param value
@@ -209,7 +209,7 @@ public final class Stores {
 	 * Returns an immutable store consisting of <em>size</em> copies of
 	 * <em>value</em>. The advantage of using this method is that memory does
 	 * not need to be allocated for each instance of the value.
-	 * 
+	 *
 	 * @param <V>
 	 *            the storage type
 	 * @param type
