@@ -27,7 +27,7 @@ class NullEnumStorage<E extends Enum<E>> implements Storage<E> {
 	NullEnumStorage(Class<E> type) {
 		this.type = type;
 		constants = type.getEnumConstants();
-		storage = SmallValueStore.newStorage(constants.length + 1);
+		storage = SmallValueStore.newStorage(constants.length + 1, 0);
 	}
 
 	@Override

@@ -16,6 +16,7 @@
  */
 package com.tomgibara.storage;
 
+import static com.tomgibara.storage.StoreNullity.settingNullAllowed;
 import static com.tomgibara.storage.StoreNullity.settingNullDisallowed;
 import static com.tomgibara.storage.StoreNullity.settingNullToValue;
 import static org.junit.Assert.*;
@@ -31,7 +32,7 @@ public class StorageTest {
 	public void testSmallValueStorage() {
 
 		{
-			Storage<Integer> t = Storage.smallValues(4, false);
+			Storage<Integer> t = Storage.smallValues(4, settingNullToValue(0));
 			Store<Integer> s = t.newStore(100);
 			s.set(0, 0);
 			s.set(1, 1);
@@ -50,14 +51,14 @@ public class StorageTest {
 		}
 
 		{
-			Storage<Integer> t = Storage.smallValues(1, false);
+			Storage<Integer> t = Storage.smallValues(1, settingNullToValue(0));
 			Store<Integer> s = t.newStore(10);
 			assertEquals(Collections.nCopies(10, 0), s.asList());
 			assertTrue(s.population().ones().isAll());
 		}
 
 		{
-			Storage<Integer> t = Storage.smallValues(1, true);
+			Storage<Integer> t = Storage.smallValues(1, settingNullAllowed());
 			Store<Integer> s = t.newStore(10);
 			s.set(0, 0);
 			s.set(3, 0);
@@ -72,7 +73,7 @@ public class StorageTest {
 		}
 
 		{
-			Storage<Integer> t = Storage.smallValues(3, false);
+			Storage<Integer> t = Storage.smallValues(3, settingNullToValue(0));
 			Store<Integer> s = t.newStore(23);
 			s.set(1, 1);
 			s.set(2, 2);
@@ -88,18 +89,18 @@ public class StorageTest {
 				assertEquals(i % 3, s.get(i).intValue());
 			}
 			s.fill(0);
-			assertEquals(Storage.smallValues(1, false).newStore(23), s);
+			assertEquals(Storage.smallValues(1, settingNullToValue(0)).newStore(23), s);
 			s.fill(1);
 			assertEquals(Collections.nCopies(23, 1), s.asList());
 		}
 
 		{
-			Storage<Integer> t = Storage.smallValues(4, false);
+			Storage<Integer> t = Storage.smallValues(4, settingNullToValue(0));
 			Store<Integer> s = t.newStore(10);
 		}
 
 		{
-			Storage<Integer> t = Storage.smallValues(5, false);
+			Storage<Integer> t = Storage.smallValues(5, settingNullToValue(0));
 			Store<Integer> s = t.newStore(16);
 			assertEquals(Collections.nCopies(16, 0), s.asList());
 			for (int i = 0; i < 16; i++) {
@@ -111,6 +112,15 @@ public class StorageTest {
 				assertEquals(i % 5, s.get(i).intValue());
 			}
 		}
+
+		for (int range = 2; range < 16; range++) {
+			Storage<Integer> t = Storage.smallValues(range, settingNullToValue(1));
+			Store<Integer> s = t.newStore(10);
+			assertEquals(Collections.nCopies(10, 1), s.asList());
+			assertTrue(s.population().ones().isAll());
+		}
+
+
 	}
 
 	@Test
@@ -231,12 +241,16 @@ public class StorageTest {
 		assertEquals(5, Storage.typed(Tri.class, settingNullToValue(Tri.SCALENE)).newStore(5).size());
 		assertEquals(5, Storage.typed(Tri.class, settingNullToValue(Tri.SCALENE)).newStore(5).count());
 		// small value
-		assertEquals(0, Storage.smallValues(4,true).newStore(0).size());
-		assertEquals(5, Storage.smallValues(4,true).newStore(5).size());
-		assertEquals(0, Storage.smallValues(4,true).newStore(5).count());
-		assertEquals(0, Storage.smallValues(4,false).newStore(0).size());
-		assertEquals(5, Storage.smallValues(4,false).newStore(5).size());
-		assertEquals(5, Storage.smallValues(4,false).newStore(5).count());
+		for (int range = 1; range < 8; range++) {
+			int r = range;
+			assertEquals(0, Storage.smallValues(r,settingNullAllowed()).newStore(0).size());
+			assertEquals(5, Storage.smallValues(r,settingNullAllowed()).newStore(5).size());
+			assertEquals(0, Storage.smallValues(r,settingNullAllowed()).newStore(5).count());
+			assertEquals(0, Storage.smallValues(r,settingNullDisallowed()).newStore(0).size());
+			checkIAE(() ->  Storage.smallValues(r,settingNullDisallowed()).newStore(5));
+			assertEquals(5, Storage.smallValues(r,settingNullToValue(0)).newStore(5).size());
+			assertEquals(5, Storage.smallValues(r,settingNullToValue(0)).newStore(5).count());
+		}
 	}
 
 	private void checkIAE(Runnable r) {

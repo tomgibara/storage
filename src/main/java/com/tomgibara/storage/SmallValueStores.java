@@ -28,7 +28,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 	// statics - ternary packing
 
-	private static final StoreNullity<Integer> zeroNullity = StoreNullity.settingNullToValue(0);
+	//private static final StoreNullity<Integer> zeroNullity = StoreNullity.settingNullToValue(0);
 
 	private static final byte[] TERNARY_PACK = new byte[1024];
 	private static final int[] TERNARY_UNPACK = new int[243];
@@ -94,22 +94,23 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 	// statics
 
-	static SmallValueStorage newStorage(int range) {
+	//TODO optimize other storage methods
+	static SmallValueStorage newStorage(int range, int nullValue) {
 		switch (range) {
-		case 1:  return size -> new UnaryStore(checkedSize(size));
-		case 2:  return size -> new BinaryStore(checkedSize(size));
-		case 3:  return size -> new TernaryStore(checkedSize(size));
-		case 5:  return size -> new QuinaryStore(checkedSize(size));
-		default: return size -> new ArbitraryStore(checkedSize(size), range);
+		case 1:  return size -> new UnaryStore(checkedSize(size), nullValue);
+		case 2:  return size -> new BinaryStore(checkedSize(size), nullValue);
+		case 3:  return size -> new TernaryStore(checkedSize(size), nullValue);
+		case 5:  return size -> new QuinaryStore(checkedSize(size), nullValue);
+		default: return size -> new ArbitraryStore(checkedSize(size), nullValue, range);
 		}
 	}
 
 	static NullSmallStorage newNullStorage(int range) {
 		switch (range) {
 		case 1:  return size -> new ZeroOrNullStore(checkedSize(size));
-		case 2:  return size -> new NullableStore(new TernaryStore(checkedSize(size)));
-		case 4:  return size -> new NullableStore(new QuinaryStore(checkedSize(size)));
-		default: return size -> new NullableStore(new ArbitraryStore(checkedSize(size), range + 1));
+		case 2:  return size -> new NullableStore(new TernaryStore(checkedSize(size), 0));
+		case 4:  return size -> new NullableStore(new QuinaryStore(checkedSize(size), 0));
+		default: return size -> new NullableStore(new ArbitraryStore(checkedSize(size), 0, range + 1));
 		}
 	}
 
@@ -121,11 +122,14 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 	// fields
 
 	final int size;
+	// -1 indicates not settable
+	final int nullValue;
 
 	// constructors
 
-	SmallValueStore(int size) {
+	SmallValueStore(int size, int nullValue) {
 		this.size = size;
+		this.nullValue = nullValue;
 	}
 
 	// methods
@@ -141,14 +145,14 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 	}
 
 	@Override
-	public boolean isNull(int index) {
-		if (index < 0 || index >= size) throw new IllegalArgumentException("invalid index");
-		return false;
+	public StoreNullity<Integer> nullity() {
+		return nullValue < 0 ? StoreNullity.settingNullDisallowed() : StoreNullity.settingNullToValue(nullValue);
 	}
 
 	@Override
-	public StoreNullity<Integer> nullity() {
-		return zeroNullity;
+	public boolean isNull(int index) {
+		if (index < 0 || index >= size) throw new IllegalArgumentException("invalid index");
+		return false;
 	}
 
 	@Override
@@ -187,6 +191,15 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		if (index >= size) throw new IllegalArgumentException("index too large");
 	}
 
+	void initCheck() {
+		if (nullValue < 0 && size > 0) throw new IllegalArgumentException("cannot create sized store, no null value");
+	}
+
+	// assumes initCheck has already been performed
+	void initFill() {
+		if (nullValue > 0) fillInt(nullValue);
+	}
+
 	// inner classes
 
 	interface SmallValueStorage extends Storage<Integer> {
@@ -203,12 +216,14 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		private final boolean mutable;
 
-		UnaryStore(int size) {
-			super(size);
+		UnaryStore(int size, int nullValue) {
+			super(size, nullValue);
+			initCheck();
 			mutable = true;
+			initFill();
 		}
-		UnaryStore(int size, boolean mutable) {
-			super(size);
+		UnaryStore(int size, int nullValue, boolean mutable) {
+			super(size, nullValue);
 			this.mutable = mutable;
 		}
 
@@ -241,13 +256,13 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		public boolean isMutable() { return mutable; }
 
 		@Override
-		public UnaryStore mutableCopy() { return new UnaryStore(size, true); }
+		public UnaryStore mutableCopy() { return new UnaryStore(size, nullValue, true); }
 
 		@Override
-		public UnaryStore immutableCopy() { return new UnaryStore(size, false); }
+		public UnaryStore immutableCopy() { return new UnaryStore(size, nullValue, false); }
 
 		@Override
-		public UnaryStore immutableView() { return new UnaryStore(size, false); }
+		public UnaryStore immutableView() { return new UnaryStore(size, nullValue, false); }
 
 		@Override
 		public void transpose(int i, int j) {
@@ -257,7 +272,11 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		private void checkValue(Integer value) {
-			if (value != null && value.intValue() != 0) throw new IllegalArgumentException("non-zero value");
+			if (value == null) {
+				if (nullValue < 0) StoreNullity.failNull();
+			} else {
+				if (value.intValue() != 0) throw new IllegalArgumentException("non-zero value");
+			}
 		}
 
 		private void checkMutable() {
@@ -278,13 +297,15 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		private final BitStore bits;
 
-		BinaryStore(int size) {
-			super(size);
+		BinaryStore(int size, int nullValue) {
+			super(size, nullValue);
+			initCheck();
 			bits = Bits.store(size);
+			initFill();
 		}
 
-		BinaryStore(BitStore bits) {
-			super(bits.size());
+		BinaryStore(BitStore bits, int nullValue) {
+			super(bits.size(), nullValue);
 			this.bits = bits;
 		}
 
@@ -310,13 +331,13 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		public boolean isMutable() { return bits.isMutable(); }
 
 		@Override
-		public BinaryStore mutableCopy() { return new BinaryStore(bits.mutableCopy()); }
+		public BinaryStore mutableCopy() { return new BinaryStore(bits.mutableCopy(), nullValue); }
 
 		@Override
-		public BinaryStore immutableCopy() { return new BinaryStore(bits.immutableCopy()); }
+		public BinaryStore immutableCopy() { return new BinaryStore(bits.immutableCopy(), nullValue); }
 
 		@Override
-		public BinaryStore immutableView() { return new BinaryStore(bits.immutable()); }
+		public BinaryStore immutableView() { return new BinaryStore(bits.immutable(), nullValue); }
 
 		@Override
 		public void transpose(int i, int j) {
@@ -339,16 +360,21 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		private boolean checkedValue(Integer value) {
-			if (value == null) return false;
+			if (value == null) {
+				if (nullValue < 0) StoreNullity.failNull();
+				return nullValue > 0;
+			}
 			switch (value) {
 			case 0 : return false;
 			case 1 : return true;
 			default: throw new IllegalArgumentException("value not 0 or 1");
 			}
 		}
+
 		private int valueOf(boolean v) {
 			return v ? 1 : 0;
 		}
+
 	}
 
 	private final static class TernaryStore extends SmallValueStore {
@@ -356,15 +382,17 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		private final byte[] data;
 		private final boolean mutable;
 
-		TernaryStore(int size) {
-			super(size);
+		TernaryStore(int size, int nullValue) {
+			super(size, nullValue);
+			initCheck();
 			int length = (size + 4) / 5;
 			data = new byte[length];
 			mutable = true;
+			initFill();
 		}
 
-		TernaryStore(int size, byte[] data, boolean mutable) {
-			super(size);
+		TernaryStore(int size, int nullValue, byte[] data, boolean mutable) {
+			super(size, nullValue);
 			this.data = data;
 			this.mutable = mutable;
 		}
@@ -393,17 +421,17 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		@Override
 		public TernaryStore mutableCopy() {
-			return new TernaryStore(size, data.clone(), true);
+			return new TernaryStore(size, nullValue, data.clone(), true);
 		}
 
 		@Override
 		public TernaryStore immutableCopy() {
-			return new TernaryStore(size, data.clone(), false);
+			return new TernaryStore(size, nullValue, data.clone(), false);
 		}
 
 		@Override
 		public TernaryStore immutableView() {
-			return new TernaryStore(size, data, false);
+			return new TernaryStore(size, nullValue, data, false);
 		}
 
 		@Override
@@ -441,7 +469,10 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		private int checkedValue(Integer value) {
-			if (value == null) return 0;
+			if (value == null) {
+				if (nullValue < 0) StoreNullity.failNull();
+				return nullValue;
+			}
 			if (value < 0) throw new IllegalArgumentException("negative value");
 			if (value >= 3) throw new IllegalArgumentException("value too large");
 			return value;
@@ -452,13 +483,15 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		private final BitStore bits;
 
-		QuinaryStore(int size) {
-			super(size);
+		QuinaryStore(int size, int nullValue) {
+			super(size, nullValue);
+			initCheck();
 			bits = Bits.store(7 * size);
+			initFill();
 		}
 
-		QuinaryStore(int size, BitStore bits) {
-			super(size);
+		QuinaryStore(int size, int nullValue, BitStore bits) {
+			super(size, nullValue);
 			this.bits = bits;
 		}
 
@@ -486,17 +519,17 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		@Override
 		public QuinaryStore mutableCopy() {
-			return new QuinaryStore(size, bits.mutableCopy());
+			return new QuinaryStore(size, nullValue, bits.mutableCopy());
 		}
 
 		@Override
 		public QuinaryStore immutableCopy() {
-			return new QuinaryStore(size, bits.immutableCopy());
+			return new QuinaryStore(size, nullValue, bits.immutableCopy());
 		}
 
 		@Override
 		public QuinaryStore immutableView() {
-			return new QuinaryStore(size, bits.immutable());
+			return new QuinaryStore(size, nullValue, bits.immutable());
 		}
 
 		@Override
@@ -543,7 +576,10 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		private int checkedValue(Integer value) {
-			if (value == null) return 0;
+			if (value == null) {
+				if (nullValue < 0) StoreNullity.failNull();
+				return nullValue;
+			}
 			if (value < 0) throw new IllegalArgumentException("negative value");
 			if (value >= 5) throw new IllegalArgumentException("value too large");
 			return value;
@@ -564,15 +600,17 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		private final int count;
 		private final BitStore bits;
 
-		ArbitraryStore(int size, int range) {
-			super(size);
+		ArbitraryStore(int size, int nullValue, int range) {
+			super(size, nullValue);
+			initCheck();
 			this.range = range;
 			count = Integer.highestOneBit(range - 1) << 1;
 			bits = Bits.store(size * count);
+			initFill();
 		}
 
 		ArbitraryStore(ArbitraryStore that, BitStore bits) {
-			super(that.size());
+			super(that.size(), that.nullValue);
 			this.range = that.range;
 			this.count = that.count;
 			this.bits = bits;
@@ -634,7 +672,10 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		private int checkedValue(Integer value) {
-			if (value == null) return 0;
+			if (value == null) {
+				if (nullValue < 0) StoreNullity.failNull();
+				return nullValue;
+			}
 			if (value < 0) throw new IllegalArgumentException("negative value");
 			if (value >= range) throw new IllegalArgumentException("value too large");
 			return value;

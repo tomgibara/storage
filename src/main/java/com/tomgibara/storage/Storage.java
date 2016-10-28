@@ -195,14 +195,21 @@ public interface Storage<V> {
 	 *            whether the returned storage will accept null values
 	 * @return small value storage
 	 */
-	static Storage<Integer> smallValues(int range, boolean nullsAllowed) {
-		if (range < 0) throw new IllegalArgumentException("negative range");
+	static Storage<Integer> smallValues(int range, StoreNullity<Integer> nullity) {
+		if (range <= 0) throw new IllegalArgumentException("non positive range");
 		if (range == Integer.MAX_VALUE) throw new IllegalArgumentException("range too large");
-		if (nullsAllowed) {
+		if (nullity == null) throw new IllegalArgumentException("null nullity");
+
+		if (nullity.nullGettable()) {
 			return SmallValueStore.newNullStorage(range);
-		} else {
-			return SmallValueStore.newStorage(range);
 		}
+		if (nullity.nullSettable()) {
+			int nv = nullity.nullValue();
+			if (nv < 0) throw new IllegalArgumentException("negative nullValue");
+			if (nv >= range) throw new IllegalArgumentException("nullValue meets or exceeds range");
+			return SmallValueStore.newStorage(range, nv);
+		}
+		return SmallValueStore.newStorage(range, -1);
 	}
 
 	/**

@@ -31,7 +31,7 @@ final class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		this.nullity = nullity;
 		this.nullValue = nullity.nullSettable() ? nullity.nullValue().ordinal() : 0;
 		constants = type.getEnumConstants();
-		storage = SmallValueStore.newStorage(constants.length);
+		storage = SmallValueStore.newStorage(constants.length, nullValue);
 	}
 
 	@Override
@@ -44,7 +44,6 @@ final class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		if (size < 0) throw new IllegalArgumentException("negative size");
 		if (size > 0 && !nullity.nullSettable()) throw new IllegalArgumentException("no null value with which to populate store");
 		SmallValueStore store = storage.newStore(size);
-		if (nullValue != 0) store.fillInt(nullValue);
 		return new EnumStore(store);
 	}
 

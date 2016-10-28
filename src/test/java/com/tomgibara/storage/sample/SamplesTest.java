@@ -16,7 +16,6 @@ public class SamplesTest {
 
 	int size = 100;
 	int newSize = 200;
-	boolean nullsAllowed = false;
 	Storage<T> storage = Storage.generic();
 	int i = 0;
 	int j = 1;
@@ -45,7 +44,7 @@ public class SamplesTest {
 		Store<T> ex5 = Storage.<T>soft().newStore(size);
 
 		/* Creating storage for ints in the range [0,4]. */
-		Store<Integer> ex6 = Storage.smallValues(5, nullsAllowed).newStore(size);
+		Store<Integer> ex6 = Storage.smallValues(5, StoreNullity.settingNullDisallowed()).newStore(size);
 
 
 		// WRAPPING EXISTING ARRAYS
