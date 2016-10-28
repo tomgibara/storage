@@ -46,8 +46,14 @@ final class ImmutableStorage<V> implements Storage<V> {
 	}
 
 	@Override
-	public Store<V> newStore(int size) throws IllegalArgumentException {
-		return new NullConstantStore<V>(storage.valueType(), size);
+	public Store<V> newStore(int size, V value) throws IllegalArgumentException {
+		StoreNullity<V> nullity = storage.nullity();
+		Class<V> type = storage.valueType();
+		if (size == 0) return new EmptyStore<>(type, nullity, false);
+		if (!nullity.nullSettable()) StoreNullity.failNull();
+		return nullity.nullGettable() ?
+				new NullConstantStore<>(type, size) :
+				new ConstantStore<>(type, nullity, value, size);
 	}
 
 	@Override

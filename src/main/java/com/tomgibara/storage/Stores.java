@@ -30,6 +30,10 @@ import java.util.Arrays;
  */
 public final class Stores {
 
+	// private statics
+
+	private static final EmptyStore<Object> emptyStore = new EmptyStore<Object>(Object.class, settingNullAllowed(), false);
+
 	// package statics
 
 	static final int BYTE    =  1;
@@ -45,15 +49,36 @@ public final class Stores {
 
 	/**
 	 * <p>
-	 * Returns a 'mutable' store of zero size. Though the store is ostensibly
-	 * mutable, its fixed zero size means that the store is immutable for all
-	 * practical purposes.
+	 * Returns an immutable store of zero size. This method provides a generic
+	 * alternative to {@link #empty(Class)} and will return
+	 * <code>Object.class</code> from its {@link Store#valueType()} method.
+	 * Using {@link #empty(Class)} with a precise type is to be preferred where
+	 * possible.
 	 *
 	 * <p>
-	 * Nevertheless, if the immutable status of the store is significant for the
-	 * application, the {@link Store#immutable()} method (or one of its
-	 * relations) may be invoked to produce an equivalent store that reports
-	 * itself as immutable.
+	 * If the mutable status of the store is significant for the application,
+	 * the {@link Store#mutable()} method (or one of its relations) may be
+	 * invoked to produce an equivalent store that reports itself as mutable.
+	 *
+	 * @param <V>
+	 *            the storage type
+	 * @return a store of zero size
+	 */
+	@SuppressWarnings("unchecked")
+	public static <V> Store<V> empty() {
+		return (EmptyStore<V>) emptyStore;
+	}
+
+	/**
+	 * <p>
+	 * Returns an immutable store of zero size. Where the precise type of the
+	 * store is unknown (typically due to type erasure) the {@link #empty()}
+	 * method can be used.
+	 *
+	 * <p>
+	 * If the mutable status of the store is significant for the application,
+	 * the {@link Store#mutable()} method (or one of its relations) may be
+	 * invoked to produce an equivalent store that reports itself as immutable.
 	 *
 	 * @param <V>
 	 *            the storage type
@@ -61,9 +86,8 @@ public final class Stores {
 	 *            the putative type of the store elements
 	 * @return a store of zero size
 	 */
-
 	public static <V> Store<V> empty(Class<V> type) {
-		return new EmptyStore<V>(type, true);
+		return new EmptyStore<V>(type, settingNullAllowed(), false);
 	}
 
 	/**
@@ -202,7 +226,7 @@ public final class Stores {
 		Class<V> clss = (Class<V>)Object.class;
 		return value == null ?
 				new NullConstantStore<V>(clss, size) :
-				new ConstantStore<V>(clss, value, size);
+				new ConstantStore<V>(clss, settingNullDisallowed(), value, size);
 	}
 
 	/**
@@ -226,7 +250,7 @@ public final class Stores {
 		if (size < 0) throw new IllegalArgumentException("negative size");
 		return value == null ?
 				new NullConstantStore<V>(type, size) :
-				new ConstantStore<V>(type, value, size);
+				new ConstantStore<V>(type, settingNullDisallowed(), value, size);
 	}
 
 	/**

@@ -36,8 +36,8 @@ class NullEnumStorage<E extends Enum<E>> implements Storage<E> {
 	}
 
 	@Override
-	public Store<E> newStore(int size) throws IllegalArgumentException {
-		return new NullEnumStore(storage.newStore(size));
+	public Store<E> newStore(int size, E value) throws IllegalArgumentException {
+		return new NullEnumStore(storage.newStore(size, value == null ? 0 : value.ordinal() + 1));
 	}
 
 	private final class NullEnumStore extends AbstractStore<E> {
@@ -103,6 +103,11 @@ class NullEnumStorage<E extends Enum<E>> implements Storage<E> {
 		@Override
 		public Store<E> immutableView() {
 			return new NullEnumStore(store.immutableView());
+		}
+
+		@Override
+		public Store<E> resizedCopy(int newSize) {
+			return new NullEnumStore(store.resizedCopy(newSize));
 		}
 
 		// transposable methods

@@ -18,7 +18,7 @@ package com.tomgibara.storage;
 
 import java.util.Arrays;
 
-import com.tomgibara.fundament.Bijection;
+import com.tomgibara.fundament.Mapping;
 
 /**
  * Instances of this class dictate how null values are treated by stores.
@@ -310,7 +310,7 @@ public final class StoreNullity<V> {
 		return values;
 	}
 
-	<W> StoreNullity<W> map(Bijection<V, W> fn) {
+	<W> StoreNullity<W> map(Mapping<V, W> fn) {
 		if (this == nullAllowed) return settingNullAllowed();
 		if (this == nullDisallowed) return settingNullDisallowed();
 		return new StoreNullity<>(fn.apply(value));

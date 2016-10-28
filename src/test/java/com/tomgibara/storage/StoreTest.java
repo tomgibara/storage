@@ -30,6 +30,7 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Spliterator;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -317,6 +318,27 @@ public class StoreTest {
 		List<V> expected = new ArrayList<>(s.asList());
 		expected.removeIf(v -> v == null);
 		assertEquals(expected, StreamSupport.stream(s.spliterator(), false).collect(Collectors.toList()));
+	}
+
+	public void testSmallStoreResize() {
+		Random r = new Random(0L);
+		for (int i = 0; i < 1000; i++) {
+			int range = 1 + r.nextInt(15);
+			int nullValue = r.nextInt(range);
+			int initValue = r.nextInt(range);
+			int initSize = r.nextInt(50);
+			int nextSize = r.nextInt(100);
+
+			Store<Integer> store = Storage.smallValues(range, settingNullToValue(nullValue)).newStore(initSize);
+			store.fill(initValue);
+			store = store.resizedCopy(nextSize);
+
+			Store<Integer> check = Storage.generic(settingNullToValue(nullValue)).newStore(initSize);
+			check.fill(initValue);
+			check = check.resizedCopy(nextSize);
+			
+			assertEquals(check, store);
+		}
 	}
 
 	private void checkIAE(Runnable r) {

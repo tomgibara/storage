@@ -36,13 +36,20 @@ abstract class RefStore<V> extends AbstractStore<V> {
 
 
 	@SuppressWarnings("unchecked")
-	RefStore(int size) {
+	RefStore(int size, V initialValue) {
 		try {
 			refs = new Reference[size];
 		} catch (NegativeArraySizeException e) {
 			throw new IllegalArgumentException("negative size");
 		}
-		count = 0;
+		if (initialValue == null) {
+			count = 0;
+		} else {
+			for (int i = 0; i < size; i++) {
+				refs[i] = newReference(initialValue, queue, i);
+			}
+			count = size;
+		}
 	}
 
 	@Override

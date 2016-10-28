@@ -44,7 +44,7 @@ public class SamplesTest {
 		Store<T> ex5 = Storage.<T>soft().newStore(size);
 
 		/* Creating storage for ints in the range [0,4]. */
-		Store<Integer> ex6 = Storage.smallValues(5, StoreNullity.settingNullDisallowed()).newStore(size);
+		Store<Integer> ex6 = Storage.smallValues(5, StoreNullity.settingNullToValue(0)).newStore(size);
 
 
 		// WRAPPING EXISTING ARRAYS

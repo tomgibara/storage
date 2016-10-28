@@ -22,13 +22,13 @@ import java.lang.ref.WeakReference;
 
 final class WeakRefStore<V> extends RefStore<V> {
 
-	WeakRefStore(int size) {
-		super(size);
+	WeakRefStore(int size, V initialValue) {
+		super(size, initialValue);
 	}
 
 	@Override
 	public WeakRefStore<V> resizedCopy(int newSize) {
-		WeakRefStore<V> that = new WeakRefStore<V>(newSize);
+		WeakRefStore<V> that = new WeakRefStore<V>(newSize, null);
 		populate(that);
 		return that;
 	}

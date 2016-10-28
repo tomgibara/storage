@@ -64,8 +64,8 @@ class ArrayStore<V> extends AbstractStore<V> {
 			}
 
 			@Override
-			public Store<V> newStore(int size) throws IllegalArgumentException {
-				return new ArrayStore<>(type, size, nullity);
+			public Store<V> newStore(int size, V initialValue) throws IllegalArgumentException {
+				return new ArrayStore<>(type, size, nullity, initialValue);
 			}
 
 			@Override
@@ -99,11 +99,11 @@ class ArrayStore<V> extends AbstractStore<V> {
 			}
 
 			@Override
-			public Store<V> newStore(int size) throws IllegalArgumentException {
+			public Store<V> newStore(int size, V initialValue) throws IllegalArgumentException {
 				if (size < 0) throw new IllegalArgumentException("negative size");
-				if (nullity.nullSettable()) return new ConstantStore<V>(type, nullity.nullValue(), size);
-				if (size == 0) return new EmptyStore<>(type, false);
-				throw new IllegalArgumentException("null disallowed");
+				if (size == 0) return new EmptyStore<>(type, nullity, false);
+				initialValue = nullity.checkedValue(initialValue);
+				return new ConstantStore<V>(type, nullity, initialValue, size);
 			}
 
 			@Override
@@ -122,9 +122,9 @@ class ArrayStore<V> extends AbstractStore<V> {
 	final StoreNullity<V> nullity;
 
 	@SuppressWarnings("unchecked")
-	ArrayStore(Class<V> type, int size, StoreNullity<V> nullity) {
-		V nullValue = nullity.nullValue();
-		if (size > 0 && nullValue == null) throw new IllegalArgumentException("nullity has no nullValue");
+	ArrayStore(Class<V> type, int size, StoreNullity<V> nullity, V initialValue) {
+		if (initialValue == null) initialValue = nullity.nullValue();
+		if (size > 0 && initialValue == null) StoreNullity.failNull();
 		if (type == Object.class) {
 			values = (V[]) new Object[size];
 		} else try {
@@ -132,7 +132,7 @@ class ArrayStore<V> extends AbstractStore<V> {
 		} catch (NegativeArraySizeException e) {
 			throw new IllegalArgumentException("negative size", e);
 		}
-		Arrays.fill(values, nullValue);
+		Arrays.fill(values, initialValue);
 		this.nullity = nullity;
 	}
 

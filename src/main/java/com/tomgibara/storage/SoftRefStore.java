@@ -22,13 +22,13 @@ import java.lang.ref.SoftReference;
 
 final class SoftRefStore<V> extends RefStore<V> {
 
-	SoftRefStore(int size) {
-		super(size);
+	SoftRefStore(int size, V initialValue) {
+		super(size, initialValue);
 	}
 
 	@Override
 	public SoftRefStore<V> resizedCopy(int newSize) {
-		SoftRefStore<V> that = new SoftRefStore<V>(newSize);
+		SoftRefStore<V> that = new SoftRefStore<V>(newSize, null);
 		populate(that);
 		return that;
 	}

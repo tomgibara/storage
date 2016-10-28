@@ -46,8 +46,8 @@ class NullArrayStore<V> extends AbstractStore<V> {
 			}
 
 			@Override
-			public Store<V> newStore(int size) throws IllegalArgumentException {
-				return new NullArrayStore<>(type, size);
+			public Store<V> newStore(int size, V value) throws IllegalArgumentException {
+				return new NullArrayStore<>(type, size, value);
 			}
 
 			@Override
@@ -84,9 +84,15 @@ class NullArrayStore<V> extends AbstractStore<V> {
 			}
 
 			@Override
-			public Store<V> newStore(int size) throws IllegalArgumentException {
+			public Store<V> newStore(int size, V value) throws IllegalArgumentException {
 				if (size < 0L) throw new IllegalArgumentException("negative size");
-				return new NullConstantStore<V>(type, size);
+				StoreNullity<V> nullity = nullity();
+				if (size == 0) {
+					return new EmptyStore<V>(type, nullity, false);
+				}
+				return value == null ?
+					new NullConstantStore<V>(type, size) :
+					new ConstantStore<V>(type, nullity, value, size);
 			}
 
 			@Override
@@ -105,13 +111,18 @@ class NullArrayStore<V> extends AbstractStore<V> {
 	int count;
 
 	@SuppressWarnings("unchecked")
-	NullArrayStore(Class<V> type, int size) {
+	NullArrayStore(Class<V> type, int size, V initialValue) {
 		try {
 			values = (V[]) Array.newInstance(type, size);
 		} catch (NegativeArraySizeException e) {
 			throw new IllegalArgumentException("negative size", e);
 		}
-		this.count = 0;
+		if (initialValue == null) {
+			count = 0;
+		} else {
+			Arrays.fill(values, initialValue);
+			count = size;
+		}
 	}
 
 	NullArrayStore(V[] values) {

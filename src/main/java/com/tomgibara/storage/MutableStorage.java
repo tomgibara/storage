@@ -46,8 +46,8 @@ final class MutableStorage<V> implements Storage<V> {
 	}
 
 	@Override
-	public Store<V> newStore(int size) throws IllegalArgumentException {
-		return storage.newStore(size).mutableCopy();
+	public Store<V> newStore(int size, V value) throws IllegalArgumentException {
+		return storage.newStore(size, value).mutableCopy();
 	}
 
 	@Override

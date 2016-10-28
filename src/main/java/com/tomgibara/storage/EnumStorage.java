@@ -29,7 +29,7 @@ final class EnumStorage<E extends Enum<E>> implements Storage<E> {
 	EnumStorage(Class<E> type, StoreNullity<E> nullity) {
 		this.type = type;
 		this.nullity = nullity;
-		this.nullValue = nullity.nullSettable() ? nullity.nullValue().ordinal() : 0;
+		this.nullValue = nullity.nullSettable() ? nullity.nullValue().ordinal() : -1;
 		constants = type.getEnumConstants();
 		storage = SmallValueStore.newStorage(constants.length, nullValue);
 	}
@@ -40,10 +40,11 @@ final class EnumStorage<E extends Enum<E>> implements Storage<E> {
 	}
 
 	@Override
-	public Store<E> newStore(int size) throws IllegalArgumentException {
+	public Store<E> newStore(int size, E value) throws IllegalArgumentException {
 		if (size < 0) throw new IllegalArgumentException("negative size");
-		if (size > 0 && !nullity.nullSettable()) throw new IllegalArgumentException("no null value with which to populate store");
-		SmallValueStore store = storage.newStore(size);
+		if (size == 0) return new EmptyStore<>(type, nullity, true);
+		value = nullity.checkedValue(value);
+		SmallValueStore store = storage.newStore(size, value.ordinal());
 		return new EnumStore(store);
 	}
 
@@ -51,7 +52,7 @@ final class EnumStorage<E extends Enum<E>> implements Storage<E> {
 	public Store<E> newStoreOf(@SuppressWarnings("unchecked") E... values) {
 		if (values == null) throw new IllegalArgumentException("null values");
 		int size = values.length;
-		SmallValueStore store = storage.newStore(size);
+		SmallValueStore store = storage.newStore(size, 0);
 		for (int i = 0; i < size; i++) {
 			store.set(i, nullity.checkedValue(values[i]).ordinal());
 		}
@@ -62,7 +63,7 @@ final class EnumStorage<E extends Enum<E>> implements Storage<E> {
 	public Store<E> newCopyOf(Store<E> store) {
 		if (store == null) throw new IllegalArgumentException("null store");
 		int size = store.size();
-		SmallValueStore s = storage.newStore(size);
+		SmallValueStore s = storage.newStore(size, 0);
 		if (store.nullity().nullGettable()) {
 			for (int i = 0; i < size; i++) {
 				s.set(i, nullity.checkedValue(store.get(i)).ordinal());
@@ -116,6 +117,11 @@ final class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		@Override
 		public void fill(E value) {
 			store.fillInt( value(value) );
+		}
+
+		@Override
+		public Store<E> resizedCopy(int newSize) {
+			return new EnumStore(store.resizedCopy(newSize));
 		}
 
 		// mutability methods

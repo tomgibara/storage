@@ -18,8 +18,6 @@ package com.tomgibara.storage;
 
 import static com.tomgibara.storage.StoreNullity.settingNullAllowed;
 
-import java.util.Optional;
-
 import com.tomgibara.storage.RefStore.RefStorage;
 
 /**
@@ -149,7 +147,7 @@ public interface Storage<V> {
 	 * @return weak storage
 	 */
 	static <V> Storage<V> weak() {
-		return (RefStorage<V>) size -> new WeakRefStore<>(size);
+		return (RefStorage<V>) (size, value) -> new WeakRefStore<>(size, value);
 	}
 
 	/**
@@ -166,7 +164,7 @@ public interface Storage<V> {
 	 * @return soft storage
 	 */
 	static <V> Storage<V> soft() {
-		return (RefStorage<V>) size -> new SoftRefStore<>(size);
+		return (RefStorage<V>) (size, value) -> new SoftRefStore<>(size, value);
 	}
 
 	/**
@@ -191,8 +189,8 @@ public interface Storage<V> {
 	 * @param range
 	 *            defines the range <code>[0..range)</code> that small values
 	 *            may take in this store
-	 * @param nullsAllowed
-	 *            whether the returned storage will accept null values
+	 * @param nullity
+	 *            determines how null values are handled by the stores
 	 * @return small value storage
 	 */
 	static Storage<Integer> smallValues(int range, StoreNullity<Integer> nullity) {
@@ -261,16 +259,44 @@ public interface Storage<V> {
 	Class<V> valueType();
 
 	/**
-	 * Creates a new store with the requested size. The returned store is
-	 * mutable.
+	 * <p>
+	 * Creates a new store with the requested size. A convenience method
+	 * equivalent to passing a null value to {@link #newStore(int, Object)}.
+	 *
+	 * <p>
+	 * The returned store is mutable precisely when {@link #isStorageMutable()}
+	 * returns true.
 	 *
 	 * @param size
 	 *            the required size
 	 * @throws IllegalArgumentException
 	 *             if the size is negative
-	 * @return an new store
+	 * @return a new store
 	 */
-	Store<V> newStore(int size) throws IllegalArgumentException;
+	default Store<V> newStore(int size) throws IllegalArgumentException {
+		return newStore(size, null);
+	}
+
+	/**
+	 * <p>
+	 * Creates a new store with the requested size. The supplied value is
+	 * assigned to every index of the store, unless the value is null, in which
+	 * case every index either remains unassigned or is assigned the value
+	 * supplied by {@link StoreNullity#nullValue()}.
+	 * 
+	 * <p>
+	 * The returned store is mutable precisely when {@link #isStorageMutable()}
+	 * returns true.
+	 *
+	 * @param size
+	 *            the required size
+	 * @param value
+	 *            the value to be assigned to every
+	 * @throws IllegalArgumentException
+	 *             if the size is negative
+	 * @return a new store
+	 */
+	Store<V> newStore(int size, V value) throws IllegalArgumentException;
 
 	/**
 	 * <p>
@@ -279,7 +305,8 @@ public interface Storage<V> {
 	 * null values will be handled as per {@link #nullity()}.
 	 *
 	 * <p>
-	 * The returned store is an independent copy of the supplied array.
+	 * The returned store is an independent copy of the supplied array and is
+	 * mutable precisely when {@link #isStorageMutable()} returns true.
 	 *
 	 * @param values
 	 *            an array of values
@@ -287,21 +314,19 @@ public interface Storage<V> {
 	 */
 	default Store<V> newStoreOf(@SuppressWarnings("unchecked") V... values) {
 		if (values == null) throw new IllegalArgumentException("null values");
-		if (isStorageMutable()) {
-			Store<V> store = newStore(values.length);
-			for (int i = 0; i < values.length; i++) {
-				store.set(i, values[i]);
-			}
-			return store;
-		}
-		return mutable().newStoreOf(values).immutableView();
+		return newCopyOf(new NullArrayStore<>(values));
 	}
 
 	/**
+	 * <p>
 	 * Creates a copy of the supplied store. The size of the returned store
 	 * equals the size of the supplied store and null values will be substituted
 	 * with {@link StoreNullity#nullValue()} if necessary. The returned store is
 	 * an independent copy of the one supplied.
+	 *
+	 * <p>
+	 * The returned store is mutable precisely when {@link #isStorageMutable()}
+	 * returns true.
 	 *
 	 * @param store
 	 *            the store to be copied
@@ -309,14 +334,17 @@ public interface Storage<V> {
 	 */
 	default Store<V> newCopyOf(Store<V> store) {
 		if (store == null) throw new IllegalArgumentException("null store");
-		if (isStorageMutable()) {
-			Store<V> copy = newStore(store.size());
-			for (int i = 0; i < store.size(); i++) {
-				copy.set(i, store.get(i));
-			}
-			return copy;
+		int size = store.size();
+		boolean mutable = isStorageMutable();
+		StoreNullity<V> nullity = nullity();
+		if (size == 0) return new EmptyStore<>(valueType(), nullity, mutable);
+		if (!mutable) return mutable().newCopyOf(store).immutableView();
+		// workaround possibility that it may not be possible to create a null filled store before filling
+		Store<V> copy = nullity.nullSettable() ? newStore(size) : newStore(size, store.get(0));
+		for (int i = 0; i < store.size(); i++) {
+			copy.set(i, store.get(i));
 		}
-		return mutable().newCopyOf(store).immutableView();
+		return copy;
 	}
 
 }

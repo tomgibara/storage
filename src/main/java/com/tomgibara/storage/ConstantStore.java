@@ -33,11 +33,13 @@ import com.tomgibara.fundament.Mapping;
 final class ConstantStore<V> implements Store<V> {
 
 	private final Class<V> type;
+	private final StoreNullity<V> nullity;
 	private final V value;
 	private final int size;
 
-	ConstantStore(Class<V> type, V value, int size) {
+	ConstantStore(Class<V> type, StoreNullity<V> nullity, V value, int size) {
 		this.type = type;
+		this.nullity = nullity;
 		this.value = value;
 		this.size = size;
 	}
@@ -45,6 +47,11 @@ final class ConstantStore<V> implements Store<V> {
 	@Override
 	public Class<V> valueType() {
 		return type;
+	}
+
+	@Override
+	public StoreNullity<V> nullity() {
+		return nullity;
 	}
 
 	@Override
@@ -80,7 +87,7 @@ final class ConstantStore<V> implements Store<V> {
 	public Store<V> resizedCopy(int newSize) {
 		if (newSize == size) return this;
 		if (newSize < 0) throw new IllegalArgumentException("negative newSize");
-		return new ConstantStore<>(type, value, newSize);
+		return new ConstantStore<>(type, nullity, value, newSize);
 	}
 
 	@Override
@@ -100,17 +107,17 @@ final class ConstantStore<V> implements Store<V> {
 
 	@Override
 	public Store<V> asTransformedBy(UnaryOperator<V> fn) {
-		return new ConstantStore<>(type, fn.apply(value), size);
+		return new ConstantStore<>(type, nullity, fn.apply(value), size);
 	}
 
 	@Override
 	public <W> Store<W> asTransformedBy(Bijection<V, W> fn) {
-		return new ConstantStore<>(fn.rangeType(), fn.apply(value), size);
+		return new ConstantStore<>(fn.rangeType(), nullity.map(fn), fn.apply(value), size);
 	}
 
 	@Override
 	public <W> Store<W> asTransformedBy(Mapping<V, W> fn) {
-		return new ConstantStore<>(fn.rangeType(), fn.apply(value), size);
+		return new ConstantStore<>(fn.rangeType(), nullity.map(fn), fn.apply(value), size);
 	}
 
 	// transformedIterator defaulted
@@ -118,12 +125,7 @@ final class ConstantStore<V> implements Store<V> {
 	@Override
 	public Store<V> copiedBy(Storage<V> storage) {
 		if (storage == null) throw new IllegalArgumentException("null storage");
-		if (storage.isStorageMutable()) {
-			Store<V> store = storage.newStore(size);
-			store.fill(value);
-			return store;
-		}
-		return storage.newCopyOf(this);
+		return storage.isStorageMutable() ? storage.newStore(size, value) : storage.newCopyOf(this);
 	}
 
 	// iterable methods

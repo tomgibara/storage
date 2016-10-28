@@ -30,10 +30,9 @@ import org.junit.Test;
 public class StoresTest {
 
 	@Test
-	public void testIsNullable() {
-//		assertFalse( Stores.objects(Optional.empty()).nullValue().isPresent() );
-//		assertTrue( Stores.objects(Optional.of(new Object())).nullValue().isPresent() );
-//		assertFalse( Stores.objectsAndNull(Optional.of(new Object())).nullValue().isPresent() );
+	public void testEmpty() {
+		assertFalse(Stores.empty().isMutable());
+		assertFalse(Stores.empty(String.class).isMutable());
 	}
 
 	@Test
