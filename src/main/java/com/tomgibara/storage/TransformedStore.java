@@ -52,18 +52,13 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 	// store methods
 
 	@Override
-	public Class<W> valueType() {
-		return fn.rangeType();
+	public StoreType<W> type() {
+		return store.type().map(fn);
 	}
 
 	@Override
 	public int size() {
 		return store.size();
-	}
-
-	@Override
-	public StoreNullity<W> nullity() {
-		return store.nullity().map(fn);
 	}
 
 	@Override

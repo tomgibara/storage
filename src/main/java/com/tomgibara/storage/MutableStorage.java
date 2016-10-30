@@ -27,6 +27,9 @@ final class MutableStorage<V> implements Storage<V> {
 	}
 
 	@Override
+	public StoreType<V> type() { return storage.type(); }
+
+	@Override
 	public boolean isStorageMutable() { return true; }
 
 	@Override
@@ -34,16 +37,6 @@ final class MutableStorage<V> implements Storage<V> {
 
 	@Override
 	public Storage<V> immutable() { return storage; }
-
-	@Override
-	public Class<V> valueType() {
-		return storage.valueType();
-	}
-
-	@Override
-	public StoreNullity<V> nullity() {
-		return storage.nullity();
-	}
 
 	@Override
 	public Store<V> newStore(int size, V value) throws IllegalArgumentException {

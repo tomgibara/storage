@@ -29,7 +29,7 @@ class StoreSpliterator<V> implements Spliterator<V> {
 
 	StoreSpliterator(Store<V> store) {
 		this.store = store;
-		nonNull = !store.nullity().nullGettable();
+		nonNull = !store.type().nullGettable;
 		chi = nonNull ? ORDERED | SIZED | SUBSIZED | NONNULL : ORDERED;
 		from = 0;
 		to = store.size();

@@ -80,18 +80,16 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 	// store methods
 
-	Object imm = null;
-
-	/**
-	 * The type of values stored by this store. Some store implementations may
-	 * store their values as primitives and may choose to report primitive
-	 * classes. Other implementations may treat all values as object types and
-	 * will return <code>Object.class</code> despite ostensibly having a
-	 * genericized type.
-	 *
-	 * @return the value type
-	 */
-	Class<V> valueType();
+//	/**
+//	 * The type of values stored by this store. Some store implementations may
+//	 * store their values as primitives and may choose to report primitive
+//	 * classes. Other implementations may treat all values as object types and
+//	 * will return <code>Object.class</code> despite ostensibly having a
+//	 * genericized type.
+//	 *
+//	 * @return the value type
+//	 */
+//	Class<V> valueType();
 
 	/**
 	 * The greatest number of values that the store can contain. Valid indices
@@ -130,13 +128,17 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 		return get(index) != null;
 	}
 
-	/**
-	 * Determines how null values are supported by this store
-	 *
-	 * @return the support provided for null values
-	 */
-	default StoreNullity<V> nullity() {
-		return StoreNullity.settingNullAllowed();
+//	/**
+//	 * Determines how null values are supported by this store
+//	 *
+//	 * @return the support provided for null values
+//	 */
+//	default StoreNullity<V> nullity() {
+//		return StoreNullity.settingNullAllowed();
+//	}
+
+	default StoreType<V> type() {
+		return StoreType.generic();
 	}
 
 	/**
@@ -197,7 +199,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 */
 	default boolean compact() {
 		if (!isMutable()) throw immutableException();
-		if (!nullity().nullGettable()) return false; // there can be no nulls
+		if (!type().nullGettable) return false; // there can be no nulls
 		int count = count();
 		if (count == size()) return false; // this should be a cheap test
 
@@ -239,14 +241,14 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @see #mutableCopy()
 	 */
 	default Store<V> resizedCopy(int newSize) {
-		StoreNullity<V> nullity = nullity();
-		if (nullity.nullGettable()) {
+		StoreType<V> type = type();
+		if (type.nullGettable) {
 			return new NullArrayStore<>(Stores.toArray(this, newSize, null), count());
 		}
-		if (!nullity.nullSettable() && newSize > size()) {
+		if (!type.nullSettable && newSize > size()) {
 			throw new IllegalArgumentException("cannot create copy with greater size, no null value");
 		}
-		return new ArrayStore<>(Stores.toArray(this, newSize, nullity.nullValue()), nullity);
+		return new ArrayStore<>(Stores.toArray(this, newSize, type.nullValue), type);
 	}
 
 	/**
@@ -268,7 +270,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @return bits indicating the indices at which values are present
 	 */
 	default BitStore population() {
-		if (!nullity().nullGettable()) return Bits.oneBits(size());
+		if (!type().nullGettable) return Bits.oneBits(size());
 		return new AbstractBitStore() {
 
 			@Override
@@ -350,7 +352,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @see #asTransformedBy(Mapping)
 	 */
 	default Store<V> asTransformedBy(UnaryOperator<V> op) {
-		return asTransformedBy(Mapping.fromUnaryOperator(valueType(), op));
+		return asTransformedBy(Mapping.fromUnaryOperator(type().valueType, op));
 	}
 
 	/**
@@ -475,7 +477,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	@Override
 	public default void forEach(Consumer<? super V> action) {
 		int size = size();
-		if (nullity().nullGettable()) {
+		if (type().nullGettable) {
 			for (int i = 0; i < size; i++) {
 				V v = get(i);
 				if (v != null) action.accept(v);
@@ -495,7 +497,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 */
 	public default void forEach(BiConsumer<Integer, ? super V> action) {
 		int size = size();
-		if (nullity().nullGettable()) {
+		if (type().nullGettable) {
 			for (int i = 0; i < size; i++) {
 				V v = get(i);
 				if (v != null) action.accept(i, v);
@@ -536,7 +538,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 	@Override
 	default Store<V> immutableCopy() {
-		return new ImmutableArrayStore<>(Stores.toArray(this), count(), nullity());
+		return new ImmutableArrayStore<>(Stores.toArray(this), count(), type());
 	}
 
 	@Override

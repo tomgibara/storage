@@ -16,9 +16,6 @@
  */
 package com.tomgibara.storage;
 
-import static com.tomgibara.storage.StoreNullity.settingNullAllowed;
-import static com.tomgibara.storage.StoreNullity.settingNullDisallowed;
-
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
@@ -32,7 +29,7 @@ public final class Stores {
 
 	// private statics
 
-	private static final EmptyStore<Object> emptyStore = new EmptyStore<Object>(Object.class, settingNullAllowed(), false);
+//	private static final EmptyStore<Object> emptyStore = new EmptyStore<Object>(StoreType.OBJECT, false);
 
 	// package statics
 
@@ -45,50 +42,54 @@ public final class Stores {
 	static final int DOUBLE  = 11;
 	static final int BOOLEAN = 12;
 
+	static int hash(Class<?> clss) {
+		return (clss.getName().hashCode() >> 8) & 0xf;
+	}
+
 	// public scoped methods
 
-	/**
-	 * <p>
-	 * Returns an immutable store of zero size. This method provides a generic
-	 * alternative to {@link #empty(Class)} and will return
-	 * <code>Object.class</code> from its {@link Store#valueType()} method.
-	 * Using {@link #empty(Class)} with a precise type is to be preferred where
-	 * possible.
-	 *
-	 * <p>
-	 * If the mutable status of the store is significant for the application,
-	 * the {@link Store#mutable()} method (or one of its relations) may be
-	 * invoked to produce an equivalent store that reports itself as mutable.
-	 *
-	 * @param <V>
-	 *            the storage type
-	 * @return a store of zero size
-	 */
-	@SuppressWarnings("unchecked")
-	public static <V> Store<V> empty() {
-		return (EmptyStore<V>) emptyStore;
-	}
-
-	/**
-	 * <p>
-	 * Returns an immutable store of zero size. Where the precise type of the
-	 * store is unknown (typically due to type erasure) the {@link #empty()}
-	 * method can be used.
-	 *
-	 * <p>
-	 * If the mutable status of the store is significant for the application,
-	 * the {@link Store#mutable()} method (or one of its relations) may be
-	 * invoked to produce an equivalent store that reports itself as immutable.
-	 *
-	 * @param <V>
-	 *            the storage type
-	 * @param type
-	 *            the putative type of the store elements
-	 * @return a store of zero size
-	 */
-	public static <V> Store<V> empty(Class<V> type) {
-		return new EmptyStore<V>(type, settingNullAllowed(), false);
-	}
+//	/**
+//	 * <p>
+//	 * Returns an immutable store of zero size. This method provides a generic
+//	 * alternative to {@link #emptyWithType(StoreType)} and will return
+//	 * <code>Object.class</code> from its {@link Store#valueType()} method.
+//	 * Using {@link #empty(Class)} with a precise type is to be preferred where
+//	 * possible.
+//	 *
+//	 * <p>
+//	 * If the mutable status of the store is significant for the application,
+//	 * the {@link Store#mutable()} method (or one of its relations) may be
+//	 * invoked to produce an equivalent store that reports itself as mutable.
+//	 *
+//	 * @param <V>
+//	 *            the storage type
+//	 * @return a store of zero size
+//	 */
+//	@SuppressWarnings("unchecked")
+//	public static <V> Store<V> empty() {
+//		return (EmptyStore<V>) emptyStore;
+//	}
+//
+//	/**
+//	 * <p>
+//	 * Returns an immutable store of zero size. Where the precise type of the
+//	 * store is unknown (typically due to type erasure) the {@link #empty()}
+//	 * method can be used.
+//	 *
+//	 * <p>
+//	 * If the mutable status of the store is significant for the application,
+//	 * the {@link Store#mutable()} method (or one of its relations) may be
+//	 * invoked to produce an equivalent store that reports itself as immutable.
+//	 *
+//	 * @param <V>
+//	 *            the storage type
+//	 * @param type
+//	 *            the putative type of the store elements
+//	 * @return a store of zero size
+//	 */
+//	public static <V> Store<V> emptyWithType(StoreType<V> type) {
+//		return new EmptyStore<V>(type, false);
+//	}
 
 	/**
 	 * Creates a mutable store that wraps an existing array. The returned store
@@ -113,7 +114,7 @@ public final class Stores {
 	 * with the specified nullity; supplying an array containing nulls where
 	 * they are prohibited is likely to cause malfunction.
 	 *
-	 * @param nullity
+	 * @param type
 	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
@@ -122,9 +123,9 @@ public final class Stores {
 	 * @return a store that mediates access to the array
 	 */
 	@SafeVarargs
-	public static <V> Store<V> objectsWithNullity(StoreNullity<V> nullity, V... values) {
+	public static <V> Store<V> objectsWithType(StoreType<V> type, V... values) {
 		checkValuesNotNull(values);
-		return nullity.nullGettable() ? new NullArrayStore<>(values) : new ArrayStore<>(values, nullity);
+		return type.nullGettable ? new NullArrayStore<>(values) : new ArrayStore<>(values, type);
 	}
 
 	/**
@@ -157,16 +158,16 @@ public final class Stores {
 	 *
 	 * @param values
 	 *            the values of the store
-	 * @param nullity
+	 * @param type
 	 *            how null values are to be supported
 	 * @param <V>
 	 *            the type of values to be stored
 	 * @return a store that returns values from array
 	 */
 	@SafeVarargs
-	public static <V> Store<V> immutableObjectsWithNullity(StoreNullity<V> nullity, V... values) {
+	public static <V> Store<V> immutableObjectsWithType(StoreType<V> type, V... values) {
 		checkValuesNotNull(values);
-		return new ImmutableArrayStore<>(values, nullity);
+		return new ImmutableArrayStore<>(values, type);
 	}
 
 	/**
@@ -182,7 +183,7 @@ public final class Stores {
 	@SafeVarargs
 	public static <V> Store<V> immutableObjects(V... values) {
 		checkValuesNotNull(values);
-		return new ImmutableArrayStore<>(values, settingNullAllowed());
+		return new ImmutableArrayStore<>(values, StoreType.of(componentType(values)));
 	}
 
 	/**
@@ -203,7 +204,7 @@ public final class Stores {
 	public static <V> Store<V> immutableObjectsAndNullCount(int count, V... values) {
 		if (count < 0) throw new IllegalArgumentException("negative size");
 		checkValuesNotNull(values);
-		return new ImmutableArrayStore<>(values, count, settingNullAllowed());
+		return new ImmutableArrayStore<>(values, count, StoreType.of(componentType(values)));
 	}
 
 	/**
@@ -222,11 +223,10 @@ public final class Stores {
 	 */
 	public static <V> Store<V> constantStore(V value, int size) {
 		if (size < 0) throw new IllegalArgumentException("negative size");
-		@SuppressWarnings("unchecked")
-		Class<V> clss = (Class<V>)Object.class;
+		StoreType<V> type = StoreType.generic();
 		return value == null ?
-				new NullConstantStore<V>(clss, size) :
-				new ConstantStore<V>(clss, settingNullDisallowed(), value, size);
+				new NullConstantStore<V>(type, size) :
+				new ConstantStore<V>(type, value, size);
 	}
 
 	/**
@@ -245,12 +245,12 @@ public final class Stores {
 	 * @return a store consisting of multiple copies of a single value
 	 * @see #constantStore(Object, int)
 	 */
-	public static <V> Store<V> constantStore(Class<V> type, V value, int size) {
-		if (type == null) throw new IllegalArgumentException("null type");
+	public static <V> Store<V> constantStore(Class<V> clss, V value, int size) {
+		StoreType<V> type = StoreType.of(clss);
 		if (size < 0) throw new IllegalArgumentException("negative size");
 		return value == null ?
 				new NullConstantStore<V>(type, size) :
-				new ConstantStore<V>(type, settingNullDisallowed(), value, size);
+				new ConstantStore<V>(type, value, size);
 	}
 
 	/**
@@ -263,7 +263,7 @@ public final class Stores {
 	 */
 	public static Store<Byte> bytes(byte... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.ByteStore(values, settingNullDisallowed());
+		return new PrimitiveStore.ByteStore(values, StoreType.BYTE_NN);
 	}
 
 	/**
@@ -273,15 +273,15 @@ public final class Stores {
 	 * not modify the wrapped array; the null status of an index may be obtained
 	 * from the {@link Store#population()}.
 	 *
-	 * @param nullity
+	 * @param type
 	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Byte> bytesWithNullity(StoreNullity<Byte> nullity, byte... values) {
+	public static Store<Byte> bytesWithType(StoreType<Byte> type, byte... values) {
 		checkValuesNotNull(values);
-		return nullity.nullGettable() ? new NullPrimitiveStore.ByteStore(values) : new PrimitiveStore.ByteStore(values, nullity);
+		return type.nullGettable ? new NullPrimitiveStore.ByteStore(values) : new PrimitiveStore.ByteStore(values, type);
 	}
 
 	/**
@@ -294,7 +294,7 @@ public final class Stores {
 	 */
 	public static Store<Short> shorts(short... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.ShortStore(values, settingNullDisallowed());
+		return new PrimitiveStore.ShortStore(values, StoreType.SHORT_NN);
 	}
 
 	/**
@@ -304,15 +304,15 @@ public final class Stores {
 	 * not modify the wrapped array; the null status of an index may be obtained
 	 * from the {@link Store#population()}.
 	 *
-	 * @param nullity
+	 * @param type
 	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Short> shortsWithNullity(StoreNullity<Short> nullity, short... values) {
+	public static Store<Short> shortsWithType(StoreType<Short> type, short... values) {
 		checkValuesNotNull(values);
-		return nullity.nullGettable() ? new NullPrimitiveStore.ShortStore(values) : new PrimitiveStore.ShortStore(values, nullity);
+		return type.nullGettable ? new NullPrimitiveStore.ShortStore(values) : new PrimitiveStore.ShortStore(values, type);
 	}
 
 	/**
@@ -325,7 +325,7 @@ public final class Stores {
 	 */
 	public static Store<Integer> ints(int... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.IntegerStore(values, settingNullDisallowed());
+		return new PrimitiveStore.IntegerStore(values, StoreType.INT_NN);
 	}
 
 	/**
@@ -335,15 +335,15 @@ public final class Stores {
 	 * not modify the wrapped array; the null status of an index may be obtained
 	 * from the {@link Store#population()}.
 	 *
-	 * @param nullity
+	 * @param type
 	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Integer> intsWithNullity(StoreNullity<Integer> nullity, int... values) {
+	public static Store<Integer> intsWithType(StoreType<Integer> type, int... values) {
 		checkValuesNotNull(values);
-		return nullity.nullGettable() ? new NullPrimitiveStore.IntegerStore(values) : new PrimitiveStore.IntegerStore(values, nullity);
+		return type.nullGettable ? new NullPrimitiveStore.IntegerStore(values) : new PrimitiveStore.IntegerStore(values, type);
 	}
 
 	/**
@@ -356,7 +356,7 @@ public final class Stores {
 	 */
 	public static Store<Long> longs(long... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.LongStore(values, settingNullDisallowed());
+		return new PrimitiveStore.LongStore(values, StoreType.LONG_NN);
 	}
 
 	/**
@@ -366,15 +366,15 @@ public final class Stores {
 	 * not modify the wrapped array; the null status of an index may be obtained
 	 * from the {@link Store#population()}.
 	 *
-	 * @param nullity
+	 * @param type
 	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Long> longsWithNullity(StoreNullity<Long> nullity, long... values) {
+	public static Store<Long> longsWithType(StoreType<Long> type, long... values) {
 		checkValuesNotNull(values);
-		return nullity.nullGettable() ? new NullPrimitiveStore.LongStore(values) : new PrimitiveStore.LongStore(values, nullity);
+		return type.nullGettable ? new NullPrimitiveStore.LongStore(values) : new PrimitiveStore.LongStore(values, type);
 	}
 
 	/**
@@ -387,7 +387,7 @@ public final class Stores {
 	 */
 	public static Store<Boolean> booleans(boolean... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.BooleanStore(values, settingNullDisallowed());
+		return new PrimitiveStore.BooleanStore(values, StoreType.BOOLEAN_NN);
 	}
 
 	/**
@@ -397,15 +397,15 @@ public final class Stores {
 	 * not modify the wrapped array; the null status of an index may be obtained
 	 * from the {@link Store#population()}.
 	 *
-	 * @param nullity
+	 * @param type
 	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Boolean> booleansWithNullity(StoreNullity<Boolean> nullity, boolean... values) {
+	public static Store<Boolean> booleansWithType(StoreType<Boolean> type, boolean... values) {
 		checkValuesNotNull(values);
-		return nullity.nullGettable() ? new NullPrimitiveStore.BooleanStore(values) : new PrimitiveStore.BooleanStore(values, nullity);
+		return type.nullGettable ? new NullPrimitiveStore.BooleanStore(values) : new PrimitiveStore.BooleanStore(values, type);
 	}
 
 	/**
@@ -418,7 +418,7 @@ public final class Stores {
 	 */
 	public static Store<Character> chars(char... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.CharacterStore(values, settingNullDisallowed());
+		return new PrimitiveStore.CharacterStore(values, StoreType.CHAR_NN);
 	}
 
 	/**
@@ -428,15 +428,15 @@ public final class Stores {
 	 * not modify the wrapped array; the null status of an index may be obtained
 	 * from the {@link Store#population()}.
 	 *
-	 * @param nullity
+	 * @param type
 	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Character> charsWithNullity(StoreNullity<Character> nullity, char... values) {
+	public static Store<Character> charsWithType(StoreType<Character> type, char... values) {
 		checkValuesNotNull(values);
-		return nullity.nullGettable() ? new NullPrimitiveStore.CharacterStore(values) : new PrimitiveStore.CharacterStore(values, nullity);
+		return type.nullGettable ? new NullPrimitiveStore.CharacterStore(values) : new PrimitiveStore.CharacterStore(values, type);
 	}
 
 	/**
@@ -449,7 +449,7 @@ public final class Stores {
 	 */
 	public static Store<Float> floats(float... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.FloatStore(values, settingNullDisallowed());
+		return new PrimitiveStore.FloatStore(values, StoreType.FLOAT_NN);
 	}
 
 	/**
@@ -459,15 +459,15 @@ public final class Stores {
 	 * not modify the wrapped array; the null status of an index may be obtained
 	 * from the {@link Store#population()}.
 	 *
-	 * @param nullity
+	 * @param type
 	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Float> floatsWithNullity(StoreNullity<Float> nullity, float... values) {
+	public static Store<Float> floatsWithType(StoreType<Float> type, float... values) {
 		checkValuesNotNull(values);
-		return nullity.nullGettable() ? new NullPrimitiveStore.FloatStore(values) : new PrimitiveStore.FloatStore(values, nullity);
+		return type.nullGettable ? new NullPrimitiveStore.FloatStore(values) : new PrimitiveStore.FloatStore(values, type);
 	}
 
 	/**
@@ -480,7 +480,7 @@ public final class Stores {
 	 */
 	public static Store<Double> doubles(double... values) {
 		checkValuesNotNull(values);
-		return new PrimitiveStore.DoubleStore(values, settingNullDisallowed());
+		return new PrimitiveStore.DoubleStore(values, StoreType.DOUBLE_NN);
 	}
 
 	/**
@@ -490,15 +490,15 @@ public final class Stores {
 	 * not modify the wrapped array; the null status of an index may be obtained
 	 * from the {@link Store#population()}.
 	 *
-	 * @param nullity
+	 * @param type
 	 *            how null values are to be supported
 	 * @param values
 	 *            the values of the store
 	 * @return a store that mediates access to the array
 	 */
-	public static Store<Double> doublesWithNullity(StoreNullity<Double> nullity, double... values) {
+	public static Store<Double> doublesWithType(StoreType<Double> type, double... values) {
 		checkValuesNotNull(values);
-		return nullity.nullGettable() ? new NullPrimitiveStore.DoubleStore(values) : new PrimitiveStore.DoubleStore(values, nullity);
+		return type.nullGettable ? new NullPrimitiveStore.DoubleStore(values) : new PrimitiveStore.DoubleStore(values, type);
 	}
 
 	// package scoped methods
@@ -508,15 +508,13 @@ public final class Stores {
 	}
 
 	static <V> V[] typedArrayCopy(Class<V> type, V[] vs) {
-		if (vs.getClass().getComponentType() == type) {
-			return vs.clone();
-		} else {
-			@SuppressWarnings("unchecked")
-			V[] copy = (V[]) Array.newInstance(type, vs.length);
-			System.arraycopy(vs, 0, copy, 0, vs.length);
-			return copy;
-		}
-
+		// fast path
+		if (vs.getClass().getComponentType() == type) return vs.clone();
+		// slow path
+		@SuppressWarnings("unchecked")
+		V[] copy = (V[]) Array.newInstance(type, vs.length);
+		System.arraycopy(vs, 0, copy, 0, vs.length);
+		return copy;
 	}
 
 	static <V> V[] toArray(Store<V> store) {
@@ -525,7 +523,7 @@ public final class Stores {
 
 	static<V> V[] toArray(Store<V> store, int length, V nullValue) {
 		@SuppressWarnings("unchecked")
-		V[] vs = (V[]) Array.newInstance(store.valueType(), length);
+		V[] vs = (V[]) Array.newInstance(store.type().valueType, length);
 		return copyIntoArray(store, vs, nullValue);
 	}
 
@@ -562,6 +560,11 @@ public final class Stores {
 			vs[j++] = null;
 		}
 		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	static <V> Class<V> componentType(V[] vs) {
+		return (Class<V>) vs.getClass().getComponentType();
 	}
 
 	// non-constructor

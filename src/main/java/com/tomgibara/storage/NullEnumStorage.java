@@ -20,18 +20,20 @@ import com.tomgibara.storage.SmallValueStore.SmallValueStorage;
 
 class NullEnumStorage<E extends Enum<E>> implements Storage<E> {
 
-	private final Class<E> type;
+	private static final StoreType<Integer> TYPE = StoreType.INT.settingNullToValue(0);
+
+	private final StoreType<E> type;
 	private final SmallValueStorage storage;
 	private final E[] constants;
 
-	NullEnumStorage(Class<E> type) {
+	NullEnumStorage(StoreType<E> type) {
 		this.type = type;
-		constants = type.getEnumConstants();
-		storage = SmallValueStore.newStorage(constants.length + 1, 0);
+		constants = type.valueType.getEnumConstants();
+		storage = SmallValueStore.newNonNullStorage(constants.length + 1, TYPE);
 	}
 
 	@Override
-	public Class<E> valueType() {
+	public StoreType<E> type() {
 		return type;
 	}
 
@@ -46,11 +48,6 @@ class NullEnumStorage<E extends Enum<E>> implements Storage<E> {
 
 		NullEnumStore(SmallValueStore store) {
 			this.store = store;
-		}
-
-		@Override
-		public Class<E> valueType() {
-			return type;
 		}
 
 		@Override
@@ -81,6 +78,11 @@ class NullEnumStorage<E extends Enum<E>> implements Storage<E> {
 		@Override
 		public void fill(E value) {
 			store.fillInt( value(value) );
+		}
+
+		@Override
+		public StoreType<E> type() {
+			return type;
 		}
 
 		// mutability methods

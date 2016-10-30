@@ -23,10 +23,8 @@ import java.util.Arrays;
 abstract class RefStore<V> extends AbstractStore<V> {
 
 	interface RefStorage<V> extends Storage<V> {
-		//TODO this is pretty smelly
-		@SuppressWarnings("unchecked")
 		@Override
-		public default Class<V> valueType() { return (Class<V>) Object.class; }
+		public default StoreType<V> type() { return StoreType.generic(); }
 	}
 
 	private final ReferenceQueue<V> queue = new ReferenceQueue<V>();
@@ -53,12 +51,10 @@ abstract class RefStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
-	//TODO this is pretty smelly
-	@SuppressWarnings("unchecked")
-	public Class<V> valueType() {
-		return (Class<V>) Object.class;
+	public StoreType<V> type() {
+		return StoreType.generic();
 	}
-
+	
 	@Override
 	public int size() {
 		return refs.length;
@@ -134,7 +130,7 @@ abstract class RefStore<V> extends AbstractStore<V> {
 			vs[i] = value;
 			count++;
 		}
-		return new ImmutableArrayStore<>(vs, count, nullity());
+		return new ImmutableArrayStore<>(vs, count, type());
 	}
 
 	abstract Reference<V> newReference(V referent, ReferenceQueue<V> queue, int index);

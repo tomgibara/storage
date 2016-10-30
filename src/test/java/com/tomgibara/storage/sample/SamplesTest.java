@@ -7,7 +7,7 @@ import org.junit.Test;
 import com.tomgibara.bits.BitStore;
 import com.tomgibara.storage.Storage;
 import com.tomgibara.storage.Store;
-import com.tomgibara.storage.StoreNullity;
+import com.tomgibara.storage.StoreType;
 import com.tomgibara.storage.Stores;
 
 public class SamplesTest {
@@ -16,7 +16,7 @@ public class SamplesTest {
 
 	int size = 100;
 	int newSize = 200;
-	Storage<T> storage = Storage.generic();
+	Storage<T> storage = StoreType.<T>generic().storage();
 	int i = 0;
 	int j = 1;
 	T value = new T();
@@ -28,14 +28,14 @@ public class SamplesTest {
 		// CREATING NEW STORES
 
 		/* Creating generic array storage backed by Object arrays. */
-		Store<T> ex1 = Storage.<T>generic().newStore(size);
+		Store<T> ex1 = StoreType.<T>generic().storage().newStore(size);
 
 		/* Creating storage backed by primitive arrays. */
-		Store<Integer> ex2 = Storage.typed(int.class).newStore(size);
+		Store<Integer> ex2 = StoreType.of(int.class).storage().newStore(size);
 
 		/* Creating storage backed by String arrays
 		   in which nulls are replaced by empty string. */
-		Store<String> ex3 = Storage.typed(String.class, StoreNullity.settingNullToValue("")).newStore(size);
+		Store<String> ex3 = StoreType.of(String.class).settingNullToValue("").storage().newStore(size);
 
 		/* Creating storage backed by weak references. */
 		Store<T> ex4 = Storage.<T>weak().newStore(size);
@@ -44,7 +44,7 @@ public class SamplesTest {
 		Store<T> ex5 = Storage.<T>soft().newStore(size);
 
 		/* Creating storage for ints in the range [0,4]. */
-		Store<Integer> ex6 = Storage.smallValues(5, StoreNullity.settingNullToValue(0)).newStore(size);
+		Store<Integer> ex6 = StoreType.of(int.class).smallValueStorage(5).newStore(size, 0);
 
 
 		// WRAPPING EXISTING ARRAYS
@@ -54,13 +54,13 @@ public class SamplesTest {
 
 		/* Wrapping a primitive array as a store,
 		   adding support for null values. */
-		Store<Double> ex8 = Stores.doublesWithNullity(StoreNullity.settingNullAllowed(), 1.0,2.0,3.0);
+		Store<Double> ex8 = Stores.doublesWithType(StoreType.of(double.class), 1.0,2.0,3.0);
 
 		/* Wrapping an object array permitting null values. */
 		Store<Object> ex9 = Stores.objects(new Object[size]);
 
 		/* Wrapping an object array, not permitting null values. */
-		Store<String> exa = Stores.objectsWithNullity(StoreNullity.settingNullDisallowed(), "Zippy", "Bungle", "George");
+		Store<String> exa = Stores.objectsWithType(StoreType.of(String.class).settingNullDisallowed(), "Zippy", "Bungle", "George");
 
 
 		// BASIC STORE FUNCTIONS

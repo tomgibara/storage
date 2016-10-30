@@ -16,34 +16,34 @@
  */
 package com.tomgibara.storage;
 
+import com.tomgibara.fundament.Mapping;
 import com.tomgibara.storage.SmallValueStore.SmallValueStorage;
 
 final class EnumStorage<E extends Enum<E>> implements Storage<E> {
 
-	private final Class<E> type;
+	private final StoreType<E> type;
 	private final E[] constants;
 	private final int nullValue;
-	private final StoreNullity<E> nullity;
 	private final SmallValueStorage storage;
 
-	EnumStorage(Class<E> type, StoreNullity<E> nullity) {
+	EnumStorage(StoreType<E> type) {
 		this.type = type;
-		this.nullity = nullity;
-		this.nullValue = nullity.nullSettable() ? nullity.nullValue().ordinal() : -1;
-		constants = type.getEnumConstants();
-		storage = SmallValueStore.newStorage(constants.length, nullValue);
+		this.nullValue = type.nullSettable ? type.nullValue.ordinal() : -1;
+		constants = type.valueType.getEnumConstants();
+		Mapping<E, Integer> fn = Mapping.fromFunction(type.valueType, int.class, nv -> nv.ordinal());
+		storage = SmallValueStore.newNonNullStorage(constants.length, type.map(fn));
 	}
 
 	@Override
-	public Class<E> valueType() {
+	public StoreType<E> type() {
 		return type;
 	}
 
 	@Override
 	public Store<E> newStore(int size, E value) throws IllegalArgumentException {
 		if (size < 0) throw new IllegalArgumentException("negative size");
-		if (size == 0) return new EmptyStore<>(type, nullity, true);
-		value = nullity.checkedValue(value);
+		if (size == 0) return new EmptyStore<>(type, true);
+		value = type.checkedValue(value);
 		SmallValueStore store = storage.newStore(size, value.ordinal());
 		return new EnumStore(store);
 	}
@@ -54,7 +54,7 @@ final class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		int size = values.length;
 		SmallValueStore store = storage.newStore(size, 0);
 		for (int i = 0; i < size; i++) {
-			store.set(i, nullity.checkedValue(values[i]).ordinal());
+			store.set(i, type.checkedValue(values[i]).ordinal());
 		}
 		return new EnumStore(store);
 	}
@@ -64,9 +64,9 @@ final class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		if (store == null) throw new IllegalArgumentException("null store");
 		int size = store.size();
 		SmallValueStore s = storage.newStore(size, 0);
-		if (store.nullity().nullGettable()) {
+		if (store.type().nullGettable) {
 			for (int i = 0; i < size; i++) {
-				s.set(i, nullity.checkedValue(store.get(i)).ordinal());
+				s.set(i, type.checkedValue(store.get(i)).ordinal());
 			}
 		} else {
 			for (int i = 0; i < size; i++) {
@@ -85,13 +85,8 @@ final class EnumStorage<E extends Enum<E>> implements Storage<E> {
 		}
 
 		@Override
-		public Class<E> valueType() {
+		public StoreType<E> type() {
 			return type;
-		}
-
-		@Override
-		public StoreNullity<E> nullity() {
-			return nullity;
 		}
 
 		@Override
@@ -157,7 +152,7 @@ final class EnumStorage<E extends Enum<E>> implements Storage<E> {
 
 		private int value(E e) {
 			if (e == null) {
-				nullity.checkNull();
+				type.checkNull();
 				return nullValue;
 			}
 			return e.ordinal();

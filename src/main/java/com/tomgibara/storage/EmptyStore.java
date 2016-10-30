@@ -18,21 +18,19 @@ import com.tomgibara.fundament.Mapping;
 
 final class EmptyStore<V> implements Store<V> {
 
-	private final Class<V> type;
-	private final StoreNullity<V> nullity;
+	private final StoreType<V> type;
 	private final boolean mutable;
 
-	EmptyStore(Class<V> type, StoreNullity<V> nullity, boolean mutable) {
+	EmptyStore(StoreType<V> type, boolean mutable) {
 		this.type = type;
-		this.nullity = nullity;
 		this.mutable = mutable;
 	}
 
 	// store methods
 
 	@Override
-	public StoreNullity<V> nullity() {
-		return nullity;
+	public StoreType<V> type() {
+		return type;
 	}
 
 	@Override
@@ -62,23 +60,18 @@ final class EmptyStore<V> implements Store<V> {
 
 	@Override
 	public Store<V> immutable() {
-		return mutable ? new EmptyStore<>(type, nullity, false) : this;
+		return mutable ? new EmptyStore<>(type, false) : this;
 	}
 
 	@Override
 	public Store<V> mutable() {
-		return mutable ? this : new EmptyStore<>(type, nullity, true);
+		return mutable ? this : new EmptyStore<>(type, true);
 	}
 
 	@Override
 	public void transpose(int i, int j) {
 		if (i != 0) throw new IllegalArgumentException("invalid i");
 		if (j != 0) throw new IllegalArgumentException("invalid j");
-	}
-
-	@Override
-	public Class<V> valueType() {
-		return type;
 	}
 
 	@Override
@@ -103,17 +96,17 @@ final class EmptyStore<V> implements Store<V> {
 
 	@Override
 	public <W> Store<W> asTransformedBy(Bijection<V, W> fn) {
-		return new EmptyStore<>(fn.rangeType(), nullity.map(fn), mutable);
+		return new EmptyStore<>(type.map(fn), mutable);
 	}
 
 	@Override
 	public <W> Store<W> asTransformedBy(Mapping<V, W> fn) {
-		return new EmptyStore<>(fn.rangeType(), nullity.map(fn), mutable);
+		return new EmptyStore<>(type.map(fn), mutable);
 	}
 
 	@Override
 	public Store<V> asTransformedBy(UnaryOperator<V> fn) {
-		return new EmptyStore<>(type, nullity, mutable);
+		return new EmptyStore<>(type, mutable);
 	}
 
 	@Override

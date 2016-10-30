@@ -24,114 +24,112 @@ import java.util.Spliterators;
 
 abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
-	private static final int BYTE    =  1;
-	private static final int FLOAT   =  2;
-	private static final int CHAR    =  3;
-	private static final int SHORT   =  4;
-	private static final int LONG    =  6;
-	private static final int INT     =  7;
-	private static final int DOUBLE  = 11;
-	private static final int BOOLEAN = 12;
-
 	private static void failGrowCopy() {
 		throw new IllegalArgumentException("cannot increase size, null not settable");
 	}
 
-	private static final <T> StoreNullity<T> newNullity(boolean nullSettable, T nullValue) {
-		return nullSettable ? StoreNullity.settingNullToValue(nullValue) : StoreNullity.settingNullDisallowed();
+	private static final <T> StoreType<T> newType(Class<T> clss, boolean nullSettable, T nullValue) {
+		//TODO can we avoid intermediate object creation?
+		StoreType<T> type = StoreType.of(clss);
+		return nullSettable ? type.settingNullToValue(nullValue) : type.settingNullDisallowed();
 	}
 
 	private static abstract class PrimitiveStorage<P> implements Storage<P> {
-		final StoreNullity<P> nullity;
-		PrimitiveStorage(StoreNullity<P> nullity) { this.nullity = nullity; }
-		@Override final public StoreNullity<P> nullity() { return nullity; }
+		final StoreType<P> type;
+		PrimitiveStorage(StoreType<P> type) { this.type = type; }
+		@Override final public StoreType<P> type() { return type; }
 	}
 
-	private static final Storage<Byte> byteStorage(StoreNullity<Byte> nullity) {
-		return new PrimitiveStorage<Byte>(nullity) {
-			@Override public Class<Byte> valueType() { return byte.class; }
-			@Override public PrimitiveStore<Byte> newStore(int size, Byte initialValue) { return new ByteStore(size, nullity, initialValue); }
+	private static final Storage<Byte> byteStorage(StoreType<Byte> type) {
+		return new PrimitiveStorage<Byte>(type) {
+			@Override public PrimitiveStore<Byte> newStore(int size, Byte initialValue) { return new ByteStore(size, type, initialValue); }
 		};
 	};
 
-	private static final Storage<Float> floatStorage(StoreNullity<Float> nullity) {
-		return new PrimitiveStorage<Float>(nullity) {
-			@Override public Class<Float> valueType() { return float.class; }
-			@Override public PrimitiveStore<Float> newStore(int size, Float initialValue) { return new FloatStore(size, nullity, initialValue); }
+	private static final Storage<Float> floatStorage(StoreType<Float> type) {
+		return new PrimitiveStorage<Float>(type) {
+			@Override public PrimitiveStore<Float> newStore(int size, Float initialValue) { return new FloatStore(size, type, initialValue); }
 		};
 	};
 
-	private static final Storage<Character> charStorage(StoreNullity<Character> nullity) {
-		return new PrimitiveStorage<Character>(nullity) {
-			@Override public Class<Character> valueType() { return char.class; }
-			@Override public PrimitiveStore<Character> newStore(int size, Character initialValue) { return new CharacterStore(size, nullity, initialValue); }
+	private static final Storage<Character> charStorage(StoreType<Character> type) {
+		return new PrimitiveStorage<Character>(type) {
+			@Override public PrimitiveStore<Character> newStore(int size, Character initialValue) { return new CharacterStore(size, type, initialValue); }
 		};
 	};
 
-	private static final Storage<Short> shortStorage(StoreNullity<Short> nullity) {
-		return new PrimitiveStorage<Short>(nullity) {
-			@Override public Class<Short> valueType() { return short.class; }
-			@Override public PrimitiveStore<Short> newStore(int size, Short initialValue) { return new ShortStore(size, nullity, initialValue); }
+	private static final Storage<Short> shortStorage(StoreType<Short> type) {
+		return new PrimitiveStorage<Short>(type) {
+			@Override public PrimitiveStore<Short> newStore(int size, Short initialValue) { return new ShortStore(size, type, initialValue); }
 		};
 	};
 
-	private static final Storage<Long> longStorage(StoreNullity<Long> nullity) {
-		return new PrimitiveStorage<Long>(nullity) {
-			@Override public Class<Long> valueType() { return long.class; }
-			@Override public PrimitiveStore<Long> newStore(int size, Long initialValue) { return new LongStore(size, nullity, initialValue); }
+	private static final Storage<Long> longStorage(StoreType<Long> type) {
+		return new PrimitiveStorage<Long>(type) {
+			@Override public PrimitiveStore<Long> newStore(int size, Long initialValue) { return new LongStore(size, type, initialValue); }
 		};
 	};
 
-	private static final Storage<Integer> intStorage(StoreNullity<Integer> nullity) {
-		return new PrimitiveStorage<Integer>(nullity) {
-			@Override public Class<Integer> valueType() { return int.class; }
-			@Override public PrimitiveStore<Integer> newStore(int size, Integer initialValue) { return new IntegerStore(size, nullity, initialValue); }
+	private static final Storage<Integer> intStorage(StoreType<Integer> type) {
+		return new PrimitiveStorage<Integer>(type) {
+			@Override public PrimitiveStore<Integer> newStore(int size, Integer initialValue) { return new IntegerStore(size, type, initialValue); }
 		};
 	};
 
-	private static final Storage<Double> doubleStorage(StoreNullity<Double> nullity) {
-		return new Storage<Double>() {
-			@Override public Class<Double> valueType() { return double.class; }
-			@Override public StoreNullity<Double> nullity() { return nullity; }
-			@Override public PrimitiveStore<Double> newStore(int size, Double initialValue) { return new DoubleStore(size, nullity, initialValue); }
+	private static final Storage<Double> doubleStorage(StoreType<Double> type) {
+		return new PrimitiveStorage<Double>(type) {
+			@Override public PrimitiveStore<Double> newStore(int size, Double initialValue) { return new DoubleStore(size, type, initialValue); }
 		};
 	};
 
-	private static final Storage<Boolean> booleanStorage(StoreNullity<Boolean> nullity) {
-		return new Storage<Boolean>() {
-			@Override public Class<Boolean> valueType() { return boolean.class; }
-			@Override public StoreNullity<Boolean> nullity() { return nullity; }
-			@Override public PrimitiveStore<Boolean> newStore(int size, Boolean initialValue) { return new BooleanStore(size, nullity, initialValue); }
+	private static final Storage<Boolean> booleanStorage(StoreType<Boolean> type) {
+		return new PrimitiveStorage<Boolean>(type) {
+			@Override public PrimitiveStore<Boolean> newStore(int size, Boolean initialValue) { return new BooleanStore(size, type, initialValue); }
 		};
 	};
 
 	@SuppressWarnings("unchecked")
-	static <V> Storage<V> newStorage(Class<V> type, StoreNullity<V> nullity) {
-		switch((type.getName().hashCode() >> 8) & 0xf) {
-		case Stores.BYTE:    return (Storage<V>) byteStorage   ((StoreNullity<Byte>     ) nullity);
-		case Stores.FLOAT:   return (Storage<V>) floatStorage  ((StoreNullity<Float>    ) nullity);
-		case Stores.CHAR:    return (Storage<V>) charStorage   ((StoreNullity<Character>) nullity);
-		case Stores.SHORT:   return (Storage<V>) shortStorage  ((StoreNullity<Short>    ) nullity);
-		case Stores.LONG:    return (Storage<V>) longStorage   ((StoreNullity<Long>     ) nullity);
-		case Stores.INT:     return (Storage<V>) intStorage    ((StoreNullity<Integer>  ) nullity);
-		case Stores.DOUBLE:  return (Storage<V>) doubleStorage ((StoreNullity<Double>   ) nullity);
-		case Stores.BOOLEAN: return (Storage<V>) booleanStorage((StoreNullity<Boolean>  ) nullity);
-		default: throw new IllegalArgumentException(type.getName());
+	static <V> Storage<V> newStorage(StoreType<V> type) {
+		switch((type.valueType.getName().hashCode() >> 8) & 0xf) {
+		case Stores.BYTE:    return (Storage<V>) byteStorage   ((StoreType<Byte>     ) type);
+		case Stores.FLOAT:   return (Storage<V>) floatStorage  ((StoreType<Float>    ) type);
+		case Stores.CHAR:    return (Storage<V>) charStorage   ((StoreType<Character>) type);
+		case Stores.SHORT:   return (Storage<V>) shortStorage  ((StoreType<Short>    ) type);
+		case Stores.LONG:    return (Storage<V>) longStorage   ((StoreType<Long>     ) type);
+		case Stores.INT:     return (Storage<V>) intStorage    ((StoreType<Integer>  ) type);
+		case Stores.DOUBLE:  return (Storage<V>) doubleStorage ((StoreType<Double>   ) type);
+		case Stores.BOOLEAN: return (Storage<V>) booleanStorage((StoreType<Boolean>  ) type);
+		default: throw new IllegalArgumentException(type.valueType.getName());
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	static <V> PrimitiveStore<V> newStore(Class<V> type, int size, StoreNullity<V> nullity, V value) {
-		switch((type.getName().hashCode() >> 8) & 0xf) {
-		case BYTE:    return (PrimitiveStore<V>) new ByteStore     (size, (StoreNullity<Byte>     ) nullity, (Byte)      value);
-		case FLOAT:   return (PrimitiveStore<V>) new FloatStore    (size, (StoreNullity<Float>    ) nullity, (Float)     value);
-		case CHAR:    return (PrimitiveStore<V>) new CharacterStore(size, (StoreNullity<Character>) nullity, (Character) value);
-		case SHORT:   return (PrimitiveStore<V>) new ShortStore    (size, (StoreNullity<Short>    ) nullity, (Short)     value);
-		case LONG:    return (PrimitiveStore<V>) new LongStore     (size, (StoreNullity<Long>     ) nullity, (Long)      value);
-		case INT:     return (PrimitiveStore<V>) new IntegerStore  (size, (StoreNullity<Integer>  ) nullity, (Integer)   value);
-		case DOUBLE:  return (PrimitiveStore<V>) new DoubleStore   (size, (StoreNullity<Double>   ) nullity, (Double)    value);
-		case BOOLEAN: return (PrimitiveStore<V>) new BooleanStore  (size, (StoreNullity<Boolean>  ) nullity, (Boolean)   value);
-		default: throw new IllegalArgumentException(type.getName());
+	static <V> PrimitiveStore<V> newStore(StoreType<V> type, int size, V value) {
+		switch((type.valueType.getName().hashCode() >> 8) & 0xf) {
+		case Stores.BYTE:    return (PrimitiveStore<V>) new ByteStore     (size, (StoreType<Byte>     ) type, (Byte)      value);
+		case Stores.FLOAT:   return (PrimitiveStore<V>) new FloatStore    (size, (StoreType<Float>    ) type, (Float)     value);
+		case Stores.CHAR:    return (PrimitiveStore<V>) new CharacterStore(size, (StoreType<Character>) type, (Character) value);
+		case Stores.SHORT:   return (PrimitiveStore<V>) new ShortStore    (size, (StoreType<Short>    ) type, (Short)     value);
+		case Stores.LONG:    return (PrimitiveStore<V>) new LongStore     (size, (StoreType<Long>     ) type, (Long)      value);
+		case Stores.INT:     return (PrimitiveStore<V>) new IntegerStore  (size, (StoreType<Integer>  ) type, (Integer)   value);
+		case Stores.DOUBLE:  return (PrimitiveStore<V>) new DoubleStore   (size, (StoreType<Double>   ) type, (Double)    value);
+		case Stores.BOOLEAN: return (PrimitiveStore<V>) new BooleanStore  (size, (StoreType<Boolean>  ) type, (Boolean)   value);
+		default: throw new IllegalArgumentException(type.valueType.getName());
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	static <V> PrimitiveStore<V> newStore(StoreType<V> type, Object array) {
+		switch((type.valueType.getName().hashCode() >> 8) & 0xf) {
+		case Stores.BYTE:    return (PrimitiveStore<V>) new ByteStore     ((byte   []) array, (StoreType<Byte>     ) type);
+		case Stores.FLOAT:   return (PrimitiveStore<V>) new FloatStore    ((float  []) array, (StoreType<Float>    ) type);
+		case Stores.CHAR:    return (PrimitiveStore<V>) new CharacterStore((char   []) array, (StoreType<Character>) type);
+		case Stores.SHORT:   return (PrimitiveStore<V>) new ShortStore    ((short  []) array, (StoreType<Short>    ) type);
+		case Stores.LONG:    return (PrimitiveStore<V>) new LongStore     ((long   []) array, (StoreType<Long>     ) type);
+		case Stores.INT:     return (PrimitiveStore<V>) new IntegerStore  ((int    []) array, (StoreType<Integer>  ) type);
+		case Stores.DOUBLE:  return (PrimitiveStore<V>) new DoubleStore   ((double []) array, (StoreType<Double>   ) type);
+		case Stores.BOOLEAN: return (PrimitiveStore<V>) new BooleanStore  ((boolean[]) array, (StoreType<Boolean>  ) type);
+		default: throw new IllegalArgumentException(type.valueType.getName());
 		}
 	}
 
@@ -178,7 +176,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 	@Override
 	public V set(int index, V value) {
-		if (value == null && !nullSettable) StoreNullity.failNull();
+		if (value == null && !nullSettable) StoreType.failNull();
 		V previous = getImpl(index);
 		setImpl(index, value);
 		return previous;
@@ -232,19 +230,19 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		private final byte[] values;
 		private final byte nullValue;
 
-		ByteStore(int size, StoreNullity<Byte> nullity, Byte initialValue) {
-			super(nullity.nullSettable());
+		ByteStore(int size, StoreType<Byte> type, Byte initialValue) {
+			super(type.nullSettable);
 			if (initialValue == null) checkSize(size);
 			values = new byte[size];
-			nullValue = nullSettable ? nullity.nullValue() : (byte) 0;
+			nullValue = nullSettable ? type.nullValue : (byte) 0;
 			if (initialValue == null) initialValue = nullValue;
 			if (nullValue != (byte) 0) Arrays.fill(values, initialValue);
 		}
 
-		ByteStore(byte[] values, StoreNullity<Byte> nullity) {
-			super(nullity.nullSettable());
+		ByteStore(byte[] values, StoreType<Byte> type) {
+			super(type.nullSettable);
 			this.values = values;
-			this.nullValue = nullSettable ? nullity.nullValue() : (byte) 0;
+			this.nullValue = nullSettable ? type.nullValue : (byte) 0;
 		}
 
 		private ByteStore(byte[] values, byte nullValue, boolean nullSettable) {
@@ -257,11 +255,6 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			super(mutable, nullSettable);
 			this.values = values;
 			this.nullValue = nullValue;
-		}
-
-		@Override
-		public Class<Byte> valueType() {
-			return byte.class;
 		}
 
 		@Override
@@ -300,8 +293,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public StoreNullity<Byte> nullity() {
-			return newNullity(nullSettable, nullValue);
+		public StoreType<Byte> type() {
+			return newType(byte.class, nullSettable, nullValue);
 		}
 
 	}
@@ -311,19 +304,19 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		private final float[] values;
 		private final float nullValue;
 
-		FloatStore(int size, StoreNullity<Float> nullity, Float initialValue) {
-			super(nullity.nullSettable());
+		FloatStore(int size, StoreType<Float> type, Float initialValue) {
+			super(type.nullSettable);
 			if (initialValue == null) checkSize(size);
 			values = new float[size];
-			nullValue = nullSettable ? nullity.nullValue() : 0.0f;
+			nullValue = nullSettable ? type.nullValue : 0.0f;
 			if (initialValue == null) initialValue = nullValue;
 			if (nullValue != (float) 0) Arrays.fill(values, nullValue);
 		}
 
-		FloatStore(float[] values, StoreNullity<Float> nullity) {
-			super(nullity.nullSettable());
+		FloatStore(float[] values, StoreType<Float> type) {
+			super(type.nullSettable);
 			this.values = values;
-			this.nullValue = nullSettable ? nullity.nullValue() : 0.0f;
+			this.nullValue = nullSettable ? type.nullValue : 0.0f;
 		}
 
 		private FloatStore(float[] values, float nullValue, boolean nullSettable) {
@@ -336,11 +329,6 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			super(mutable, nullSettable);
 			this.values = values;
 			this.nullValue = nullValue;
-		}
-
-		@Override
-		public Class<Float> valueType() {
-			return float.class;
 		}
 
 		@Override
@@ -379,8 +367,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public StoreNullity<Float> nullity() {
-			return newNullity(nullSettable, nullValue);
+		public StoreType<Float> type() {
+			return newType(float.class, nullSettable, nullValue);
 		}
 
 	}
@@ -390,19 +378,19 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		private final char[] values;
 		private final char nullValue;
 
-		CharacterStore(int size, StoreNullity<Character> nullity, Character initialValue) {
-			super(nullity.nullSettable());
+		CharacterStore(int size, StoreType<Character> type, Character initialValue) {
+			super(type.nullSettable);
 			if (initialValue == null) checkSize(size);
 			values = new char[size];
-			nullValue = nullSettable ? nullity.nullValue() : '\0';
+			nullValue = nullSettable ? type.nullValue : '\0';
 			if (initialValue == null) initialValue = nullValue;
 			if (nullValue != (char) 0) Arrays.fill(values, nullValue);
 		}
 
-		CharacterStore(char[] values, StoreNullity<Character> nullity) {
-			super(nullity.nullSettable());
+		CharacterStore(char[] values, StoreType<Character> type) {
+			super(type.nullSettable);
 			this.values = values;
-			this.nullValue = nullSettable ? nullity.nullValue() : '\0';
+			this.nullValue = nullSettable ? type.nullValue : '\0';
 		}
 
 		private CharacterStore(char[] values, char nullValue, boolean nullSettable) {
@@ -415,11 +403,6 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			super(mutable, nullSettable);
 			this.values = values;
 			this.nullValue = nullValue;
-		}
-
-		@Override
-		public Class<Character> valueType() {
-			return char.class;
 		}
 
 		@Override
@@ -458,8 +441,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public StoreNullity<Character> nullity() {
-			return newNullity(nullSettable, nullValue);
+		public StoreType<Character> type() {
+			return newType(char.class, nullSettable, nullValue);
 		}
 
 	}
@@ -469,19 +452,19 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		private final short[] values;
 		private final short nullValue;
 
-		ShortStore(int size, StoreNullity<Short> nullity, Short initialValue) {
-			super(nullity.nullSettable());
+		ShortStore(int size, StoreType<Short> type, Short initialValue) {
+			super(type.nullSettable);
 			if (initialValue == null) checkSize(size);
 			values = new short[size];
-			nullValue = nullSettable ? nullity.nullValue() : (short) 0;
+			nullValue = nullSettable ? type.nullValue : (short) 0;
 			if (initialValue == null) initialValue = nullValue;
 			if (nullValue != (short) 0) Arrays.fill(values, nullValue);
 		}
 
-		ShortStore(short[] values, StoreNullity<Short> nullity) {
-			super(nullity.nullSettable());
+		ShortStore(short[] values, StoreType<Short> type) {
+			super(type.nullSettable);
 			this.values = values;
-			this.nullValue = nullSettable ? nullity.nullValue() : (short) 0;
+			this.nullValue = nullSettable ? type.nullValue : (short) 0;
 		}
 
 		private ShortStore(short[] values, short nullValue, boolean nullSettable) {
@@ -494,11 +477,6 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			super(mutable, nullSettable);
 			this.values = values;
 			this.nullValue = nullValue;
-		}
-
-		@Override
-		public Class<Short> valueType() {
-			return short.class;
 		}
 
 		@Override
@@ -537,8 +515,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public StoreNullity<Short> nullity() {
-			return newNullity(nullSettable, nullValue);
+		public StoreType<Short> type() {
+			return newType(short.class, nullSettable, nullValue);
 		}
 
 	}
@@ -548,19 +526,19 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		private final long[] values;
 		private final long nullValue;
 
-		LongStore(int size, StoreNullity<Long> nullity, Long initialValue) {
-			super(nullity.nullSettable());
+		LongStore(int size, StoreType<Long> type, Long initialValue) {
+			super(type.nullSettable);
 			if (initialValue == null) checkSize(size);
 			values = new long[size];
-			nullValue = nullSettable ? nullity.nullValue() : 0L;
+			nullValue = nullSettable ? type.nullValue : 0L;
 			if (initialValue == null) initialValue = nullValue;
 			if (nullValue != (long) 0) Arrays.fill(values, nullValue);
 		}
 
-		LongStore(long[] values, StoreNullity<Long> nullity) {
-			super(nullity.nullSettable());
+		LongStore(long[] values, StoreType<Long> type) {
+			super(type.nullSettable);
 			this.values = values;
-			this.nullValue = nullSettable ? nullity.nullValue() : 0L;
+			this.nullValue = nullSettable ? type.nullValue : 0L;
 		}
 
 		private LongStore(long[] values, long nullValue, boolean nullSettable) {
@@ -573,11 +551,6 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			super(mutable, nullSettable);
 			this.values = values;
 			this.nullValue = nullValue;
-		}
-
-		@Override
-		public Class<Long> valueType() {
-			return long.class;
 		}
 
 		@Override
@@ -616,8 +589,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public StoreNullity<Long> nullity() {
-			return newNullity(nullSettable, nullValue);
+		public StoreType<Long> type() {
+			return newType(long.class, nullSettable, nullValue);
 		}
 
 		@Override
@@ -631,19 +604,19 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		private final int[] values;
 		private final int nullValue;
 
-		IntegerStore(int size, StoreNullity<Integer> nullity, Integer initialValue) {
-			super(nullity.nullSettable());
+		IntegerStore(int size, StoreType<Integer> type, Integer initialValue) {
+			super(type.nullSettable);
 			if (initialValue == null) checkSize(size);
 			values = new int[size];
-			nullValue = nullSettable ? nullity.nullValue() : 0;
+			nullValue = nullSettable ? type.nullValue : 0;
 			if (initialValue == null) initialValue = nullValue;
 			if (nullValue != (int) 0) Arrays.fill(values, nullValue);
 		}
 
-		IntegerStore(int[] values, StoreNullity<Integer> nullity) {
-			super(nullity.nullSettable());
+		IntegerStore(int[] values, StoreType<Integer> type) {
+			super(type.nullSettable);
 			this.values = values;
-			this.nullValue = nullSettable ? nullity.nullValue() : 0;
+			this.nullValue = nullSettable ? type.nullValue : 0;
 		}
 
 		private IntegerStore(int[] values, int nullValue, boolean nullSettable) {
@@ -656,11 +629,6 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			super(mutable, nullSettable);
 			this.values = values;
 			this.nullValue = nullValue;
-		}
-
-		@Override
-		public Class<Integer> valueType() {
-			return int.class;
 		}
 
 		@Override
@@ -699,8 +667,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public StoreNullity<Integer> nullity() {
-			return newNullity(nullSettable, nullValue);
+		public StoreType<Integer> type() {
+			return newType(int.class, nullSettable, nullValue);
 		}
 
 		@Override
@@ -714,19 +682,19 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		private final double[] values;
 		private final double nullValue;
 
-		DoubleStore(int size, StoreNullity<Double> nullity, Double initialValue) {
-			super(nullity.nullSettable());
+		DoubleStore(int size, StoreType<Double> type, Double initialValue) {
+			super(type.nullSettable);
 			if (initialValue == null) checkSize(size);
 			values = new double[size];
-			nullValue = nullSettable ? nullity.nullValue() : 0.0;
+			nullValue = nullSettable ? type.nullValue : 0.0;
 			if (initialValue == null) initialValue = nullValue;
 			if (nullValue != (double) 0) Arrays.fill(values, nullValue);
 		}
 
-		DoubleStore(double[] values, StoreNullity<Double> nullity) {
-			super(nullity.nullSettable());
+		DoubleStore(double[] values, StoreType<Double> type) {
+			super(type.nullSettable);
 			this.values = values;
-			this.nullValue = nullSettable ? nullity.nullValue() : 0.0;
+			this.nullValue = nullSettable ? type.nullValue : 0.0;
 		}
 
 		private DoubleStore(double[] values, double nullValue, boolean nullSettable) {
@@ -739,11 +707,6 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			super(mutable, nullSettable);
 			this.values = values;
 			this.nullValue = nullValue;
-		}
-
-		@Override
-		public Class<Double> valueType() {
-			return double.class;
 		}
 
 		@Override
@@ -782,8 +745,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public StoreNullity<Double> nullity() {
-			return newNullity(nullSettable, nullValue);
+		public StoreType<Double> type() {
+			return newType(double.class, nullSettable, nullValue);
 		}
 
 		@Override
@@ -797,19 +760,19 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		private final boolean[] values;
 		private final boolean nullValue;
 
-		BooleanStore(int size, StoreNullity<Boolean> nullity, Boolean initialValue) {
-			super(nullity.nullSettable());
+		BooleanStore(int size, StoreType<Boolean> type, Boolean initialValue) {
+			super(type.nullSettable);
 			if (initialValue == null) checkSize(size);
 			values = new boolean[size];
-			nullValue = nullSettable && nullity.nullValue();
+			nullValue = nullSettable && type.nullValue;
 			if (initialValue == null) initialValue = nullValue;
 			if (nullValue) Arrays.fill(values, nullValue);
 		}
 
-		BooleanStore(boolean[] values, StoreNullity<Boolean> nullity) {
-			super(nullity.nullSettable());
+		BooleanStore(boolean[] values, StoreType<Boolean> type) {
+			super(type.nullSettable);
 			this.values = values;
-			this.nullValue = nullSettable && nullity.nullValue();
+			this.nullValue = nullSettable && type.nullValue;
 		}
 
 		private BooleanStore(boolean[] values, boolean nullValue, boolean nullSettable) {
@@ -822,11 +785,6 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			super(mutable, nullSettable);
 			this.values = values;
 			this.nullValue = nullValue;
-		}
-
-		@Override
-		public Class<Boolean> valueType() {
-			return boolean.class;
 		}
 
 		@Override
@@ -865,8 +823,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		public StoreNullity<Boolean> nullity() {
-			return newNullity(nullSettable, nullValue);
+		public StoreType<Boolean> type() {
+			return newType(boolean.class, nullSettable, nullValue);
 		}
 
 	}

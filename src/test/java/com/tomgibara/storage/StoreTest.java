@@ -16,9 +16,6 @@
  */
 package com.tomgibara.storage;
 
-import static com.tomgibara.storage.StoreNullity.settingNullAllowed;
-import static com.tomgibara.storage.StoreNullity.settingNullDisallowed;
-import static com.tomgibara.storage.StoreNullity.settingNullToValue;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -47,8 +44,8 @@ public class StoreTest {
 	@Test
 	public void testTransformedBy() {
 
-		Store<Integer> s = Stores.intsWithNullity(settingNullAllowed(),1,2,3);
-		assertTrue(s.nullity().nullGettable());
+		Store<Integer> s = StoreType.of(int.class).settingNullAllowed().arrayAsStore(new int[] {1,2,3});
+		assertTrue(s.type().nullGettable());
 		Store<Integer> t = s.asTransformedBy(i -> 2 * i);
 		assertEquals(s.count(), t.count());
 		for (int i = 0; i < s.count(); i++) {
@@ -83,7 +80,7 @@ public class StoreTest {
 
 	@Test
 	public void testTransformedByBijection() {
-		Store<Integer> s = Stores.intsWithNullity(settingNullAllowed(),1,2,3);
+		Store<Integer> s = StoreType.of(int.class).settingNullAllowed().arrayAsStore(new int[] {1, 2, 3});
 		Bijection<Integer, String> fn = Bijection.fromFunctions(Integer.class, String.class, i -> i.toString(), t -> Integer.parseInt(t));
 		Store<String> t = s.asTransformedBy(fn);
 		assertEquals("1", t.get(0));
@@ -94,10 +91,10 @@ public class StoreTest {
 
 	@Test
 	public void testNullableResizedCopy() {
-		Store<Integer> s = Stores.intsWithNullity(settingNullAllowed(),1,2,3);
+		Store<Integer> s = StoreType.of(int.class).settingNullAllowed().arrayAsStore(new int[] {1, 2, 3});
 		Store<Integer> t = s.resizedCopy(5);
 		assertTrue(t.isMutable());
-		assertTrue(s.nullity().nullGettable());
+		assertTrue(s.type().nullGettable());
 		assertEquals(asList(1,2,3,null,null), t.asList());
 		Store<Integer> u = s.immutableCopy();
 		t.set(0, 0);
@@ -111,24 +108,24 @@ public class StoreTest {
 	@Test
 	public void testResizedCopy() {
 		// check prohibition on enlarging non-nullable stores
-		checkIAE(() -> Stores.immutableObjectsWithNullity(settingNullDisallowed(),"A","B","C").resizedCopy(4));
-		checkIAE(() -> Storage.generic(settingNullDisallowed()).newStore(0).resizedCopy(1));
-		checkIAE(() -> Storage.typed(String.class, settingNullDisallowed()).newStore(0).resizedCopy(1));
-		checkIAE(() -> Storage.typed(Tri.class, settingNullDisallowed()).newStore(0).resizedCopy(1));
-		checkIAE(() -> Storage.typed(int.class, settingNullDisallowed()).newStore(0).resizedCopy(1));
+		checkIAE(() -> StoreType.generic().settingNullDisallowed().objectsAsStore("A","B","C").resizedCopy(4));
+		checkIAE(() -> StoreType.generic().settingNullDisallowed().storage().newStore(0).resizedCopy(1));
+		checkIAE(() -> StoreType.of(String.class).settingNullDisallowed().storage().newStore(0).resizedCopy(1));
+		checkIAE(() -> StoreType.of(Tri.class).settingNullDisallowed().storage().newStore(0).resizedCopy(1));
+		checkIAE(() -> StoreType.of(int.class).settingNullDisallowed().storage().newStore(0).resizedCopy(1));
 		// check enlarging stores with null values
-		assertEquals("", Stores.immutableObjectsWithNullity(settingNullToValue(""),"A","B","C").resizedCopy(4).get(3));
-		assertEquals("", Storage.generic(settingNullToValue("")).newStore(0).resizedCopy(1).get(0));
-		assertEquals("Moo", Storage.typed(String.class, settingNullToValue("Moo")).newStore(0).resizedCopy(1).get(0));
-		assertEquals(Tri.EQUILATERAL, Storage.typed(Tri.class, settingNullToValue(Tri.EQUILATERAL)).newStore(0).resizedCopy(1).get(0));
-		assertEquals(4, Storage.typed(int.class, settingNullToValue(4)).newStore(0).resizedCopy(1).get(0).intValue());
+		assertEquals("", StoreType.generic().settingNullToValue("").objectsAsStore("A","B","C").resizedCopy(4).get(3));
+		assertEquals("", StoreType.generic().settingNullToValue("").storage().newStore(0).resizedCopy(1).get(0));
+		assertEquals("Moo", StoreType.of(String.class).settingNullToValue("Moo").storage().newStore(0).resizedCopy(1).get(0));
+		assertEquals(Tri.EQUILATERAL, StoreType.of(Tri.class).settingNullToValue(Tri.EQUILATERAL).storage().newStore(0).resizedCopy(1).get(0));
+		assertEquals(4, StoreType.of(int.class).settingNullToValue(4).storage().newStore(0).resizedCopy(1).get(0).intValue());
 		// check with ints
 		checkIAE(() -> Stores.ints(1,2,3).resizedCopy(5));
-		Store<Integer> s = Stores.intsWithNullity(StoreNullity.settingNullToValue(0),1,2,3);
+		Store<Integer> s = StoreType.of(int.class).settingNullToValue(0).arrayAsStore(new int[] {1,2,3});
 		Store<Integer> t = s.resizedCopy(5);
 		assertTrue(t.isMutable());
-		assertTrue(t.nullity().nullSettable());
-		assertFalse(t.nullity().nullGettable());
+		assertTrue(t.type().nullSettable());
+		assertFalse(t.type().nullGettable());
 		assertEquals(asList(1,2,3,0,0), t.asList());
 		Store<Integer> u = s.immutableCopy();
 		t.set(0, 4);
@@ -142,7 +139,7 @@ public class StoreTest {
 	@Test
 	public void testObjectMethods() {
 		Store<Integer> s = Stores.ints(1, 2, 3);
-		Store<Integer> t = Stores.intsWithNullity(settingNullAllowed(), 1, 2, 3);
+		Store<Integer> t = StoreType.of(int.class).settingNullAllowed().arrayAsStore(new int[] {1, 2, 3});
 		Store<Object> u = Stores.objects(new Object[] {1,2,3});
 		Store<Integer> v = Stores.ints(1, 2, 4);
 
@@ -160,7 +157,7 @@ public class StoreTest {
 
 	@Test
 	public void testIterator() {
-		Store<Integer> s = Stores.intsWithNullity(settingNullAllowed(),0,2,4,6,8);
+		Store<Integer> s = StoreType.of(int.class).settingNullAllowed().arrayAsStore(new int[] {0,2,4,6,8});
 		s.set(1, null);
 		s.set(3, null);
 		Iterator<Integer> i = s.iterator();
@@ -176,7 +173,7 @@ public class StoreTest {
 
 	@Test
 	public void testForEach() {
-		Store<Integer> s = Stores.intsWithNullity(settingNullAllowed(),0,1,2,3,4,5,6);
+		Store<Integer> s = StoreType.of(int.class).settingNullAllowed().arrayAsStore(new int[] {0,1,2,3,4,5,6});
 		int size = s.size();
 		s.set(3, null);
 		s.set(6, null);
@@ -187,12 +184,13 @@ public class StoreTest {
 
 	@Test
 	public void testCompact() {
-		testCompact(Stores.intsWithNullity(settingNullAllowed()));
-		testCompact(Stores.intsWithNullity(settingNullAllowed(),0,1,2,3));
+		StoreType<Integer> ints = StoreType.of(int.class);
+		testCompact(ints.settingNullAllowed().arrayAsStore(new int[] {}));
+		testCompact(ints.settingNullAllowed().arrayAsStore(new int[] {0,1,2,3}));
 		testCompact(Stores.ints(0,1,2,3));
-		testCompact(Stores.intsWithNullity(settingNullAllowed(),0,1).immutableView());
+		testCompact(ints.settingNullAllowed().arrayAsStore(new int[] {0,1}).immutableView());
 
-		Store<Tri> tris = Storage.typed(Tri.class).newStore(4);
+		Store<Tri> tris = StoreType.of(Tri.class).storage().newStore(4);
 		tris.set(0, Tri.EQUILATERAL);
 		tris.set(1, Tri.ISOSCELES);
 		tris.set(2, Tri.SCALENE);
@@ -218,7 +216,7 @@ public class StoreTest {
 		Store<E> c = s.mutableCopy();
 		assertFalse(c.compact());
 		assertEquals(s, c);
-		if (!c.nullity().nullGettable()) return; // cannot test more
+		if (!c.type().nullGettable()) return; // cannot test more
 		for (int i = 0; i < c.size(); i += 2) c.set(i, null);
 		assertEquals(c.size() > 0, c.compact());
 		assertEquals(size / 2, c.count());
@@ -253,7 +251,7 @@ public class StoreTest {
 			testSpliterator(strs.immutable());
 		}
 		{
-			Store<String> strs = Stores.objectsWithNullity(settingNullDisallowed(), "A", "B", "C", "D");
+			Store<String> strs = StoreType.of(String.class).settingNullDisallowed().objectsAsStore("A", "B", "C", "D");
 			Spliterator<String> s = strs.spliterator();
 			assertEquals(4L, s.getExactSizeIfKnown());
 			s.tryAdvance(v -> assertEquals("A", v));
@@ -320,6 +318,7 @@ public class StoreTest {
 		assertEquals(expected, StreamSupport.stream(s.spliterator(), false).collect(Collectors.toList()));
 	}
 
+	@Test
 	public void testSmallStoreResize() {
 		Random r = new Random(0L);
 		for (int i = 0; i < 1000; i++) {
@@ -329,14 +328,14 @@ public class StoreTest {
 			int initSize = r.nextInt(50);
 			int nextSize = r.nextInt(100);
 
-			Store<Integer> store = Storage.smallValues(range, settingNullToValue(nullValue)).newStore(initSize);
+			Store<Integer> store = StoreType.of(int.class).settingNullToValue(nullValue).smallValueStorage(range).newStore(initSize);
 			store.fill(initValue);
 			store = store.resizedCopy(nextSize);
 
-			Store<Integer> check = Storage.generic(settingNullToValue(nullValue)).newStore(initSize);
+			Store<Integer> check = StoreType.<Integer>generic().settingNullToValue(nullValue).storage().newStore(initSize);
 			check.fill(initValue);
 			check = check.resizedCopy(nextSize);
-			
+
 			assertEquals(check, store);
 		}
 	}

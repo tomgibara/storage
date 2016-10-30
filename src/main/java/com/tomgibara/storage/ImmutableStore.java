@@ -27,6 +27,11 @@ final class ImmutableStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
+	public StoreType<V> type() {
+		return store.type();
+	}
+
+	@Override
 	public int size() {
 		return store.size();
 	}
@@ -34,11 +39,6 @@ final class ImmutableStore<V> extends AbstractStore<V> {
 	@Override
 	public int count() {
 		return store.count();
-	}
-
-	@Override
-	public Class<V> valueType() {
-		return store.valueType();
 	}
 
 	@Override
@@ -64,11 +64,6 @@ final class ImmutableStore<V> extends AbstractStore<V> {
 	@Override
 	public BitStore population() {
 		return store.population();
-	}
-
-	@Override
-	public StoreNullity<V> nullity() {
-		return store.nullity();
 	}
 
 }

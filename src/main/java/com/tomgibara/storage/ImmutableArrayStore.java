@@ -24,18 +24,18 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 
 	private final V[] values;
 	private final int count;
-	private final StoreNullity<V> nullity;
+	private final StoreType<V> type;
 
-	ImmutableArrayStore(V[] values, int count, StoreNullity<V> nullity) {
+	ImmutableArrayStore(V[] values, int count, StoreType<V> type) {
 		this.values = values;
 		this.count = count;
-		this.nullity = nullity;
+		this.type = type;
 	}
 
-	ImmutableArrayStore(V[] values, StoreNullity<V> nullity) {
+	ImmutableArrayStore(V[] values, StoreType<V> type) {
 		this.values = values;
-		count = nullity.countNonNulls(values);
-		this.nullity = nullity;
+		count = type.countNonNulls(values);
+		this.type = type;
 	}
 
 	@Override
@@ -44,9 +44,8 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public Class<V> valueType() {
-		return (Class<V>) values.getClass().getComponentType();
+	public StoreType<V> type() {
+		return type;
 	}
 
 	@Override
@@ -60,19 +59,14 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 
 	@Override
 	public Store<V> resizedCopy(int newSize) {
-		return nullity.nullGettable() ?
+		return type.nullGettable ?
 				new NullArrayStore<>(Arrays.copyOf(values, newSize), count) :
-				new ArrayStore<>(nullity.resizedCopyOf(values, newSize), nullity);
-	}
-
-	@Override
-	public StoreNullity<V> nullity() {
-		return nullity;
+				new ArrayStore<>(type.resizedCopyOf(values, newSize), type);
 	}
 
 	@Override
 	public Spliterator<V> spliterator() {
-		return nullity.nullGettable() ?
+		return type.nullGettable ?
 				new StoreSpliterator<>(this) :
 				Spliterators.spliterator(values, Spliterator.ORDERED | Spliterator.NONNULL);
 	}
@@ -81,19 +75,26 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 
 	@Override
 	public Store<V> mutableCopy() {
-		return nullity.nullGettable() ?
-				new NullArrayStore<>(values.clone(), count) :
-				new ArrayStore<>(values.clone(), nullity);
+		return type.nullGettable ?
+				new NullArrayStore<>(copiedValues(), count) :
+				new ArrayStore<>(copiedValues(), type);
 		}
 
 	@Override
 	public Store<V> immutableCopy() {
-		return new ImmutableArrayStore<>(values.clone(), count, nullity);
+		return new ImmutableArrayStore<>(copiedValues(), count, type);
 	}
 
 	@Override
 	public Store<V> immutableView() {
-		return new ImmutableArrayStore<>(values.clone(), count, nullity);
+		return new ImmutableArrayStore<>(copiedValues(), count, type);
 	}
 
+	// private utility methods
+	
+	// we are cautious here because this store may wrap a more specifically typed array
+	private V[] copiedValues() {
+		return Stores.typedArrayCopy(type.valueType, values);
+	}
+	
 }

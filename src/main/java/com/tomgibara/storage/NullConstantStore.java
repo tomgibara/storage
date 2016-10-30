@@ -37,12 +37,12 @@ final class NullConstantStore<V> implements Store<V> {
 
 	// fields
 
-	private final Class<V> type;
+	private final StoreType<V> type;
 	private final int size;
 
 	// constructors
 
-	NullConstantStore(Class<V> type, int size) {
+	NullConstantStore(StoreType<V> type, int size) {
 		this.type = type;
 		this.size = size;
 	}
@@ -50,7 +50,7 @@ final class NullConstantStore<V> implements Store<V> {
 	// store methods
 
 	@Override
-	public Class<V> valueType() {
+	public StoreType<V> type() {
 		return type;
 	}
 
@@ -117,12 +117,12 @@ final class NullConstantStore<V> implements Store<V> {
 
 	@Override
 	public <W> Store<W> asTransformedBy(Bijection<V, W> fn) {
-		return new NullConstantStore<>(fn.rangeType(), size);
+		return new NullConstantStore<>(type.map(fn), size);
 	}
 
 	@Override
 	public <W> Store<W> asTransformedBy(Mapping<V, W> fn) {
-		return new NullConstantStore<>(fn.rangeType(), size);
+		return new NullConstantStore<>(type.map(fn), size);
 	}
 
 	@Override

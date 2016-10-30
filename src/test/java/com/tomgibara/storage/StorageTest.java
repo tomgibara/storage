@@ -16,10 +16,12 @@
  */
 package com.tomgibara.storage;
 
-import static com.tomgibara.storage.StoreNullity.settingNullAllowed;
-import static com.tomgibara.storage.StoreNullity.settingNullDisallowed;
-import static com.tomgibara.storage.StoreNullity.settingNullToValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Collections;
 
@@ -30,9 +32,9 @@ public class StorageTest {
 
 	@Test
 	public void testSmallValueStorage() {
-
+		StoreType<Integer> ints = StoreType.of(int.class).settingNullToValue(0);
 		{
-			Storage<Integer> t = Storage.smallValues(4, settingNullToValue(0));
+			Storage<Integer> t = ints.smallValueStorage(4);
 			Store<Integer> s = t.newStore(100);
 			s.set(0, 0);
 			s.set(1, 1);
@@ -51,14 +53,14 @@ public class StorageTest {
 		}
 
 		{
-			Storage<Integer> t = Storage.smallValues(1, settingNullToValue(0));
+			Storage<Integer> t = ints.smallValueStorage(1);
 			Store<Integer> s = t.newStore(10);
 			assertEquals(Collections.nCopies(10, 0), s.asList());
 			assertTrue(s.population().ones().isAll());
 		}
 
 		{
-			Storage<Integer> t = Storage.smallValues(1, settingNullAllowed());
+			Storage<Integer> t = ints.settingNullAllowed().smallValueStorage(1);
 			Store<Integer> s = t.newStore(10);
 			s.set(0, 0);
 			s.set(3, 0);
@@ -73,7 +75,7 @@ public class StorageTest {
 		}
 
 		{
-			Storage<Integer> t = Storage.smallValues(3, settingNullToValue(0));
+			Storage<Integer> t = ints.smallValueStorage(3);
 			Store<Integer> s = t.newStore(23);
 			s.set(1, 1);
 			s.set(2, 2);
@@ -89,18 +91,18 @@ public class StorageTest {
 				assertEquals(i % 3, s.get(i).intValue());
 			}
 			s.fill(0);
-			assertEquals(Storage.smallValues(1, settingNullToValue(0)).newStore(23), s);
+			assertEquals(ints.smallValueStorage(1).newStore(23), s);
 			s.fill(1);
 			assertEquals(Collections.nCopies(23, 1), s.asList());
 		}
 
 		{
-			Storage<Integer> t = Storage.smallValues(4, settingNullToValue(0));
+			Storage<Integer> t = ints.smallValueStorage(4);
 			Store<Integer> s = t.newStore(10);
 		}
 
 		{
-			Storage<Integer> t = Storage.smallValues(5, settingNullToValue(0));
+			Storage<Integer> t = ints.smallValueStorage(5);
 			Store<Integer> s = t.newStore(16);
 			assertEquals(Collections.nCopies(16, 0), s.asList());
 			for (int i = 0; i < 16; i++) {
@@ -114,7 +116,7 @@ public class StorageTest {
 		}
 
 		for (int range = 2; range < 16; range++) {
-			Storage<Integer> t = Storage.smallValues(range, settingNullToValue(1));
+			Storage<Integer> t = ints.settingNullToValue(1).smallValueStorage(range);
 			Store<Integer> s = t.newStore(10);
 			assertEquals(Collections.nCopies(10, 1), s.asList());
 			assertTrue(s.population().ones().isAll());
@@ -126,7 +128,7 @@ public class StorageTest {
 	@Test
 	public void testEnumStorage() {
 
-		Storage<Tri> t = Storage.typed(Tri.class, settingNullToValue(Tri.SCALENE));
+		Storage<Tri> t = StoreType.of(Tri.class).settingNullToValue(Tri.SCALENE).storage();
 		Store<Tri> s = t.newStore(10);
 		assertEquals(Tri.SCALENE, s.get(0));
 		assertEquals(Tri.SCALENE, s.get(9));
@@ -138,12 +140,12 @@ public class StorageTest {
 		assertEquals(s, s.immutableCopy());
 		assertEquals(Collections.nCopies(10, Tri.ISOSCELES), s.asList());
 		s.asList().set(0, null);
-		assertEquals(s.nullity().nullValue(), s.get(0));
+		assertEquals(s.type().nullValue(), s.get(0));
 
-		assertEquals(Tri.ISOSCELES, Storage.typed(Tri.class, settingNullToValue(Tri.ISOSCELES)).newStore(1).get(0));
+		assertEquals(Tri.ISOSCELES, StoreType.of(Tri.class).settingNullToValue(Tri.ISOSCELES).storage().newStore(1).get(0));
 
 		testEnumStorageConstruction(t);
-		testEnumStorageConstruction(Storage.typed(Tri.class, settingNullDisallowed()));
+		testEnumStorageConstruction(StoreType.of(Tri.class).settingNullDisallowed().storage());
 	}
 
 	private void testEnumStorageConstruction(Storage<Tri> t) {
@@ -152,7 +154,7 @@ public class StorageTest {
 			assertEquals(orig, t.newCopyOf(orig));
 		}
 		{
-			Store<Tri> orig = Stores.objectsWithNullity(settingNullDisallowed(), Tri.EQUILATERAL, Tri.ISOSCELES, Tri.SCALENE);
+			Store<Tri> orig = StoreType.<Tri>generic().settingNullDisallowed().objectsAsStore(Tri.EQUILATERAL, Tri.ISOSCELES, Tri.SCALENE);
 			assertEquals(orig, t.newCopyOf(orig));
 		}
 		{
@@ -164,7 +166,7 @@ public class StorageTest {
 	@Test
 	public void testNullEnumStorage() {
 
-		Storage<Tri> t = Storage.typed(Tri.class);
+		Storage<Tri> t = StoreType.of(Tri.class).storage();
 		Store<Tri> s = t.newStore(10);
 		assertEquals(null, s.set(0, Tri.ISOSCELES));
 		assertEquals(Tri.ISOSCELES, s.set(0, Tri.EQUILATERAL));
@@ -180,76 +182,89 @@ public class StorageTest {
 
 	@Test
 	public void testNonNullStorage() {
-		assertNotNull(Storage.typed(String.class, settingNullToValue("")).newStore(10).get(0));
-		assertNotNull(Storage.generic(settingNullToValue(new Object())).newStore(10).get(0));
+		assertNotNull(StoreType.of(String.class).settingNullToValue("").storage().newStore(10).get(0));
+		assertNotNull(StoreType.generic().settingNullToValue(new Object()).storage().newStore(10).get(0));
 	}
 
 	@Test
 	public void testNewStoreOf() {
-		Store<String> muStr = Storage.typed(String.class, settingNullToValue("")).mutable().newStoreOf("One", "Two", "Three", null);
+		Store<String> muStr = StoreType.of(String.class).settingNullToValue("").storage().mutable().newStoreOf("One", "Two", "Three", null);
 		assertTrue(muStr.isMutable());
 		assertEquals("One", muStr.get(0));
 		assertEquals("", muStr.get(3));
 
-		Store<String> imStr = Storage.typed(String.class).immutable().newStoreOf("One", "Two", "Three", null);
+		Store<String> imStr = StoreType.of(String.class).storage().immutable().newStoreOf("One", "Two", "Three", null);
 		assertFalse(imStr.isMutable());
 		assertEquals("One", imStr.get(0));
 		assertNull(imStr.get(3));
 
-		Store<String> muGen = Storage.<String>generic().mutable().newStoreOf("X", "Y", "Z");
-		assertEquals(Object.class, muGen.valueType());
+		Store<String> muGen = StoreType.<String>generic().storage().mutable().newStoreOf("X", "Y", "Z");
+		assertEquals(Object.class, muGen.type().valueType());
 
-		Store<Integer> muInt = Storage.typed(int.class).mutable().newStoreOf(1,2,3,4);
+		Store<Integer> muInt = StoreType.of(int.class).storage().mutable().newStoreOf(1,2,3,4);
 		assertTrue(muInt.isMutable());
 		assertEquals(1, muInt.get(0).intValue());
 		assertEquals(4, muInt.get(3).intValue());
-		assertEquals(int.class, muInt.valueType());
+		assertEquals(int.class, muInt.type().valueType());
 	}
 
 	@Test
 	public void testNewStore() throws Exception {
 		// generic
-		assertEquals(0, Storage.generic().newStore(0).size());
-		assertEquals(5, Storage.generic().newStore(5).size());
-		assertEquals(0, Storage.generic().newStore(5).count());
-		assertEquals(0, Storage.generic(settingNullDisallowed()).newStore(0).size());
-		checkIAE(() -> Storage.generic(settingNullDisallowed()).newStore(5));
-		assertEquals(5, Storage.generic(settingNullToValue("")).newStore(5).size());
-		assertEquals(5, Storage.generic(settingNullToValue("")).newStore(5).count());
+		{
+			StoreType<Object> type = StoreType.generic();
+			assertEquals(0, type.storage().newStore(0).size());
+			assertEquals(5, type.storage().newStore(5).size());
+			assertEquals(0, type.storage().newStore(5).count());
+			assertEquals(0, type.settingNullDisallowed().storage().newStore(0).size());
+			checkIAE(() -> type.settingNullDisallowed().storage().newStore(5));
+			assertEquals(5, type.settingNullToValue("").storage().newStore(5).size());
+			assertEquals(5, type.settingNullToValue("").storage().newStore(5).count());
+		}
 		// typed regular
-		assertEquals(0, Storage.typed(String.class).newStore(0).size());
-		assertEquals(5, Storage.typed(String.class).newStore(5).size());
-		assertEquals(0, Storage.typed(String.class).newStore(5).count());
-		assertEquals(0, Storage.typed(String.class, settingNullDisallowed()).newStore(0).size());
-		checkIAE(() -> Storage.typed(String.class, settingNullDisallowed()).newStore(5));
-		assertEquals(5, Storage.typed(String.class, settingNullToValue("")).newStore(5).size());
-		assertEquals(5, Storage.typed(String.class, settingNullToValue("")).newStore(5).count());
+		{
+			StoreType<String> type = StoreType.of(String.class);
+			assertEquals(0, type.storage().newStore(0).size());
+			assertEquals(5, type.storage().newStore(5).size());
+			assertEquals(0, type.storage().newStore(5).count());
+			assertEquals(0, type.settingNullDisallowed().storage().newStore(0).size());
+			checkIAE(() -> type.settingNullDisallowed().storage().newStore(5));
+			assertEquals(5, type.settingNullToValue("").storage().newStore(5).size());
+			assertEquals(5, type.settingNullToValue("").storage().newStore(5).count());
+		}
 		// typed primitive
-		assertEquals(0, Storage.typed(int.class).newStore(0).size());
-		assertEquals(5, Storage.typed(int.class).newStore(5).size());
-		assertEquals(0, Storage.typed(int.class).newStore(5).count());
-		assertEquals(0, Storage.typed(int.class, settingNullDisallowed()).newStore(0).size());
-		checkIAE(() ->  Storage.typed(int.class, settingNullDisallowed()).newStore(5));
-		assertEquals(5, Storage.typed(int.class, settingNullToValue(0)).newStore(5).size());
-		assertEquals(5, Storage.typed(int.class, settingNullToValue(0)).newStore(5).count());
+		{
+			StoreType<Integer> type = StoreType.of(int.class);
+			assertEquals(0, type.storage().newStore(0).size());
+			assertEquals(5, type.storage().newStore(5).size());
+			assertEquals(0, type.storage().newStore(5).count());
+			assertEquals(0, type.settingNullDisallowed().storage().newStore(0).size());
+			checkIAE(() -> type.settingNullDisallowed().storage().newStore(5));
+			assertEquals(5, type.settingNullToValue(0).storage().newStore(5).size());
+			assertEquals(5, type.settingNullToValue(0).storage().newStore(5).count());
+		}
 		// typed enum
-		assertEquals(0, Storage.typed(Tri.class).newStore(0).size());
-		assertEquals(5, Storage.typed(Tri.class).newStore(5).size());
-		assertEquals(0, Storage.typed(Tri.class).newStore(5).count());
-		assertEquals(0, Storage.typed(Tri.class, settingNullDisallowed()).newStore(0).size());
-		checkIAE(() ->  Storage.typed(Tri.class, settingNullDisallowed()).newStore(5));
-		assertEquals(5, Storage.typed(Tri.class, settingNullToValue(Tri.SCALENE)).newStore(5).size());
-		assertEquals(5, Storage.typed(Tri.class, settingNullToValue(Tri.SCALENE)).newStore(5).count());
+		{
+			StoreType<Tri> type = StoreType.of(Tri.class);
+			assertEquals(0, type.storage().newStore(0).size());
+			assertEquals(5, type.storage().newStore(5).size());
+			assertEquals(0, type.storage().newStore(5).count());
+			assertEquals(0, type.settingNullDisallowed().storage().newStore(0).size());
+			checkIAE(() -> type.settingNullDisallowed().storage().newStore(5));
+			assertEquals(5, type.settingNullToValue(Tri.SCALENE).storage().newStore(5).size());
+			assertEquals(5, type.settingNullToValue(Tri.SCALENE).storage().newStore(5).count());
+		}
 		// small value
+		StoreType<Integer> type = StoreType.of(int.class);
 		for (int range = 1; range < 8; range++) {
 			int r = range;
-			assertEquals(0, Storage.smallValues(r,settingNullAllowed()).newStore(0).size());
-			assertEquals(5, Storage.smallValues(r,settingNullAllowed()).newStore(5).size());
-			assertEquals(0, Storage.smallValues(r,settingNullAllowed()).newStore(5).count());
-			assertEquals(0, Storage.smallValues(r,settingNullDisallowed()).newStore(0).size());
-			checkIAE(() ->  Storage.smallValues(r,settingNullDisallowed()).newStore(5));
-			assertEquals(5, Storage.smallValues(r,settingNullToValue(0)).newStore(5).size());
-			assertEquals(5, Storage.smallValues(r,settingNullToValue(0)).newStore(5).count());
+			assertEquals(0, type.settingNullAllowed().smallValueStorage(r).newStore(0).size());
+			assertEquals(5, type.settingNullAllowed().smallValueStorage(r).newStore(5).size());
+			assertEquals(0, type.settingNullAllowed().smallValueStorage(r).newStore(5).count());
+			assertEquals(0, type.settingNullDisallowed().smallValueStorage(r).newStore(0).size());
+			checkIAE(() ->  type.settingNullDisallowed().smallValueStorage(r).newStore(5));
+			assertEquals(5, type.settingNullToValue(0).smallValueStorage(r).newStore(5).size());
+			assertEquals(5, type.settingNullToValue(0).smallValueStorage(r).newStore(5).count());
 		}
 	}
 
