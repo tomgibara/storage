@@ -133,9 +133,8 @@ class NullArrayStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public StoreType<V> type() {
-		return StoreType.of((Class<V>) values.getClass().getComponentType());
+		return StoreType.of(Stores.componentType(values));
 	}
 
 	@Override
