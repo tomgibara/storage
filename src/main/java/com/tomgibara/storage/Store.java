@@ -167,15 +167,22 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	}
 
 	/**
-	 * Removes all stored values. This operation may be prohibited or operate as
-	 * per {@link #fill(Object)}, as per the store type.
+	 * Removes all stored values; equivalent to setting each indexed value to
+	 * null. This operation is prohibited if the store type disallows null
+	 * values.
 	 *
+	 * @throws IllegalStateException
+	 *             if the store does not allow null values to be set.
 	 * @see #type()
 	 */
-	default void clear() {
-		int size = size();
-		for (int i = 0; i < size; i++) {
-			set(i, null);
+	default void clear() throws IllegalStateException {
+		try {
+			int size = size();
+			for (int i = 0; i < size; i++) {
+				set(i, null);
+			}
+		} catch (IllegalArgumentException e) {
+			throw new IllegalStateException("null not supported", e);
 		}
 	}
 

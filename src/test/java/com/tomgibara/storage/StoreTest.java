@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Spliterator;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -428,11 +429,36 @@ public class StoreTest {
 		}
 	}
 
+	@Test
+	public void testClear() {
+		checkISE(() -> Stores.ints(1,2,3,4,5).clear());
+		IntFunction<Store<?>> nulls = size -> StoreType.generic().constantStore(null, size);
+		{
+			Store<Integer> objs = Stores.objects(1,2,3,4);
+			objs.clear();
+			assertEquals(nulls.apply(4), objs);
+		}
+		for (int r = 1; r < 10; r++) {
+			Store<Integer> s = StoreType.of(int.class).smallValueStorage(r).newStoreOf(0,0,0,0);
+			s.clear();
+			assertEquals(nulls.apply(4), s);
+		}
+	}
+
 	private void checkIAE(Runnable r) {
 		try {
 			r.run();
 			fail("expected IAE");
 		} catch (IllegalArgumentException e) {
+			/* expected */
+		}
+	}
+
+	private void checkISE(Runnable r) {
+		try {
+			r.run();
+			fail("expected ISE");
+		} catch (IllegalStateException e) {
 			/* expected */
 		}
 	}
