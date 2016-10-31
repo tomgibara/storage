@@ -20,6 +20,7 @@ public class SamplesTest {
 	int i = 0;
 	int j = 1;
 	T value = new T();
+	Object obj = new Object();
 
 	@SuppressWarnings("unused")
 	@Test
@@ -53,14 +54,19 @@ public class SamplesTest {
 		Store<Integer> ex7 = Stores.ints(2,3,5,7,11);
 
 		/* Wrapping an object array permitting null values. */
-		Store<Object> ex9 = Stores.objects(new Object[size]);
+		Store<Object> ex8 = Stores.objects(new Object[size]);
 
-		/* Wrapping a primitive array as a store,
-		   adding support for null values. */
-		Store<Double> ex8 = StoreType.of(double.class).arrayAsStore(new double[] {1.0,2.0,3.0});
+		/* Wrapping varargs as an immutable store. */
+		Store<String> ex9 = StoreType.of(String.class)
+				.objectsAsStore("A", "B", "C");
+		
+		/* Wrapping a primitive array as a store allowing nulls. */
+		Store<Double> exa = StoreType.of(double.class)
+				.arrayAsStore(new double[] {1.0,2.0,3.0});
 
 		/* Wrapping an object array, not permitting null values. */
-		Store<String> exa = StoreType.of(String.class).settingNullDisallowed().arrayAsStore(new String[] {"Zippy", "Bungle", "George"});
+		Store<String> exb = StoreType.of(String.class).settingNullDisallowed()
+				.arrayAsStore(new String[] {"Zippy", "Bungle", "George"});
 
 
 		// BASIC STORE FUNCTIONS
@@ -71,32 +77,38 @@ public class SamplesTest {
 		ex1.transpose(i, j);      // swap two values
 		ex1.clear();              // clear all values
 		ex1.fill(value);          // change all values
+		ex1.count();              // number of non-null values
 		ex1.iterator();           // iterate over all non-null values
 		ex1.forEach(t -> {});     // act over all non-null values
 		ex1.resizedCopy(newSize); // create a resized copy
 		ex1.compact();            // gather all non-null values
+		ex1.isSettable(obj);      // check whether a value may be set
 
 
 		// ADDITIONAL STORE FUNCTIONS
 
-		/* A count of the number non-null elements in the store. */
-		int count = ex2.count();
-
 		/* The positions of all non-null values in the store, as a bit store. */
-		BitStore population = ex3.population();
+		BitStore population = ex2.population();
 
 		/* An immutable view over the store. */
-		Store<T> view = ex4.immutableView();
+		Store<String> view = ex3.immutableView();
 
 		/* Copy a store into alternative storage. */
-		Store<T> copy = ex5.copiedBy(storage);
+		Store<T> copy = ex4.copiedBy(storage);
 
 		/* A store as a list. */
-		List<Integer> list = ex6.asList();
+		List<T> list = ex5.asList();
 
 		/* Transforming a store with a function */
-		Store<Integer> store = ex7.asTransformedBy(i -> 2*i);
+		Store<Integer> store = ex6.asTransformedBy(i -> 2*i);
 
+
+		// IDIOMATIC USAGE
+
+		/* 1 */ StoreType.of(String.class)
+		/* 2 */ .settingNullToValue("")
+		/* 3 */ .storage()
+		/* 4 */ .newStore(size);
 	}
 
 }

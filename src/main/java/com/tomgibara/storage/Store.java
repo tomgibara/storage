@@ -117,8 +117,13 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	}
 
 	/**
+	 * <p>
 	 * Specifies the type of values stored by this store and how null values are
 	 * supported.
+	 * 
+	 * <p>
+	 * The default implementation of this method returns
+	 * {@link StoreType#generic()}
 	 *
 	 * @return the store type
 	 */
