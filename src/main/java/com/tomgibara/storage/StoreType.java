@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 Tom Gibara
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package com.tomgibara.storage;
 
 import java.math.BigDecimal;
@@ -5,6 +21,31 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import com.tomgibara.fundament.Mapping;
+
+/**
+ * <p>
+ * Instances of this class determine the underlying type of values in storage,
+ * and control how null values are handled by stores. They serve as the primary
+ * means by which {@link Storage} implementations are obtained; typically via
+ * the {@link #storage()} method.
+ * 
+ * <p>
+ * Creating a {@link StoreType} instance begins by calling {@link #of(Class)}
+ * with an explicit storage type, or {@link #generic()} if the type is not known
+ * concretely (typically due to erasure). In addition to specifying the stored
+ * value type, alternative instances can be obtained that control how nulls are
+ * to be supported by the storage. Unless otherwise specified, a
+ * {@link StoreType} will allow setting and getting null values.
+ * 
+ * <p>
+ * A {@link StoreType} also provides a number of convenient methods for creating
+ * stores directly, without the use of an intervening {@link Storage} object.
+ *
+ * @param <V>
+ *            the type of values to be stored
+ *
+ * @author Tom Gibara
+ */
 
 public final class StoreType<V> {
 
@@ -72,12 +113,35 @@ public final class StoreType<V> {
 
 	// public statics
 
+	/**
+	 * Specifies genericized storage backed by <code>Object</code> arrays.
+	 * The type returned by this method supports getting and setting null values.
+	 * Using {@link #of(Class)} with a precise type is to be preferred where
+	 * possible.
+	 * 
+	 * @param <V>
+	 *            the ostensible value type
+	 * @return a generic type
+	 * @see #of(Class)
+	 */
 	//TODO this is pretty smelly
 	@SuppressWarnings("unchecked")
 	public static <V> StoreType<V> generic() {
 		return (StoreType<V>) OBJECT;
 	}
 
+	/**
+	 * Specifies that values are to be stored using the supplied type. Where the
+	 * precise type of the stored values is unknown (typically due to type
+	 * erasure) the {@link #generic()} method can be used.
+	 * 
+	 * @param <V>
+	 *            the value type
+	 * @param valueType
+	 *            the type of value stored
+	 * @return a store type
+	 * @see #generic()
+	 */
 	public static <V> StoreType<V> of(Class<V> valueType) {
 		if (valueType == Object.class) return generic();
 		return new StoreType<V>(valueType, true, true, null);
@@ -100,24 +164,22 @@ public final class StoreType<V> {
 	// builders
 
 	/**
-	 * A nullity that permits nulls to be stored and retrieved. Both
-	 * {@link #nullSettable()} and {@link #nullGettable()} return true.
+	 * A type that shares the same {@link #valueType()} but which permits nulls
+	 * to be stored and retrieved; both {@link #nullSettable()} and
+	 * {@link #nullGettable()} return true.
 	 *
-	 * @param <V>
-	 *            the generic type of the returned nullity
-	 * @return a nullity that permits null values
+	 * @return a store type that permits null values
 	 */
 	public StoreType<V> settingNullAllowed() {
 		return nullSettable & nullGettable ? this : new StoreType<>(valueType, true, true, null);
 	}
 
 	/**
-	 * A nullity that does not permit nulls to be stored or retrieved. Both
-	 * {@link #nullSettable()} and {@link #nullGettable()} return false.
+	 * A type that shares the same {@link #valueType()} but which does not
+	 * permit nulls to be stored or retrieved; both {@link #nullSettable()} and
+	 * {@link #nullGettable()} return false.
 	 *
-	 * @param <V>
-	 *            the generic type of the returned nullity
-	 * @return a nullity that prohibits null values
+	 * @return a store type that prohibits null values
 	 */
 	public StoreType<V> settingNullDisallowed() {
 		return !nullSettable && !nullGettable ? this : new StoreType<>(valueType, false, false, null);
@@ -125,22 +187,20 @@ public final class StoreType<V> {
 
 	/**
 	 * <p>
-	 * A nullity that substitutes nulls with the specified value. The returned
-	 * nullity allows nulls to be set on a store ({@link #nullSettable()}
-	 * returns true) but will not allow nulls to be returned from it (
-	 * {@link #nullGettable()} returns false).
+	 * A type that shares the same {@link #valueType()} but which substitutes
+	 * nulls with the specified value. The returned type allows nulls to be set
+	 * on a store ({@link #nullSettable()} returns true) but does not allow
+	 * nulls to be returned from it ( {@link #nullGettable()} returns false).
 	 *
 	 * <p>
 	 * The exception to this is when a null value is supplied to the method
 	 * (indicating that nulls should not be substituted). In this case, the
-	 * method returns a nullity which is equivalent to that returned by
-	 * {@link #settingNullAllowed()}.
+	 * method returns a type which is equivalent to that returned by calling
+	 * {@link #settingNullAllowed()} on this type.
 	 *
-	 * @param <V>
-	 *            the type of any null-substituting value
 	 * @param value
 	 *            the value to be substituted for null
-	 * @return a nullity that substitutes nulls
+	 * @return a store type that substitutes nulls
 	 */
 	public StoreType<V> settingNullToValue(V value) {
 		return value == null ? settingNullAllowed() : new StoreType<>(valueType, true, false, value);
@@ -148,27 +208,38 @@ public final class StoreType<V> {
 
 	/**
 	 * <p>
-	 * Suggests a nullity that can substitute null for a given type. This method
-	 * may be used to identify an appropriate null value for stores of common
-	 * types.
+	 * Suggests a store type that substitutes null for a given defined range of
+	 * value types. This method may be used to easily configure a conventional
+	 * null substitution value for stores of common types.
 	 *
 	 * <p>
-	 * It returns {@link #settingNullToValue(Object)} wrapping the following
-	 * values for the types given.
+	 * It returns {@link #settingNullToValue(Object)} with the following values
+	 * for the types given.
 	 *
 	 * <dl>
 	 * <dt>primitive numeric types
 	 * <dd><code>0</code>
+	 * 
 	 * <dt><code>boolean</code>
 	 * <dd><code>false</code>
+	 * 
 	 * <dt><code>char</code>
 	 * <dd><code>'\0'</code>
+	 * 
 	 * <dt>primitive wrapper types
 	 * <dd><em>as per primitive types</em></dd>
+	 * 
 	 * <dt>enumerations
 	 * <dd>the enum constant with ordinal 0 (if it exists)
+	 * 
 	 * <dt><code>java.lang.String</code>
 	 * <dd>the empty string <code>""</code>
+	 * 
+	 * <dt><code>java.math.BigInteger</code>
+	 * <dd><code>BigInteger.ZERO</code>
+	 * 
+	 * <dt><code>java.math.BigDecimal</code>
+	 * <dd><code>BigDecimal.ZERO</code>
 	 * </dl>
 	 *
 	 * <p>
@@ -176,11 +247,7 @@ public final class StoreType<V> {
 	 * Future implementations may return null-replacing instances for a greater
 	 * number of types.
 	 *
-	 * @param <V>
-	 *            the generic type of the returned nullity
-	 * @param type
-	 *            a type of stored value
-	 * @return an optional null value
+	 * @return a type that defaults null values, or that allows them
 	 */
 	@SuppressWarnings("unchecked")
 	public StoreType<V> settingNullToDefault() {
@@ -251,7 +318,7 @@ public final class StoreType<V> {
 	 * <p>
 	 * Returns the value passed to {@link #settingNullToValue(Object)}, or null.
 	 * This value will replace null in any operation that attempts to introduce
-	 * nulls into a store to which this nullity applies.
+	 * nulls into a store of this type.
 	 *
 	 * <p>
 	 * Note that any non-null value returned by this method will by substituted
@@ -268,13 +335,71 @@ public final class StoreType<V> {
 	}
 
 	// storage
-	
+
+	/**
+	 * <p>
+	 * Storage backed by typed arrays, or by <code>Object</code> arrays in the
+	 * case of a generic type. The storage returned by this method supports
+	 * setting and getting null values as per the this type.
+	 *
+	 * <p>
+	 * The use of primitive value types will result in storage backed by arrays
+	 * of primitives. Such stores provide greater type safety than those created
+	 * by genericized storage. In many contexts they will also provide a very
+	 * significant reduction in the memory required to store values.
+	 * 
+	 * <p>
+	 * Specific support is also provided for enumeration types. These are stored
+	 * as small value integers yielding a commensurate reduction in memory usage
+	 * at the possible expense of slower operation times. To bypass this, use a
+	 * {@link #generic()} type.
+	 * 
+	 * <p>
+	 * Note that storage returned by this method is always mutable. To obtain
+	 * storage that directly constructs immutable stores, make a further call
+	 * to {@link Storage#immutable()}
+	 *
+	 * @return the basis of creating new stores
+	 * @see #generic()
+	 * @see #of(Class)
+	 */
 	public Storage<V> storage() {
 		return storage == null ? storage = createStorage() : storage;
 	}
 
+	/**
+	 * <p>
+	 * Storage that packs bounded non-negative integer values into minimal bit
+	 * sizes. Such storage may be useful in situations where a very large number
+	 * of small integer values need to be stored without occupying more memory
+	 * than is needed. The range must be less than
+	 * <code>Integer.MAX_VALUE</code>
+	 *
+	 * <p>
+	 * Generally values in a range are packed linearly using the least number of
+	 * bits needed to represent them individually. However, in the present
+	 * implementation, ternary values ([0,1,2] or [null, 0,1]) and quinary
+	 * values ([0,1,2,3,4] or [null, 0, 1, 2, 3]) are treated specially to avoid
+	 * underutilized memory. Ternary storage requires 8 bits for every 5 values
+	 * and quinary storage requires 7 bits for every 3 values. As a result, the
+	 * performance of ternary and quinary storage may degraded in some
+	 * applications. In any such case, it is possible to use a larger range to
+	 * switch to a regular linear bit-packing strategy.
+	 * 
+	 * <p>
+	 * This method may only be called on a type for which the
+	 * {@link #valueType()} is <code>int.class</code>. In all other cases an
+	 * exception will be thrown.
+	 *
+	 * @param range
+	 *            defines the range <code>[0..range)</code> that small values
+	 *            may take in this store
+	 * @return small value storage
+	 * @throws IllegalStateException
+	 *             if the value type of this type is not <code>int.class</code>
+	 */
 	@SuppressWarnings("unchecked")
-	public Storage<V> smallValueStorage(int range) {
+	public Storage<V> smallValueStorage(int range) throws IllegalStateException {
 		if (range <= 0) throw new IllegalArgumentException("non positive range");
 		if (range == Integer.MAX_VALUE) throw new IllegalArgumentException("range too large");
 		if (valueType != int.class) throw new IllegalStateException("requires int typed store");
@@ -283,10 +408,34 @@ public final class StoreType<V> {
 
 	// stores
 
+	/**
+	 * <p>
+	 * An immutable empty store.
+	 * 
+	 * <p>
+	 * This method provides a convenient way to fabricate an empty store as
+	 * needed.
+	 * 
+	 * @return an immutable empty store
+	 */
 	public Store<V> emptyStore() {
 		return new EmptyStore<>(this, false);
 	}
 
+	/**
+	 * <p>
+	 * Exposes the supplied objects as an immutable store. No copy of the
+	 * supplied array is made, but the returned store cannot be modified by the
+	 * caller, and thus the caller cannot modify it.
+	 * 
+	 * <p>
+	 * If {@link #nullGettable()} on this type returns false, the supplied array
+	 * is not permitted to contain nulls.
+	 * 
+	 * @param objects
+	 *            the objects from which a store should be fabricated.
+	 * @return the objects as a store
+	 */
 	public Store<V> objectsAsStore(@SuppressWarnings("unchecked") V... objects) {
 		if (objects == null) throw new IllegalArgumentException("null objects");
 		Class<?> clss = objects.getClass().getComponentType();
@@ -294,6 +443,25 @@ public final class StoreType<V> {
 		throw new IllegalArgumentException("object type not assignable to " + valueType.getName());
 	}
 
+	/**
+	 * <p>
+	 * Exposes an array as a store, as per this type. The store returned is
+	 * mutable and backed by the supplied array so that changes in the store
+	 * will be reflected in the array. The component type of the supplied array
+	 * must equal (ie. precisely match) {@link #valueType()}.
+	 * 
+	 * <p>
+	 * Note that the array is supplied as an object since primitive arrays are
+	 * also supported.
+	 * 
+	 * <p>
+	 * This method provides a means by which arrays can be operated on as stores
+	 * and entails no duplication of the array values.
+	 * 
+	 * @param array
+	 *            an array consistent with this type
+	 * @return a mutable store backed the supplied array
+	 */
 	@SuppressWarnings("unchecked")
 	public Store<V> arrayAsStore(Object array) {
 		if (array == null) throw new IllegalArgumentException("null array");
@@ -305,6 +473,25 @@ public final class StoreType<V> {
 		} else {
 			return nullGettable ? new NullArrayStore<>((V[]) array) : new ArrayStore<>((V[]) array, this);
 		}
+	}
+
+	/**
+	 * Returns an immutable store consisting of <em>size</em> copies of
+	 * <em>value</em>. The advantage of using this method is that memory does
+	 * not need to be allocated for each instance of the value.
+	 *
+	 * @param value
+	 *            the value to be stored, possibly null
+	 * @param size
+	 *            the number of copies stored, possibly zero
+	 * @return a store consisting of multiple copies of a single value
+	 */
+	public Store<V> constantStore(V value, int size) {
+		if (size < 0) throw new IllegalArgumentException("negative size");
+		value = checkedValue(value);
+		return value == null ?
+				new NullConstantStore<V>(this, size) :
+				new ConstantStore<V>(this, value, size);
 	}
 
 	// TODO object methods

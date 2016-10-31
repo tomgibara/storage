@@ -52,15 +52,15 @@ public class SamplesTest {
 		/* Wrapping a primitive array as a store. */
 		Store<Integer> ex7 = Stores.ints(2,3,5,7,11);
 
-		/* Wrapping a primitive array as a store,
-		   adding support for null values. */
-		Store<Double> ex8 = Stores.doublesWithType(StoreType.of(double.class), 1.0,2.0,3.0);
-
 		/* Wrapping an object array permitting null values. */
 		Store<Object> ex9 = Stores.objects(new Object[size]);
 
+		/* Wrapping a primitive array as a store,
+		   adding support for null values. */
+		Store<Double> ex8 = StoreType.of(double.class).arrayAsStore(new double[] {1.0,2.0,3.0});
+
 		/* Wrapping an object array, not permitting null values. */
-		Store<String> exa = Stores.objectsWithType(StoreType.of(String.class).settingNullDisallowed(), "Zippy", "Bungle", "George");
+		Store<String> exa = StoreType.of(String.class).settingNullDisallowed().arrayAsStore(new String[] {"Zippy", "Bungle", "George"});
 
 
 		// BASIC STORE FUNCTIONS

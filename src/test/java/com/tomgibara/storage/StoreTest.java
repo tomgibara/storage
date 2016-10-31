@@ -296,7 +296,7 @@ public class StoreTest {
 			testSpliterator(longs);
 		}
 		{
-			Store<String> xs = Stores.constantStore("X", 11);
+			Store<String> xs = StoreType.of(String.class).constantStore("X", 11);
 			Spliterator<String> s = xs.spliterator();
 			assertEquals(11L, s.getExactSizeIfKnown());
 			for (int i = 0; i < 11; i++) {
@@ -305,7 +305,7 @@ public class StoreTest {
 			testSpliterator(xs);
 		}
 		{
-			Store<Object> none = Stores.constantStore(null, 4);
+			Store<Object> none = StoreType.generic().constantStore(null, 4);
 			Spliterator<Object> s = none.spliterator();
 			assertFalse(s.tryAdvance(v -> fail()));
 			testSpliterator(none);

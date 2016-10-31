@@ -33,4 +33,10 @@ public class StoresTest {
 		assertEquals(4, Stores.ints(0,1,2,3).count());
 		assertEquals(0, Stores.ints().count());
 	}
+
+	@Test
+	public void testVarargs() {
+		Store<Object> store = Stores.objects("Me", "Myself", "I");
+		store.set(0, new Object());
+	}
 }

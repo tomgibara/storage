@@ -69,6 +69,13 @@ final class EmptyStore<V> implements Store<V> {
 	}
 
 	@Override
+	public Store<V> resizedCopy(int newSize) {
+		if (newSize == 0) return new EmptyStore<>(type, true);
+		// create copy this way to ensure backing stores are consistent with valueType
+		return type.storage().newStore(newSize);
+	}
+
+	@Override
 	public void transpose(int i, int j) {
 		if (i != 0) throw new IllegalArgumentException("invalid i");
 		if (j != 0) throw new IllegalArgumentException("invalid j");

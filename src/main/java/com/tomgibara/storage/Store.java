@@ -49,11 +49,10 @@ import com.tomgibara.fundament.Transposable;
  * previously non-null value was stored is to remove that value.
  *
  * <p>
- * Due to the provision of default methods, only the methods
- * {@link #valueType()}, {@link #size()} and {@link #get(int)} need to be
- * implemented to provide an immutable store implementation. If a store is
- * mutable, the methods {@link #set(int, Object)} and {@link #isMutable()} must
- * also be implemented.
+ * Due to the provision of default methods, only the methods {@link #size()} and
+ * {@link #get(int)} need to be implemented to provide an immutable store
+ * implementation. If a store is mutable, the methods {@link #set(int, Object)}
+ * and {@link #isMutable()} must also be implemented.
  *
  * <p>
  * Store implementations are expected to implement the Java object methods as
@@ -80,17 +79,6 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 	// store methods
 
-//	/**
-//	 * The type of values stored by this store. Some store implementations may
-//	 * store their values as primitives and may choose to report primitive
-//	 * classes. Other implementations may treat all values as object types and
-//	 * will return <code>Object.class</code> despite ostensibly having a
-//	 * genericized type.
-//	 *
-//	 * @return the value type
-//	 */
-//	Class<V> valueType();
-
 	/**
 	 * The greatest number of values that the store can contain. Valid indices
 	 * range from <code>0 &lt;= i &lt; size</code>. Stores of size zero are
@@ -109,7 +97,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @param index
 	 *            the index from which to retrieve the value
 	 * @return the value stored at the specified index
-	 * @see #nullity()
+	 * @see #type()
 	 */
 	V get(int index);
 
@@ -122,21 +110,18 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @param index
 	 *            the index of the value to be compared to null
 	 * @return true if and only if the value at the specified index is null
-	 * @see #nullity()
+	 * @see #type()
 	 */
 	default boolean isNull(int index) {
 		return get(index) != null;
 	}
 
-//	/**
-//	 * Determines how null values are supported by this store
-//	 *
-//	 * @return the support provided for null values
-//	 */
-//	default StoreNullity<V> nullity() {
-//		return StoreNullity.settingNullAllowed();
-//	}
-
+	/**
+	 * Specifies the type of values stored by this store and how null values are
+	 * supported.
+	 *
+	 * @return the store type
+	 */
 	default StoreType<V> type() {
 		return StoreType.generic();
 	}
@@ -146,7 +131,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * supported, storing null will result in no value being associated with the
 	 * specified index. Some store implementations do not support null values,
 	 * in this case the null value may be substituted by an alternative value,
-	 * or simply rejected, as determined by the store nullity.
+	 * or simply rejected, as determined by the store type.
 	 *
 	 * @param index
 	 *            the index at which to store the value
@@ -155,9 +140,9 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @return the previously stored value, or null
 	 * @throws IllegalArgumentException
 	 *             if, in general, the value cannot be stored in this store, and
-	 *             in particular, if the value is null and the nullity disallows
-	 *             the setting of null values
-	 * @see #nullity()
+	 *             in particular, if the value is null and the store type
+	 *             disallows the setting of null values
+	 * @see #type()
 	 */
 	default V set(int index, V value) {
 		throw immutableException();
@@ -165,9 +150,9 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 	/**
 	 * Removes all stored values. This operation may be prohibited or operate as
-	 * per {@link #fill(Object)}, as per the store nullity.
+	 * per {@link #fill(Object)}, as per the store type.
 	 *
-	 * @see #nullity()
+	 * @see #type()
 	 */
 	default void clear() {
 		int size = size();
@@ -182,7 +167,6 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 *
 	 * @param value the value to be assigned to every index
 	 */
-
 	default void fill(V value) {
 		if (!isMutable()) throw immutableException();
 		if (value == null) clear();
@@ -264,7 +248,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * Bits indicating which values are null. A zero at an index indicates that
 	 * there is no value stored at that index. The returned bits are immutable
 	 * but will change as values are added and removed from the store. In
-	 * stores for which {@link StoreNullity#nullGettable()} is false, all bits
+	 * stores for which {@link StoreType#nullGettable()} is false, all bits
 	 * are guaranteed to equal one.
 	 *
 	 * @return bits indicating the indices at which values are present
@@ -289,7 +273,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	/**
 	 * Exposes the store as a list. The size of the list is equal to the size of
 	 * the store. The list may contain null values if
-	 * {@link StoreNullity#nullGettable()} is true. The list supports value
+	 * {@link StoreType#nullGettable()} is true. The list supports value
 	 * mutation via <code>set</code>, but not appending via <code>add()</code>.
 	 *
 	 * @return a list backed by the values in the store.
