@@ -95,6 +95,18 @@ public final class StoreType<V> {
 	static final StoreType<BigInteger> BIGINT_DEF   = new StoreType<>(BigInteger.class, true, false, BigInteger.ZERO);
 	static final StoreType<BigDecimal> DECIMAL_DEF  = new StoreType<>(BigDecimal.class, true, false, BigDecimal.ZERO);
 
+	private static final StoreType<?>[] PRIMITIVES = new StoreType[16];
+	static {
+		PRIMITIVES[Stores.BYTE]    = BYTE;
+		PRIMITIVES[Stores.SHORT]   = SHORT;
+		PRIMITIVES[Stores.INT]     = INT;
+		PRIMITIVES[Stores.LONG]    = LONG;
+		PRIMITIVES[Stores.BOOLEAN] = BOOLEAN;
+		PRIMITIVES[Stores.CHAR]    = CHAR;
+		PRIMITIVES[Stores.FLOAT]   = FLOAT;
+		PRIMITIVES[Stores.DOUBLE]  = DOUBLE;
+	}
+
 	private static final StoreType<?>[] DEFAULTS = new StoreType[16];
 	static {
 		DEFAULTS[Stores.BYTE]    = BYTE   .settingNullToValue((byte)  0   );
@@ -142,8 +154,11 @@ public final class StoreType<V> {
 	 * @return a store type
 	 * @see #generic()
 	 */
+	@SuppressWarnings("unchecked")
 	public static <V> StoreType<V> of(Class<V> valueType) {
+		if (valueType == null) throw new IllegalArgumentException("null valueType");
 		if (valueType == Object.class) return generic();
+		if (valueType.isPrimitive()) return (StoreType<V>) PRIMITIVES[Stores.hash(valueType)];
 		return new StoreType<V>(valueType, true, true, null);
 	}
 

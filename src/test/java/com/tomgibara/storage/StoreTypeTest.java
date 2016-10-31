@@ -20,12 +20,36 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.time.Month;
 
 import org.junit.Test;
 
+import com.tomgibara.fundament.Consumer;
+
 public class StoreTypeTest {
+
+	@Test
+	public void testOf() {
+		try {
+			StoreType.of(null);
+			fail();
+		} catch (IllegalArgumentException e) {
+			/* expected */
+		}
+		Consumer<Class<?>> chk = clss -> assertEquals(clss, StoreType.of(clss).valueType());
+		chk.consume(byte.class);
+		chk.consume(short.class);
+		chk.consume(int.class);
+		chk.consume(long.class);
+		chk.consume(boolean.class);
+		chk.consume(char.class);
+		chk.consume(float.class);
+		chk.consume(double.class);
+		chk.consume(Object.class);
+		chk.consume(String.class);
+	}
 
 	@Test
 	public void testEmpty() {
