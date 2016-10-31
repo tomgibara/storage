@@ -243,11 +243,11 @@ public final class StoreType<V> {
 	 * </dl>
 	 *
 	 * <p>
-	 * For all other types, the method returns {@link #settingNullAllowed()}.
+	 * For all other types, the method returns {@link #settingNullDisallowed()}.
 	 * Future implementations may return null-replacing instances for a greater
 	 * number of types.
 	 *
-	 * @return a type that defaults null values, or that allows them
+	 * @return a type that defaults null values, or that disallows them
 	 */
 	@SuppressWarnings("unchecked")
 	public StoreType<V> settingNullToDefault() {
@@ -258,25 +258,27 @@ public final class StoreType<V> {
 
 		if (valueType.isEnum()) {
 			V[] constants = valueType.getEnumConstants();
-			return constants.length == 0 ? settingNullAllowed() : settingNullToValue((V) constants[0]);
+			return constants.length == 0 ? settingNullDisallowed() : settingNullToValue((V) constants[0]);
 		}
 
-		switch (valueType.getName()) {
-		case "java.lang.Boolean"    : return (StoreType<V>) BOOLEAN_DEF;
-		case "java.lang.Character"  : return (StoreType<V>) CHAR_DEF;
-		case "java.lang.Float"      : return (StoreType<V>) FLOAT_DEF;
-		case "java.lang.Double"     : return (StoreType<V>) DOUBLE_DEF;
-		case "java.lang.Byte"       : return (StoreType<V>) BYTE_DEF;
-		case "java.lang.Short"      : return (StoreType<V>) SHORT_DEF;
-		case "java.lang.Integer"    : return (StoreType<V>) INT_DEF;
-		case "java.lang.Long"       : return (StoreType<V>) LONG_DEF;
-
-		case "java.lang.String"     : return (StoreType<V>) STRING_DEF;
-		case "java.math.BigInteger" : return (StoreType<V>) BIGINT_DEF;
-		case "java.math.BigDecimal" : return (StoreType<V>) DECIMAL_DEF;
+		if (!valueType.isInterface()) {
+			switch (valueType.getName()) {
+			case "java.lang.Boolean"    : return (StoreType<V>) BOOLEAN_DEF;
+			case "java.lang.Character"  : return (StoreType<V>) CHAR_DEF;
+			case "java.lang.Float"      : return (StoreType<V>) FLOAT_DEF;
+			case "java.lang.Double"     : return (StoreType<V>) DOUBLE_DEF;
+			case "java.lang.Byte"       : return (StoreType<V>) BYTE_DEF;
+			case "java.lang.Short"      : return (StoreType<V>) SHORT_DEF;
+			case "java.lang.Integer"    : return (StoreType<V>) INT_DEF;
+			case "java.lang.Long"       : return (StoreType<V>) LONG_DEF;
+	
+			case "java.lang.String"     : return (StoreType<V>) STRING_DEF;
+			case "java.math.BigInteger" : return (StoreType<V>) BIGINT_DEF;
+			case "java.math.BigDecimal" : return (StoreType<V>) DECIMAL_DEF;
+			}
 		}
 
-		return settingNullAllowed();
+		return settingNullDisallowed();
 	}
 
 	// accessors

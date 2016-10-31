@@ -83,6 +83,7 @@ public class StoreTypeTest {
 	public void testEnumDefault() {
 		assertEquals(NonEmptyEnum.DOG, StoreType.of(NonEmptyEnum.class).settingNullToDefault().nullValue());
 		assertTrue(StoreType.of(NonEmptyEnum.class).settingNullToDefault().nullSettable());
+		assertFalse(StoreType.of(EmptyEnum.class).settingNullToDefault().nullSettable());
 	}
 
 	@Test
@@ -92,6 +93,8 @@ public class StoreTypeTest {
 		assertEquals(0, StoreType.of(Integer.class).settingNullToDefault().nullValue().intValue());
 		assertEquals(false, StoreType.of(boolean.class).settingNullToDefault().nullValue().booleanValue());
 		assertEquals(Month.JANUARY, StoreType.of(Month.class).settingNullToDefault().nullValue());
+		assertNull(StoreType.generic().settingNullToDefault().nullValue());
+		assertFalse(StoreType.generic().settingNullToDefault().nullSettable());
 	}
 
 }
