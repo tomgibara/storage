@@ -149,6 +149,24 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	}
 
 	/**
+	 * <p>
+	 * Indicates whether the supplied value can be set as a value on this store.
+	 * 
+	 * <p>
+	 * The default implementation checks that the value satisfies the value-type
+	 * and null constraints of the store type. Some stores may have further
+	 * restrictions on the values they may contain.
+	 * 
+	 * @param value
+	 *            some value
+	 * @return true if and only if the value is valid for the
+	 *         {@link #set(int, Object)} method on this store.
+	 */
+	default boolean isSettable(Object value) {
+		return type().checkValue(value);
+	}
+
+	/**
 	 * Removes all stored values. This operation may be prohibited or operate as
 	 * per {@link #fill(Object)}, as per the store type.
 	 *

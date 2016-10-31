@@ -188,6 +188,8 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		setInt(j, setInt(i, getInt(j)));
 	}
 
+	abstract int range();
+
 	// note: caller responsible for checking value is valid
 	abstract int setInt(int index, int value);
 
@@ -215,6 +217,11 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 	void initFill(Integer initialValue) {
 		int i = initialValue == null ? nullValue : initialValue.intValue();
 		if (i > 0) fillInt(i);
+	}
+
+	int settableValue(Object value) {
+		if (value == null) return nullValue;
+		return value instanceof Integer ? (Integer) value : -1;
 	}
 
 	// inner classes
@@ -272,6 +279,11 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
+		public boolean isSettable(Object value) {
+			return settableValue(value) == 0;
+		}
+
+		@Override
 		public BitStore population() {
 			return Bits.oneBits(size);
 		}
@@ -320,6 +332,9 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
+		int range() { return 1; }
+
+		@Override
 		int getInt(int index) { return 0; }
 
 		@Override
@@ -359,6 +374,12 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
+		public boolean isSettable(Object value) {
+			int i = settableValue(value);
+			return i == 0 || i == 1;
+		}
+
+		@Override
 		public void fill(Integer value) {
 			bits.setAll(checkedValue(value));
 		}
@@ -387,6 +408,9 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		public void transpose(int i, int j) {
 			bits.permute().transpose(i, j);
 		}
+
+		@Override
+		int range() { return 2; }
 
 		@Override
 		int getInt(int index) {
@@ -454,6 +478,12 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
+		public boolean isSettable(Object value) {
+			int i = settableValue(value);
+			return i >= 0 && i < 3;
+		}
+
+		@Override
 		public void fill(Integer value) {
 			fillInt(checkedValue(value));
 		}
@@ -493,6 +523,9 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			}
 			return store;
 		}
+
+		@Override
+		int range() { return 3; }
 
 		@Override
 		int getInt(int index) {
@@ -572,6 +605,12 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
+		public boolean isSettable(Object value) {
+			int i = settableValue(value);
+			return i >= 0 && i < 5;
+		}
+
+		@Override
 		public void fill(Integer value) {
 			fillInt(checkedValue(value));
 		}
@@ -617,6 +656,9 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			}
 			return store;
 		}
+
+		@Override
+		int range() { return 5; }
 
 		@Override
 		int getInt(int index) {
@@ -720,6 +762,12 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
+		public boolean isSettable(Object value) {
+			int i = settableValue(value);
+			return i >= 0 && i < range;
+		}
+
+		@Override
 		public void fill(Integer value) {
 			fillInt(checkedValue(value));
 		}
@@ -749,6 +797,11 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 				w.flush();
 			}
 			return store;
+		}
+
+		@Override
+		int range() {
+			return range;
 		}
 
 		@Override
@@ -797,6 +850,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 	static class ZeroOrNullStore extends AbstractStore<Integer> {
 
+		private static final Integer ZERO = 0;
 		private final int size;
 		private final BitStore bits;
 
@@ -843,6 +897,11 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			checkIndex(index);
 			boolean v = checkedValue(value);
 			return bits.getThenSetBit(index, v) ? 0 : null;
+		}
+
+		@Override
+		public boolean isSettable(Object value) {
+			return value == null || ZERO.equals(value);
 		}
 
 		@Override
@@ -923,6 +982,14 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		public Integer set(int index, Integer value) {
 			wrapped.checkIndex(index);
 			return unwrap( wrapped.setInt(index, wrap(value)) );
+		}
+
+		@Override
+		public boolean isSettable(Object value) {
+			if (value == null) return true;
+			if (!(value instanceof Integer)) return false;
+			int i = ((Integer) value) + 1;
+			return i >= 1 && i < wrapped.range();
 		}
 
 		@Override

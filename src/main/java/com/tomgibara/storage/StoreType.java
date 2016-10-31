@@ -508,6 +508,12 @@ public final class StoreType<V> {
 		return nullValue;
 	}
 
+	boolean checkValue(Object value) {
+		if (value == null) return nullSettable;
+		if (!valueType.isPrimitive()) return valueType.isInstance(value);
+		return Stores.primitiveClassFor(value.getClass()) == valueType;
+	}
+
 	void checkValues(V[] values) {
 		if (nullGettable) return;
 		if (nullSettable) {

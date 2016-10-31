@@ -340,6 +340,94 @@ public class StoreTest {
 		}
 	}
 
+	@Test
+	public void testIsSettable() {
+		{
+			Store<Integer> store = StoreType.of(int.class).settingNullDisallowed().storage().newStore(1, 0);
+			assertTrue(store.isSettable(0));
+			assertFalse(store.isSettable(null));
+			assertTrue(store.isSettable(new Integer(79357945)));
+			assertFalse(store.isSettable(0L));
+			assertFalse(store.isSettable(""));
+			assertFalse(store.isSettable(new Object()));
+		}
+		{
+			Store<Integer> store = StoreType.of(int.class).settingNullAllowed().storage().newStore(1, 0);
+			assertTrue(store.isSettable(0));
+			assertTrue(store.isSettable(null));
+			assertTrue(store.isSettable(new Integer(79357945)));
+			assertFalse(store.isSettable(0L));
+			assertFalse(store.isSettable(""));
+			assertFalse(store.isSettable(new Object()));
+		}
+		{
+			Store<Integer> store = StoreType.of(int.class).settingNullToDefault().storage().newStore(1, 0);
+			assertTrue(store.isSettable(0));
+			assertTrue(store.isSettable(null));
+			assertTrue(store.isSettable(new Integer(79357945)));
+			assertFalse(store.isSettable(0L));
+			assertFalse(store.isSettable(""));
+			assertFalse(store.isSettable(new Object()));
+		}
+		{
+			Store<Object> store = StoreType.generic().settingNullAllowed().storage().newStore(1, 0);
+			assertTrue(store.isSettable(0));
+			assertTrue(store.isSettable(null));
+			assertTrue(store.isSettable(new Integer(79357945)));
+			assertTrue(store.isSettable(0L));
+			assertTrue(store.isSettable(""));
+			assertTrue(store.isSettable(new Object()));
+		}
+		{
+			Store<Object> store = StoreType.generic().settingNullDisallowed().storage().newStore(1, 0);
+			assertTrue(store.isSettable(0));
+			assertFalse(store.isSettable(null));
+			assertTrue(store.isSettable(new Integer(79357945)));
+			assertTrue(store.isSettable(0L));
+			assertTrue(store.isSettable(""));
+			assertTrue(store.isSettable(new Object()));
+		}
+		{
+			Store<String> store = StoreType.of(String.class).settingNullAllowed().storage().newStore(1);
+			assertFalse(store.isSettable(0));
+			assertTrue(store.isSettable(null));
+			assertFalse(store.isSettable(new Integer(79357945)));
+			assertFalse(store.isSettable(0L));
+			assertTrue(store.isSettable(""));
+			assertFalse(store.isSettable(new Object()));
+		}
+		{
+			Store<String> store = StoreType.of(String.class).settingNullDisallowed().storage().newStore(1, "");
+			assertFalse(store.isSettable(0));
+			assertFalse(store.isSettable(null));
+			assertFalse(store.isSettable(new Integer(79357945)));
+			assertFalse(store.isSettable(0L));
+			assertTrue(store.isSettable(""));
+			assertFalse(store.isSettable(new Object()));
+		}
+		{
+			StoreType<Integer> ints = StoreType.of(int.class);
+			for (int n = 0; n < 3; n++) {
+				StoreType<Integer> type;
+				switch (n) {
+				case 0: type = ints.settingNullDisallowed(); break;
+				case 1: type = ints.settingNullAllowed(); break;
+				case 2: type = ints.settingNullToDefault(); break;
+				default: throw new IllegalStateException();
+				}
+				for (int r = 1; r < 10; r++) {
+					Store<Integer> store = type.smallValueStorage(r).newStore(0);
+					assertFalse(store.isSettable(this));
+					assertFalse(store.isSettable(0L));
+					assertEquals(n != 0, store.isSettable(null));
+					for (int v = -2; v < 15; v++) {
+						assertEquals("setting " + v + " on " + r, v >= 0 && v < r, store.isSettable(v));
+					}
+				}
+			}
+		}
+	}
+
 	private void checkIAE(Runnable r) {
 		try {
 			r.run();
@@ -348,5 +436,4 @@ public class StoreTest {
 			/* expected */
 		}
 	}
-
 }

@@ -48,6 +48,20 @@ public final class Stores {
 		return (clss.getName().hashCode() >> 8) & 0xf;
 	}
 
+	static Class<?> primitiveClassFor(Class<?> clss) {
+		switch (clss.getName()) {
+		case "java.lang.Boolean"    : return boolean.class;
+		case "java.lang.Character"  : return char.class;
+		case "java.lang.Float"      : return float.class;
+		case "java.lang.Double"     : return double.class;
+		case "java.lang.Byte"       : return byte.class;
+		case "java.lang.Short"      : return short.class;
+		case "java.lang.Integer"    : return int.class;
+		case "java.lang.Long"       : return long.class;
+		default : return null;
+		}
+	}
+
 	// public scoped methods
 
 	/**
