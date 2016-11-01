@@ -121,4 +121,10 @@ public class StoreTypeTest {
 		assertFalse(StoreType.generic().settingNullToDefault().nullSettable());
 	}
 
+	@Test
+	public void testToString() {
+		assertEquals("java.lang.Object (null allowed)", StoreType.generic().toString());
+		assertEquals("int (null set to 0)", StoreType.of(int.class).settingNullToValue(0).toString());
+		assertEquals("java.lang.String (null disallowed)", StoreType.of(String.class).settingNullDisallowed().toString());
+	}
 }

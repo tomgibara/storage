@@ -19,6 +19,7 @@ package com.tomgibara.storage;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Objects;
 
 import com.tomgibara.fundament.Mapping;
 
@@ -511,7 +512,41 @@ public final class StoreType<V> {
 				new ConstantStore<V>(this, value, size);
 	}
 
-	// TODO object methods
+	// object methods
+
+	@Override
+	public int hashCode() {
+		return
+				Boolean.hashCode(nullSettable) + 31 * (
+				Boolean.hashCode(nullGettable) + 31 * (
+				valueType.hashCode()           + 31 * (
+				Objects.hash(nullValue))));
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) return true;
+		if (!(obj instanceof StoreType)) return false;
+		StoreType<?> that = (StoreType<?>) obj;
+		if (this.nullSettable != that.nullSettable) return false;
+		if (this.nullGettable != that.nullGettable) return false;
+		if (!this.valueType.equals(that.valueType)) return false;
+		return Objects.equals(this.nullValue, that.nullValue);
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(valueType.getName());
+		if (nullGettable) {
+			sb.append(" (null allowed)");
+		} else if (nullSettable) {
+			sb.append(" (null set to ").append(nullValue).append(")");
+		} else {
+			sb.append(" (null disallowed)");
+		}
+		return sb.toString();
+	}
 
 	// package scoped methods
 
