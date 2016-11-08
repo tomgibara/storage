@@ -28,6 +28,8 @@ package com.tomgibara.storage;
 
 public abstract class AbstractStore<V> implements Store<V> {
 
+	// object methods
+
 	@Override
 	public int hashCode() {
 		return asList().hashCode();
@@ -46,4 +48,26 @@ public abstract class AbstractStore<V> implements Store<V> {
 		return asList().toString();
 	}
 
+	// package scoped helpers
+
+	int checkSetStore(int position, Store<?> store) {
+		if (position < 0) throw new IllegalArgumentException("negative position");
+		if (store == null) throw new IllegalArgumentException("null store");
+		int size = store.size();
+		if (!type().nullSettable && store.count() < store.size()) throw new IllegalAccessError("null not settable");
+		if (position + size > size()) throw new IllegalArgumentException("position too large");
+		return size;
+	}
+
+	<W extends V> void setStoreImpl(int position, Store<W> store, int size) {
+		if (position == 0) {
+			for (int i = 0; i < size; i++) {
+				set(i, store.get(i));
+			}
+		} else {
+			for (int i = 0; i < size; i++) {
+				set(position + i, store.get(i));
+			}
+		}
+	}
 }

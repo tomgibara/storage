@@ -113,7 +113,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @see #type()
 	 */
 	default boolean isNull(int index) {
-		return get(index) != null;
+		return get(index) == null;
 	}
 
 	/**
@@ -468,6 +468,43 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	default Store<V> copiedBy(Storage<V> storage) throws IllegalArgumentException {
 		if (storage == null) throw new IllegalArgumentException("null storage");
 		return storage.newCopyOf(this);
+	}
+
+	/**
+	 * <p>
+	 * Writes the values from another store into this store at a specified
+	 * position. An <code>IllegalArgumentException</code> will be raised if not
+	 * all of the supplied store values can be accommodated from the given
+	 * position.
+	 * 
+	 * <p>
+	 * Client code can expect that setting a store with the same type will be
+	 * faster than an iterative set/get over the positioned span.
+	 * 
+	 * <p>
+	 * Note that setting a store that is backed by the same data as this store
+	 * is not supported, but cannot be detected.
+	 * 
+	 * @param position
+	 *            the position at which the first store values should be set
+	 * @param store
+	 *            the store that provides the values to set.
+	 */
+	default <W extends V> void setStore(int position, Store<W> store) {
+		if (position < 0) throw new IllegalArgumentException("negative position");
+		if (store == null) throw new IllegalArgumentException("null store");
+		int size = store.size();
+		if (!type().nullSettable && store.count() < store.size()) throw new IllegalAccessError("null not settable");
+		if (position + size > size()) throw new IllegalArgumentException("position too large");
+		if (position == 0) {
+			for (int i = 0; i < size; i++) {
+				set(i, store.get(i));
+			}
+		} else {
+			for (int i = 0; i < size; i++) {
+				set(i, store.get(position + i));
+			}
+		}
 	}
 
 	// iterable methods

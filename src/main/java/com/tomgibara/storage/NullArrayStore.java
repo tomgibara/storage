@@ -183,6 +183,28 @@ class NullArrayStore<V> extends AbstractStore<V> {
 		return Stores.compact(values, count);
 	}
 
+	@Override
+	public <W extends V> void setStore(int index, Store<W> store) {
+		int thatSize = checkSetStore(index, store);
+		if (thatSize == 0) {
+			/* no op */
+		} else if (store instanceof ConstantStore<?>) {
+			Arrays.fill(this.values, index, index + thatSize, store.get(0));
+		} else if (store instanceof NullConstantStore<?>) {
+			Arrays.fill(this.values, index, index + thatSize, null);
+		} else if (store instanceof ArrayStore<?>) {
+			ArrayStore<W> that = (ArrayStore<W>) store;
+			System.arraycopy(that.values, 0, this.values, index, thatSize);
+		} else if (store instanceof NullArrayStore<?>) {
+			NullArrayStore<W> that = (NullArrayStore<W>) store;
+			System.arraycopy(that.values, 0, this.values, index, thatSize);
+		} else {
+			for (int i = 0; i < thatSize; i++) {
+				values[index + i] = store.get(i);
+			}
+		}
+	}
+
 	// mutability
 
 	@Override

@@ -174,6 +174,48 @@ class ArrayStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
+	public <W extends V> void setStore(int index, Store<W> store) {
+		int thatSize = checkSetStore(index, store);
+		if (thatSize == 0) {
+			/* no op */
+		} else if (store instanceof ConstantStore<?>) {
+			Arrays.fill(this.values, index, index + thatSize, store.get(0));
+		} else if (store instanceof NullConstantStore<?>) {
+			Arrays.fill(this.values, index, index + thatSize, type.nullValue);
+		} else if (store instanceof ArrayStore<?>) {
+			ArrayStore<W> that = (ArrayStore<W>) store;
+			System.arraycopy(that.values, 0, this.values, index, thatSize);
+		} else if (store instanceof NullArrayStore<?>) {
+			NullArrayStore<W> that = (NullArrayStore<W>) store;
+			W[] thatValues = that.values;
+			V[] thisValues = this.values;
+			System.arraycopy(thatValues, 0, thisValues, index, thatSize);
+			if (that.count < thatSize) {
+				V nullValue = type.nullValue;
+				for (int i = 0; i < thatSize; i++) {
+					if (thatValues[i] == null) {
+						thisValues[i + index] = nullValue;
+					}
+				}
+			}
+		} else {
+			if (store.count() < thatSize) {
+				V nullValue = type.nullValue;
+				for (int i = 0; i < thatSize; i++) {
+					W w = store.get(i);
+					values[index + i] = w == null ? nullValue : w;
+				}
+			} else {
+				for (int i = 0; i < thatSize; i++) {
+					values[index + i] = store.get(i);
+				}
+			}
+		}
+	}
+
+	// iterable methods
+
+	@Override
 	public Spliterator<V> spliterator() {
 		return Spliterators.spliterator(values, Spliterator.ORDERED | Spliterator.NONNULL);
 	}

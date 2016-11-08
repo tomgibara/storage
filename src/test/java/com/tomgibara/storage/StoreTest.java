@@ -445,6 +445,42 @@ public class StoreTest {
 		}
 	}
 
+	@Test
+	public void testSetStore() {
+		testSetStore(int.class);
+		testSetStore(Integer.class);
+	}
+
+	private <V> void testSetStore(Class<?> clss) {
+		StoreType<Integer> type = (StoreType<Integer>) StoreType.of(clss);
+		testSetStore(type.settingNullAllowed());
+		testSetStore(type.settingNullDisallowed());
+		testSetStore(type.settingNullToValue(9));
+	}
+
+	private <V> void testSetStore(StoreType<Integer> type) {
+		Store<Integer> intsA = type.storage().newStore(10, 0);
+		Store<Integer> intsB = type.storage().newStore(5, 1);
+		if (type.nullSettable()) {
+			intsB.set(1, null);
+			intsB.set(3, null);
+		}
+		testSetStore(intsA, 0, intsB);
+		testSetStore(intsA, 5, intsB);
+	}
+
+	private <V> void testSetStore(Store<V> dst, int position, Store<V> src) {
+		Store<V> t0 = dst.mutableCopy();
+		for (int i = 0; i < src.size(); i++) {
+			t0.set(position + i, src.get(i));
+		}
+		Store<V> t1 = dst.mutableCopy();
+		t1.setStore(position, src);
+		Store<V> t2 = dst.mutableCopy();
+		t2.setStore(position, new DefaultStore<>(src));
+		assertEquals(t0, t1);
+	}
+
 	private void checkIAE(Runnable r) {
 		try {
 			r.run();
@@ -462,4 +498,12 @@ public class StoreTest {
 			/* expected */
 		}
 	}
+
+	private static final class DefaultStore<V> implements Store<V> {
+		private final Store<V> store;
+		DefaultStore(Store<V> store) { this.store = store; }
+		@Override public int size() { return store.size(); }
+		@Override public V get(int index) { return store.get(index); }
+	}
+	
 }

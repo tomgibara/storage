@@ -195,11 +195,24 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		return resize(newSize);
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	public <W extends V> void setStore(int position, Store<W> store) {
+		int size = checkSetStore(position, store);
+		if (store.getClass() == this.getClass()) {
+			System.arraycopy(((PrimitiveStore<V>) store).values(), 0, values(), position, size);
+		} else {
+			setStoreImpl(position, store, size);
+		}
+	}
+
 	// for extension
 
 	abstract protected Class<?> primitiveType();
 
 	abstract protected Class<?> wrapperType();
+
+	abstract protected Object values();
 
 	abstract protected V getImpl(int index);
 
@@ -207,9 +220,9 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 	abstract protected void fillImpl(V value);
 
-	abstract protected Store<V> duplicate(boolean copy, boolean mutable);
+	abstract protected PrimitiveStore<V> duplicate(boolean copy, boolean mutable);
 
-	abstract protected Store<V> resize(int newSize);
+	abstract protected PrimitiveStore<V> resize(int newSize);
 
 	// mutability
 
@@ -281,6 +294,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		@Override
 		protected Class<?> wrapperType() {
 			return Byte.class;
+		}
+
+		@Override
+		protected Object values() {
+			return values;
 		}
 
 		@Override
@@ -368,6 +386,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
+		protected Object values() {
+			return values;
+		}
+
+		@Override
 		protected Float getImpl(int index) {
 			return values[index];
 		}
@@ -449,6 +472,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		@Override
 		protected Class<?> wrapperType() {
 			return Character.class;
+		}
+
+		@Override
+		protected Object values() {
+			return values;
 		}
 
 		@Override
@@ -536,6 +564,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
+		protected Object values() {
+			return values;
+		}
+
+		@Override
 		protected Short getImpl(int index) {
 			return values[index];
 		}
@@ -617,6 +650,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		@Override
 		protected Class<?> wrapperType() {
 			return Long.class;
+		}
+
+		@Override
+		protected Object values() {
+			return values;
 		}
 
 		@Override
@@ -708,6 +746,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
+		protected Object values() {
+			return values;
+		}
+
+		@Override
 		protected Integer getImpl(int index) {
 			return values[index];
 		}
@@ -796,6 +839,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
+		protected Object values() {
+			return values;
+		}
+
+		@Override
 		protected Double getImpl(int index) {
 			return values[index];
 		}
@@ -881,6 +929,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		@Override
 		protected Class<?> wrapperType() {
 			return Boolean.class;
+		}
+
+		@Override
+		protected Object values() {
+			return values;
 		}
 
 		@Override

@@ -313,6 +313,16 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
+		public <W extends Integer> void setStore(int position, Store<W> store) {
+			int size = checkSetStore(position, store);
+			if (store instanceof UnaryStore) {
+				/* no op */
+			} else {
+				setStoreImpl(position, store, size);
+			}
+		}
+
+		@Override
 		public void transpose(int i, int j) {
 			checkIndex(i);
 			checkIndex(j);
@@ -402,6 +412,16 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			BitStore newBits = Bits.resizedCopyOf(bits, newSize, false);
 			if (newSize > size && nullValue == 1) newBits.range(size, newSize).fill();
 			return new BinaryStore(newBits, nullValue);
+		}
+
+		@Override
+		public <W extends Integer> void setStore(int position, Store<W> store) {
+			int size = checkSetStore(position, store);
+			if (store instanceof BinaryStore) {
+				bits.setStore(position, ((BinaryStore) store).bits);
+			} else {
+				setStoreImpl(position, store, size);
+			}
 		}
 
 		@Override
@@ -800,6 +820,16 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
+		public <W extends Integer> void setStore(int position, Store<W> store) {
+			int size = checkSetStore(position, store);
+			if (store instanceof ArbitraryStore) {
+				bits.setStore(position * count, ((ArbitraryStore) store).bits);
+			} else {
+				setStoreImpl(position, store, size);
+			}
+		}
+
+		@Override
 		int range() {
 			return range;
 		}
@@ -920,6 +950,21 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
+		public Store<Integer> resizedCopy(int newSize) {
+			return new ZeroOrNullStore(Bits.resizedCopyOf(bits, newSize, false));
+		}
+
+		@Override
+		public <W extends Integer> void setStore(int position, Store<W> store) {
+			int size = checkSetStore(position, store);
+			if (store instanceof ZeroOrNullStore) {
+				bits.setStore(position, ((ZeroOrNullStore) store).bits);
+			} else {
+				setStoreImpl(position, store, size);
+			}
+		}
+
+		@Override
 		public boolean isMutable() { return bits.isMutable(); }
 
 		@Override
@@ -1000,6 +1045,20 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		@Override
 		public void fill(Integer value) {
 			wrapped.fillInt(wrap(value));
+		}
+
+		@Override
+		public Store<Integer> resizedCopy(int newSize) {
+			return new NullableStore(wrapped.resizedCopy(newSize));
+		}
+
+		@Override
+		public <W extends Integer> void setStore(int position, Store<W> store) {
+			if (store instanceof NullableStore) {
+				wrapped.setStore(position, ((NullableStore) store).wrapped);
+			} else {
+				super.setStore(position, store);
+			}
 		}
 
 		@Override
