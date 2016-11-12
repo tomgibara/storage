@@ -110,6 +110,26 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	static <V> NullPrimitiveStore<V> newStore(Store<V> store, int newSize) {
+		StoreType<V> type = store.type();
+		Object array = Stores.toPrimitiveArray(store, newSize, type.settingNullToDefault().nullValue);
+		BitStore populated = Bits.resizedCopyOf(store.population(), newSize, false);
+		int count = store.count();
+
+		switch (Stores.hash(type.valueType)) {
+		case Stores.BYTE:    return (NullPrimitiveStore<V>) new ByteStore     (populated, count, (byte   []) array);
+		case Stores.FLOAT:   return (NullPrimitiveStore<V>) new FloatStore    (populated, count, (float  []) array);
+		case Stores.CHAR:    return (NullPrimitiveStore<V>) new CharacterStore(populated, count, (char   []) array);
+		case Stores.SHORT:   return (NullPrimitiveStore<V>) new ShortStore    (populated, count, (short  []) array);
+		case Stores.LONG:    return (NullPrimitiveStore<V>) new LongStore     (populated, count, (long   []) array);
+		case Stores.INT:     return (NullPrimitiveStore<V>) new IntegerStore  (populated, count, (int    []) array);
+		case Stores.DOUBLE:  return (NullPrimitiveStore<V>) new DoubleStore   (populated, count, (double []) array);
+		case Stores.BOOLEAN: return (NullPrimitiveStore<V>) new BooleanStore  (populated, count, (boolean[]) array);
+		default: throw new IllegalArgumentException("invalid store type: " + type);
+		}
+	}
+
 	int count;
 	BitStore populated;
 

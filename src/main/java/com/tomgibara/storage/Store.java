@@ -256,13 +256,18 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 */
 	default Store<V> resizedCopy(int newSize) {
 		StoreType<V> type = type();
-		if (type.nullGettable) {
-			return new NullArrayStore<>(Stores.toArray(this, newSize, null), count());
-		}
 		if (!type.nullSettable && newSize > size()) {
 			throw new IllegalArgumentException("cannot create copy with greater size, no null value");
 		}
-		return new ArrayStore<>(Stores.toArray(this, newSize, type.nullValue), type);
+		if (type.valueType.isPrimitive()) {
+			return type.nullGettable ?
+					NullPrimitiveStore.newStore(this, newSize) :
+					PrimitiveStore.newStore(this, newSize);
+		} else {
+			return type.nullGettable ?
+					new NullArrayStore<>(Stores.toObjectArray(this, newSize, null), count()) :
+					new ArrayStore<>(Stores.toObjectArray(this, newSize, type.nullValue), type);
+		}
 	}
 
 	/**
@@ -589,7 +594,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 	@Override
 	default Store<V> immutableCopy() {
-		return new ImmutableArrayStore<>(Stores.toArray(this), count(), type());
+		return new ImmutableArrayStore<>(Stores.toObjectArray(this), count(), type());
 	}
 
 	@Override

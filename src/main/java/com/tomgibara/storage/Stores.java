@@ -19,6 +19,8 @@ package com.tomgibara.storage;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
+import com.tomgibara.storage.StoreArrays.StoreArray;
+
 /**
  * <p>
  * Static methods for creating new stores that wrap existing arrays.
@@ -58,6 +60,20 @@ public final class Stores {
 		case "java.lang.Short"      : return short.class;
 		case "java.lang.Integer"    : return int.class;
 		case "java.lang.Long"       : return long.class;
+		default : return null;
+		}
+	}
+
+	static Class<?> wrapperClassFor(Class<?> clss) {
+		switch (clss.getName()) {
+		case "boolean" : return Boolean.class;
+		case "char"    : return Character.class;
+		case "float"   : return Float.class;
+		case "double"  : return Double.class;
+		case "byte"    : return Byte.class;
+		case "short"   : return Short.class;
+		case "int"     : return Integer.class;
+		case "long"    : return Long.class;
 		default : return null;
 		}
 	}
@@ -257,17 +273,31 @@ public final class Stores {
 		return copy;
 	}
 
-	static <V> V[] toArray(Store<V> store) {
-		return toArray(store, store.size(), null);
+	static <V> Object toPrimitiveArray(Store<V> store) {
+		return toPrimitiveArray(store, store.size(), null);
 	}
 
-	static<V> V[] toArray(Store<V> store, int length, V nullValue) {
+	@SuppressWarnings("unchecked")
+	static<V> Object toPrimitiveArray(Store<V> store, int length, V nullValue) {
+		StoreArray<Object, Object> sa = StoreArrays.forType(store.type().valueType);
+		Object array = sa.create(length);
+		sa.copyIntoArray((Store<Object>) store, array, nullValue);
+		return array;
+	}
+
+	static <V> V[] toObjectArray(Store<V> store) {
+		return toObjectArray(store, store.size(), null);
+	}
+
+	static<V> V[] toObjectArray(Store<V> store, int length, V nullValue) {
+		Class<?> clss = store.type().valueType;
+		if (clss.isPrimitive()) clss = wrapperClassFor(clss);
 		@SuppressWarnings("unchecked")
-		V[] vs = (V[]) Array.newInstance(store.type().valueType, length);
+		V[] vs = (V[]) Array.newInstance(clss, length);
 		return copyIntoArray(store, vs, nullValue);
 	}
 
-	static<V> V[] copyIntoArray(Store<V> store, V[] vs, V nullValue) {
+	private static<V> V[] copyIntoArray(Store<V> store, V[] vs, V nullValue) {
 		int length = vs.length;
 		int limit = Math.min( store.size(), length);
 		for (int i = 0; i < limit; i++) {

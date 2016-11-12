@@ -133,6 +133,10 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 	}
 
+	static <V> PrimitiveStore<V> newStore(Store<V> store, int newSize) {
+		return newStore(store.type(), Stores.toPrimitiveArray(store, newSize, store.type().nullValue));
+	}
+
 	final boolean mutable;
 	final boolean nullSettable;
 
