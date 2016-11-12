@@ -133,14 +133,19 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 	int count;
 	BitStore populated;
 
-	protected NullPrimitiveStore(BitStore populated) {
-		this.populated = populated.mutable();
-		this.count = populated.ones().count();
+	protected NullPrimitiveStore(BitStore populated, int count) {
+		this.populated = populated;
+		this.count = count;
 	}
 
-	protected NullPrimitiveStore(BitStore populated, int count) {
-		this.populated = populated.mutable();
-		this.count = count;
+	protected NullPrimitiveStore(int size, boolean filled) {
+		populated = Bits.store(size);
+		if (filled) {
+			populated.fill();
+			count = size;
+		} else {
+			count = 0;
+		}
 	}
 
 	// store
@@ -243,6 +248,11 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
+	public Store<V> immutableView() {
+		return duplicate(populated.immutableView(), false);
+	}
+
+	@Override
 	public Store<V> mutableCopy() {
 		return duplicate(populated.mutableCopy(), true);
 	}
@@ -259,7 +269,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		private byte[] values;
 
 		ByteStore(int size, Byte initialValue) {
-			super(Bits.bits(initialValue != null, size));
+			super(size, initialValue != null);
 			this.values = new byte[size];
 			if (count > 0) {
 				Arrays.fill(values, initialValue);
@@ -267,7 +277,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		ByteStore(byte[] values) {
-			super(Bits.oneBits(values.length));
+			super(values.length, true);
 			this.values = values;
 		}
 
@@ -317,7 +327,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		private float[] values;
 
 		FloatStore(int size, Float initialValue) {
-			super(Bits.bits(initialValue != null, size));
+			super(size, initialValue != null);
 			this.values = new float[size];
 			if (count > 0) {
 				Arrays.fill(values, initialValue);
@@ -325,7 +335,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		FloatStore(float[] values) {
-			super(Bits.oneBits(values.length));
+			super(values.length, true);
 			this.values = values;
 		}
 
@@ -376,7 +386,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		private char[] values;
 
 		CharacterStore(int size, Character initialValue) {
-			super(Bits.bits(initialValue != null, size));
+			super(size, initialValue != null);
 			this.values = new char[size];
 			if (count > 0) {
 				Arrays.fill(values, initialValue);
@@ -384,7 +394,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		CharacterStore(char[] values) {
-			super(Bits.oneBits(values.length));
+			super(values.length, true);
 			this.values = values;
 		}
 
@@ -435,7 +445,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		private short[] values;
 
 		ShortStore(int size, Short initialValue) {
-			super(Bits.bits(initialValue != null, size));
+			super(size, initialValue != null);
 			this.values = new short[size];
 			if (count > 0) {
 				Arrays.fill(values, initialValue);
@@ -443,7 +453,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		ShortStore(short[] values) {
-			super(Bits.oneBits(values.length));
+			super(values.length, true);
 			this.values = values;
 		}
 
@@ -494,7 +504,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		private long[] values;
 
 		LongStore(int size, Long initialValue) {
-			super(Bits.bits(initialValue != null, size));
+			super(size, initialValue != null);
 			this.values = new long[size];
 			if (count > 0) {
 				Arrays.fill(values, initialValue);
@@ -502,7 +512,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		LongStore(long[] values) {
-			super(Bits.oneBits(values.length));
+			super(values.length, true);
 			this.values = values;
 		}
 
@@ -553,7 +563,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		private int[] values;
 
 		IntegerStore(int size, Integer initialValue) {
-			super(Bits.bits(initialValue != null, size));
+			super(size, initialValue != null);
 			this.values = new int[size];
 			if (count > 0) {
 				Arrays.fill(values, initialValue);
@@ -561,7 +571,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		IntegerStore(int[] values) {
-			super(Bits.oneBits(values.length));
+			super(values.length, true);
 			this.values = values;
 		}
 
@@ -612,7 +622,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		private double[] values;
 
 		DoubleStore(int size, Double initialValue) {
-			super(Bits.bits(initialValue != null, size));
+			super(size, initialValue != null);
 			this.values = new double[size];
 			if (count > 0) {
 				Arrays.fill(values, initialValue);
@@ -620,7 +630,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		DoubleStore(double[] values) {
-			super(Bits.oneBits(values.length));
+			super(values.length, true);
 			this.values = values;
 		}
 
@@ -671,7 +681,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		private boolean[] values;
 
 		BooleanStore(int size, Boolean initialValue) {
-			super(Bits.bits(initialValue != null, size));
+			super(size, initialValue != null);
 			this.values = new boolean[size];
 			if (count > 0) {
 				Arrays.fill(values, initialValue);
@@ -679,7 +689,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		BooleanStore(boolean[] values) {
-			super(Bits.oneBits(values.length));
+			super(values.length, true);
 			this.values = values;
 		}
 

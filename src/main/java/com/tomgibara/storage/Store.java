@@ -306,6 +306,32 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	}
 
 	/**
+	 * <p>
+	 * A store consisting of the indexed values in the specified range. The
+	 * zeroth element of the returned store will <code><em>from</em></code>
+	 * element of this store.
+	 *
+	 * <p>
+	 * The returned store is a live view of this store. The mutability of the
+	 * returned store matches the mutability of this store.
+	 * 
+	 * @param from
+	 *            the first indexed value in the store (inclusive)
+	 * @param to
+	 *            the last indexed value in the store (exclusive)
+	 * @return a store over the specified range
+	 */
+	default Store<V> range(int from, int to) {
+		if (from < 0) throw new IllegalArgumentException("negative from");
+		if (from > to) throw new IllegalArgumentException("from exceeds to");
+		if (to > size()) throw new IllegalArgumentException("to exceeds size");
+		int size = from - to;
+		if (size == size()) return this;
+		if (size == 0) return new EmptyStore<>(type(), isMutable());
+		return new RangeStore<V>(this, from, to);
+	}
+
+	/**
 	 * Exposes the store as a list. The size of the list is equal to the size of
 	 * the store. The list may contain null values if
 	 * {@link StoreType#nullGettable()} is true. The list supports value
@@ -594,7 +620,16 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 
 	@Override
 	default Store<V> immutableCopy() {
-		return new ImmutableArrayStore<>(Stores.toObjectArray(this), count(), type());
+		StoreType<V> type = type();
+		if (!type.valueType.isPrimitive()) {
+			return new ImmutableArrayStore<>(Stores.toObjectArray(this), count(), type());
+		}
+		// for primitives prefer immutable wrapper around mutable primitives
+		int size = size();
+		Store<V> store = type.nullGettable ?
+				NullPrimitiveStore.newStore(this, size) :
+				PrimitiveStore.newStore(this, size);
+		return store.immutableView();
 	}
 
 	@Override

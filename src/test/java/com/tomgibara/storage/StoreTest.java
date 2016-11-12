@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Spliterator;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -38,6 +39,7 @@ import org.junit.Test;
 import com.tomgibara.bits.BitStore;
 import com.tomgibara.bits.Bits;
 import com.tomgibara.fundament.Bijection;
+import com.tomgibara.fundament.Producer;
 import com.tomgibara.storage.StorageTest.Tri;
 
 public class StoreTest {
@@ -68,6 +70,7 @@ public class StoreTest {
 		assertNull(s.get(0));
 
 		t = s.immutableView().asTransformedBy(i -> 2 * i);
+		assertFalse(s.immutableView().isMutable());
 		assertFalse(t.isMutable());
 		try {
 			t.transpose(0, 1);
@@ -479,6 +482,49 @@ public class StoreTest {
 		Store<V> t2 = dst.mutableCopy();
 		t2.setStore(position, new DefaultStore<>(src));
 		assertEquals(t0, t1);
+	}
+
+	@Test
+	public void testRange() {
+		Random r = new Random(0L);
+		int tests = 100;
+		Function<StoreType<Object>, Store<Object>> p = StorageTestUtil.randomStores(r);
+		StorageTestUtil.forAllTypes(t -> {
+			for (int test = 0; test < tests; test++) {
+				Store<Object> store = p.apply((StoreType<Object>) t);
+				testRange(r, store);
+			}
+		});
+		for (int range = 1; range < 16; range++) {
+			Producer<Store<Integer>> p1 = StorageTestUtil.randomSmallValueStores(r, range, true);
+			Producer<Store<Integer>> p2 = StorageTestUtil.randomSmallValueStores(r, range, false);
+			for (int test = 0; test < tests; test++) {
+				testRange(r, p1.produce());
+				testRange(r, p2.produce());
+			}
+		}
+	}
+
+	private <V> void testRange(Random r, Store<V> store) {
+		int to = r.nextInt(store.size() + 1);
+		int from = r.nextInt(to + 1);
+		int rangeSize = to - from;
+		Store<V> range = store.range(from, to);
+		assertEquals(rangeSize, range.size());
+		BitStore p1 = store.population();
+		BitStore p2 = range.population();
+		for (int i = 0; i < rangeSize; i++) {
+			assertEquals(range.get(i), store.get(from + i));
+			assertEquals(p2.getBit(i), p1.getBit(from + i));
+		}
+		if (store.type().nullSettable()) {
+			Store<V> resized = range.resizedCopy(rangeSize * 2);
+			assertEquals(range, resized.range(0, rangeSize));
+			resized.setStore(rangeSize, range);
+			for (int i = 0; i < rangeSize; i++) {
+				assertEquals(range.get(i), resized.get(rangeSize + i));
+			}
+		}
 	}
 
 	private void checkIAE(Runnable r) {
