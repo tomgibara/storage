@@ -75,6 +75,16 @@ import com.tomgibara.fundament.Transposable;
  * @param <V>
  *            the type of the values stored
  */
+/* Implementation note:
+ * 
+ * Default implementations exist that can wrap a store to provide ranging,
+ * immutability and transformation. These implementations are designed to be
+ * generally layered in the following order (outer-to-inner):
+ * 
+ * Transformation
+ * Range
+ * Mutability
+ */
 public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposable {
 
 	// store methods

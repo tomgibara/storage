@@ -39,36 +39,6 @@ final class EmptyStore<V> implements Store<V> {
 	}
 
 	@Override
-	public boolean isMutable() {
-		return mutable;
-	}
-
-	@Override
-	public Store<V> mutableCopy() {
-		return mutable();
-	}
-
-	@Override
-	public Store<V> immutableCopy() {
-		return immutable();
-	}
-
-	@Override
-	public Store<V> immutableView() {
-		return immutable();
-	}
-
-	@Override
-	public Store<V> immutable() {
-		return mutable ? new EmptyStore<>(type, false) : this;
-	}
-
-	@Override
-	public Store<V> mutable() {
-		return mutable ? this : new EmptyStore<>(type, true);
-	}
-
-	@Override
 	public Store<V> resizedCopy(int newSize) {
 		if (newSize == 0) return new EmptyStore<>(type, true);
 		// create copy this way to ensure backing stores are consistent with valueType
@@ -94,6 +64,15 @@ final class EmptyStore<V> implements Store<V> {
 	@Override
 	public V set(int index, V value) {
 		throw new IllegalArgumentException("invalid index");
+	}
+
+	@Override
+	public Store<V> range(int from, int to) {
+		if (from < 0) throw new IllegalArgumentException("negative from");
+		if (from > 0) throw new IllegalArgumentException("from exceeds size");
+		if (to < 0) throw new IllegalArgumentException("negative to");
+		if (to > 0) throw new IllegalArgumentException("to exceeds size");
+		return this;
 	}
 
 	@Override
@@ -167,6 +146,39 @@ final class EmptyStore<V> implements Store<V> {
 
 	@Override
 	public void fill(V value) { }
+
+	// mutable methods
+
+
+	@Override
+	public boolean isMutable() {
+		return mutable;
+	}
+
+	@Override
+	public Store<V> mutableCopy() {
+		return mutable();
+	}
+
+	@Override
+	public Store<V> immutableCopy() {
+		return immutable();
+	}
+
+	@Override
+	public Store<V> immutableView() {
+		return immutable();
+	}
+
+	@Override
+	public Store<V> immutable() {
+		return mutable ? new EmptyStore<>(type, false) : this;
+	}
+
+	@Override
+	public Store<V> mutable() {
+		return mutable ? this : new EmptyStore<>(type, true);
+	}
 
 	// Object methods
 

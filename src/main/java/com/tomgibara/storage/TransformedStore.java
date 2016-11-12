@@ -86,6 +86,11 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 	}
 
 	@Override
+	public Store<W> range(int from, int to) {
+		return new TransformedStore<>(store.range(from, to), fn);
+	}
+
+	@Override
 	public Store<W> resizedCopy(int newSize) {
 		return new TransformedStore<>(store.resizedCopy(newSize), fn);
 	}
@@ -122,6 +127,11 @@ class TransformedStore<V,W> extends AbstractStore<W> {
 	@Override
 	public boolean isMutable() {
 		return store.isMutable();
+	}
+
+	@Override
+	public Store<W> mutableCopy() {
+		return new TransformedStore<>(store.mutableCopy(), fn);
 	}
 
 	@Override

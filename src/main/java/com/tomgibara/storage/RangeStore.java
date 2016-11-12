@@ -66,4 +66,11 @@ final class RangeStore<V> extends AbstractStore<V> {
 		store.setStore(from + position, store);
 	}
 
+	// mutable methods
+
+	@Override
+	public Store<V> immutableView() {
+		return isMutable() ? store.immutableView().range(from, to) : this;
+	}
+
 }

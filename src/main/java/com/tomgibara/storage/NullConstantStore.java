@@ -106,6 +106,17 @@ final class NullConstantStore<V> implements Store<V> {
 	}
 
 	@Override
+	public Store<V> range(int from, int to) {
+		if (from < 0) throw new IllegalArgumentException("negative from");
+		if (from > to) throw new IllegalArgumentException("from exceeds to");
+		if (to > size()) throw new IllegalArgumentException("to exceeds size");
+		int size = from - to;
+		if (size == size()) return this;
+		if (size == 0) return new EmptyStore<>(type, isMutable());
+		return new NullConstantStore<>(type, size);
+	}
+
+	@Override
 	public List<V> asList() {
 		return Collections.nCopies(size, null);
 	}
