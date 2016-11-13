@@ -202,11 +202,18 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <W extends V> void setStore(int position, Store<W> store) {
-		int size = checkSetStore(position, store);
+		int from = 0;
+		int to = checkSetStore(position, store);
+		if (store instanceof RangeStore<?>) {
+			RangeStore<W> range = (RangeStore<W>) store;
+			store = range.store;
+			from = range.from;
+			to = range.to;
+		}
 		if (store.getClass() == this.getClass()) {
-			System.arraycopy(((PrimitiveStore<V>) store).values(), 0, values(), position, size);
+			System.arraycopy(((PrimitiveStore<V>) store).values(), from, values(), position, to - from);
 		} else {
-			setStoreImpl(position, store, size);
+			setStoreImpl(position, store, from, to);
 		}
 	}
 

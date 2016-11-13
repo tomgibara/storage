@@ -485,6 +485,35 @@ public class StoreTest {
 	}
 
 	@Test
+	public void testSetStoreRandom() {
+		Random r = new Random(0L);
+		int tests = 100;
+		Function<StoreType<Object>, Store<Object>> p = StorageTestUtil.randomStores(r);
+		StorageTestUtil.forAllTypes(t -> {
+			for (int test = 0; test < tests; test++) {
+				Store<Object> a = p.apply((StoreType<Object>) t);
+				Store<Object> b = p.apply((StoreType<Object>) t);
+				testSetStore(r, a, b);
+			}
+		});
+	}
+
+	private void testSetStore(Random r, Store<Object> a, Store<Object> b) {
+		Store<Object> bg;
+		Store<Object> sm;
+		int pos = r.nextInt(Math.abs(b.size() - a.size()) + 1);
+		if (a.size() < b .size()) {
+			sm = a;
+			bg = b;
+		} else {
+			sm = b;
+			bg = a;
+		}
+		bg.setStore(pos, sm);
+		bg.setStore(pos, new DefaultStore<>(sm));
+	}
+
+	@Test
 	public void testRange() {
 		Random r = new Random(0L);
 		int tests = 100;

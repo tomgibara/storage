@@ -22,9 +22,9 @@ import com.tomgibara.bits.BitStore;
 
 final class RangeStore<V> extends AbstractStore<V> {
 
-	private final Store<V> store;
-	private final int from;
-	private final int to;
+	final Store<V> store;
+	final int from;
+	final int to;
 
 	RangeStore(Store<V> store, int from, int to) {
 		this.store = store;
@@ -79,7 +79,7 @@ final class RangeStore<V> extends AbstractStore<V> {
 
 	@Override
 	public <W extends V> void setStore(int position, Store<W> store) {
-		store.setStore(from + position, store);
+		this.store.setStore(from + position, store);
 	}
 
 	// mutable methods

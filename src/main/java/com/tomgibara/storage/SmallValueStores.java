@@ -314,11 +314,18 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		@Override
 		public <W extends Integer> void setStore(int position, Store<W> store) {
-			int size = checkSetStore(position, store);
+			int from = 0;
+			int to = checkSetStore(position, store);
+			if (store instanceof RangeStore<?>) {
+				RangeStore<W> range = (RangeStore<W>) store;
+				store = range.store;
+				from = range.from;
+				to = range.to;
+			}
 			if (store instanceof UnaryStore) {
 				/* no op */
 			} else {
-				setStoreImpl(position, store, size);
+				setStoreImpl(position, store, from, to);
 			}
 		}
 
@@ -416,11 +423,18 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		@Override
 		public <W extends Integer> void setStore(int position, Store<W> store) {
-			int size = checkSetStore(position, store);
+			int from = 0;
+			int to = checkSetStore(position, store);
+			if (store instanceof RangeStore<?>) {
+				RangeStore<W> range = (RangeStore<W>) store;
+				store = range.store;
+				from = range.from;
+				to = range.to;
+			}
 			if (store instanceof BinaryStore) {
-				bits.setStore(position, ((BinaryStore) store).bits);
+				bits.setStore(position, ((BinaryStore) store).bits.range(from, to));
 			} else {
-				setStoreImpl(position, store, size);
+				setStoreImpl(position, store, from, to);
 			}
 		}
 
@@ -821,11 +835,18 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		@Override
 		public <W extends Integer> void setStore(int position, Store<W> store) {
-			int size = checkSetStore(position, store);
+			int from = 0;
+			int to = checkSetStore(position, store);
+			if (store instanceof RangeStore<?>) {
+				RangeStore<W> range = (RangeStore<W>) store;
+				store = range.store;
+				from = range.from;
+				to = range.to;
+			}
 			if (store instanceof ArbitraryStore) {
-				bits.setStore(position * count, ((ArbitraryStore) store).bits);
+				bits.setStore(position * count, ((ArbitraryStore) store).bits.range(from * count, to * count));
 			} else {
-				setStoreImpl(position, store, size);
+				setStoreImpl(position, store, from, to);
 			}
 		}
 
@@ -956,11 +977,18 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		@Override
 		public <W extends Integer> void setStore(int position, Store<W> store) {
-			int size = checkSetStore(position, store);
+			int from = 0;
+			int to = checkSetStore(position, store);
+			if (store instanceof RangeStore<?>) {
+				RangeStore<W> range = (RangeStore<W>) store;
+				store = range.store;
+				from = range.from;
+				to = range.to;
+			}
 			if (store instanceof ZeroOrNullStore) {
-				bits.setStore(position, ((ZeroOrNullStore) store).bits);
+				bits.setStore(position, ((ZeroOrNullStore) store).bits.range(from, to));
 			} else {
-				setStoreImpl(position, store, size);
+				setStoreImpl(position, store, from, to);
 			}
 		}
 

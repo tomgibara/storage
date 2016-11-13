@@ -215,11 +215,18 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <W extends V> void setStore(int position, Store<W> store) {
-		int size = checkSetStore(position, store);
+		int from = 0;
+		int to = checkSetStore(position, store);
+		if (store instanceof RangeStore<?>) {
+			RangeStore<W> range = (RangeStore<W>) store;
+			store = range.store;
+			from = range.from;
+			to = range.to;
+		}
 		if (store.getClass() == this.getClass()) {
-			setStoreImpl(position, (NullPrimitiveStore<V>)store, size);
+			setStoreImpl(position, (NullPrimitiveStore<V>)store, from, to);
 		} else {
-			setStoreImpl(position, store, size);
+			setStoreImpl(position, store, from, to);
 		}
 	}
 
@@ -238,7 +245,7 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 
 	abstract protected Store<V> duplicate(BitStore populated, boolean copy);
 
-	abstract protected void setStoreImpl(int position, NullPrimitiveStore<V> store, int size);
+	abstract protected void setStoreImpl(int position, NullPrimitiveStore<V> store, int from, int to);
 
 	// mutability
 
@@ -315,10 +322,10 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		protected void setStoreImpl(int position, NullPrimitiveStore<Byte> store, int size) {
+		protected void setStoreImpl(int position, NullPrimitiveStore<Byte> store, int from, int to) {
 			ByteStore that = (ByteStore) store;
-			this.populated.setStore(position, that.populated);
-			System.arraycopy(that.values, 0, this.values, position, size);
+			this.populated.setStore(position, that.populated.range(from, to));
+			System.arraycopy(that.values, from, this.values, position, to - from);
 		}
 	}
 
@@ -373,10 +380,10 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		protected void setStoreImpl(int position, NullPrimitiveStore<Float> store, int size) {
+		protected void setStoreImpl(int position, NullPrimitiveStore<Float> store, int from, int to) {
 			FloatStore that = (FloatStore) store;
-			this.populated.setStore(position, that.populated);
-			System.arraycopy(that.values, 0, this.values, position, size);
+			this.populated.setStore(position, that.populated.range(from, to));
+			System.arraycopy(that.values, from, this.values, position, to - from);
 		}
 
 	}
@@ -432,10 +439,10 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		protected void setStoreImpl(int position, NullPrimitiveStore<Character> store, int size) {
+		protected void setStoreImpl(int position, NullPrimitiveStore<Character> store, int from, int to) {
 			CharacterStore that = (CharacterStore) store;
-			this.populated.setStore(position, that.populated);
-			System.arraycopy(that.values, 0, this.values, position, size);
+			this.populated.setStore(position, that.populated.range(from, to));
+			System.arraycopy(that.values, from, this.values, position, to - from);
 		}
 
 	}
@@ -491,10 +498,10 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		protected void setStoreImpl(int position, NullPrimitiveStore<Short> store, int size) {
+		protected void setStoreImpl(int position, NullPrimitiveStore<Short> store, int from, int to) {
 			ShortStore that = (ShortStore) store;
-			this.populated.setStore(position, that.populated);
-			System.arraycopy(that.values, 0, this.values, position, size);
+			this.populated.setStore(position, that.populated.range(from, to));
+			System.arraycopy(that.values, from, this.values, position, to - from);
 		}
 
 	}
@@ -550,10 +557,10 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		protected void setStoreImpl(int position, NullPrimitiveStore<Long> store, int size) {
+		protected void setStoreImpl(int position, NullPrimitiveStore<Long> store, int from, int to) {
 			LongStore that = (LongStore) store;
-			this.populated.setStore(position, that.populated);
-			System.arraycopy(that.values, 0, this.values, position, size);
+			this.populated.setStore(position, that.populated.range(from, to));
+			System.arraycopy(that.values, from, this.values, position, to - from);
 		}
 
 	}
@@ -609,10 +616,10 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		protected void setStoreImpl(int position, NullPrimitiveStore<Integer> store, int size) {
+		protected void setStoreImpl(int position, NullPrimitiveStore<Integer> store, int from, int to) {
 			IntegerStore that = (IntegerStore) store;
-			this.populated.setStore(position, that.populated);
-			System.arraycopy(that.values, 0, this.values, position, size);
+			this.populated.setStore(position, that.populated.range(from, to));
+			System.arraycopy(that.values, from, this.values, position, to - from);
 		}
 
 	}
@@ -668,10 +675,10 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		protected void setStoreImpl(int position, NullPrimitiveStore<Double> store, int size) {
+		protected void setStoreImpl(int position, NullPrimitiveStore<Double> store, int from, int to) {
 			DoubleStore that = (DoubleStore) store;
-			this.populated.setStore(position, that.populated);
-			System.arraycopy(that.values, 0, this.values, position, size);
+			this.populated.setStore(position, that.populated.range(from, to));
+			System.arraycopy(that.values, from, this.values, position, to - from);
 		}
 
 	}
@@ -727,10 +734,10 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
-		protected void setStoreImpl(int position, NullPrimitiveStore<Boolean> store, int size) {
+		protected void setStoreImpl(int position, NullPrimitiveStore<Boolean> store, int from, int to) {
 			BooleanStore that = (BooleanStore) store;
-			this.populated.setStore(position, that.populated);
-			System.arraycopy(that.values, 0, this.values, position, size);
+			this.populated.setStore(position, that.populated.range(from, to));
+			System.arraycopy(that.values, from, this.values, position, to - from);
 		}
 
 	}

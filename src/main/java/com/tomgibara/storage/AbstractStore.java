@@ -59,14 +59,15 @@ public abstract class AbstractStore<V> implements Store<V> {
 		return size;
 	}
 
-	<W extends V> void setStoreImpl(int position, Store<W> store, int size) {
-		if (position == 0) {
-			for (int i = 0; i < size; i++) {
+	<W extends V> void setStoreImpl(int position, Store<W> store, int from, int to) {
+		int offset = position - from;
+		if (offset == 0) {
+			for (int i = from; i < to; i++) {
 				set(i, store.get(i));
 			}
 		} else {
-			for (int i = 0; i < size; i++) {
-				set(position + i, store.get(i));
+			for (int i = from; i < to; i++) {
+				set(offset + i, store.get(i));
 			}
 		}
 	}
