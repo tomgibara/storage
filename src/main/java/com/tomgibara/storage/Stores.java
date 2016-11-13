@@ -19,6 +19,7 @@ package com.tomgibara.storage;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
+import com.tomgibara.bits.BitStore;
 import com.tomgibara.storage.StoreArrays.StoreArray;
 
 /**
@@ -255,6 +256,11 @@ public final class Stores {
 	public static Store<Double> doubles(double... values) {
 		checkValuesNotNull(values);
 		return new PrimitiveStore.DoubleStore(values, StoreType.DOUBLE_NN);
+	}
+
+	public static Store<Boolean> bits(BitStore bits) {
+		if (bits == null) throw new IllegalArgumentException("null bits");
+		return new BitsStore(bits);
 	}
 
 	// package scoped methods
