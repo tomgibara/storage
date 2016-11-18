@@ -515,23 +515,7 @@ public class StoreTest {
 
 	@Test
 	public void testRange() {
-		Random r = new Random(0L);
-		int tests = 100;
-		Function<StoreType<Object>, Store<Object>> p = StorageTestUtil.randomStores(r);
-		StorageTestUtil.forAllTypes(t -> {
-			for (int test = 0; test < tests; test++) {
-				Store<Object> store = p.apply((StoreType<Object>) t);
-				testRange(r, store);
-			}
-		});
-		for (int range = 1; range < 16; range++) {
-			Producer<Store<Integer>> p1 = StorageTestUtil.randomSmallValueStores(r, range, true);
-			Producer<Store<Integer>> p2 = StorageTestUtil.randomSmallValueStores(r, range, false);
-			for (int test = 0; test < tests; test++) {
-				testRange(r, p1.produce());
-				testRange(r, p2.produce());
-			}
-		}
+		testRandom(this::testRange);
 	}
 
 	private <V> void testRange(Random r, Store<V> store) {
@@ -556,6 +540,19 @@ public class StoreTest {
 		}
 	}
 
+	@Test
+	public void testObjectMethodsRandom() {
+		testRandom(this::testObjectMethods);
+	}
+
+	private <V> void testObjectMethods(Random r, Store<V> store) {
+		DefaultStore<V> def = new DefaultStore<V>(store);
+		String type = store.getClass().getName();
+		assertEquals(type, store, def);
+		assertEquals(type, store.hashCode(), def.hashCode());
+		assertEquals(type, store.toString(), def.toString());
+	}
+
 	private void checkIAE(Runnable r) {
 		try {
 			r.run();
@@ -574,11 +571,35 @@ public class StoreTest {
 		}
 	}
 
-	private static final class DefaultStore<V> implements Store<V> {
+	private static final class DefaultStore<V> extends AbstractStore<V> {
 		private final Store<V> store;
 		DefaultStore(Store<V> store) { this.store = store; }
 		@Override public int size() { return store.size(); }
 		@Override public V get(int index) { return store.get(index); }
 	}
 	
+	private void testRandom(RandomTest rt) {
+		Random r = new Random(0L);
+		int tests = 100;
+		Function<StoreType<Object>, Store<Object>> p = StorageTestUtil.randomStores(r);
+		StorageTestUtil.forAllTypes(t -> {
+			for (int test = 0; test < tests; test++) {
+				Store<Object> store = p.apply((StoreType<Object>) t);
+				rt.perform(r, store);
+			}
+		});
+		for (int range = 1; range < 16; range++) {
+			Producer<Store<Integer>> p1 = StorageTestUtil.randomSmallValueStores(r, range, true);
+			Producer<Store<Integer>> p2 = StorageTestUtil.randomSmallValueStores(r, range, false);
+			for (int test = 0; test < tests; test++) {
+				rt.perform(r, p1.produce());
+				rt.perform(r, p2.produce());
+			}
+		}
+	}
+
+	private interface RandomTest {
+		
+		<V> void perform(Random r, Store<V> store);
+	}
 }
