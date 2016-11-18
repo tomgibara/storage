@@ -186,13 +186,12 @@ public interface Storage<V> {
 		int size = store.size();
 		boolean mutable = isStorageMutable();
 		StoreType<V> type = type();
-		if (size == 0) return new EmptyStore<>(type, mutable);
+		if (size == 0) return newStore(0);
 		if (!mutable) return mutable().newCopyOf(store).immutableView();
 		// workaround possibility that it may not be possible to create a null filled store before filling
+		// if store[0] is null, this will fail, but that's okay, copy would fail anyway
 		Store<V> copy = type.nullSettable ? newStore(size) : newStore(size, store.get(0));
-		for (int i = 0; i < store.size(); i++) {
-			copy.set(i, store.get(i));
-		}
+		copy.setStore(0, store);
 		return copy;
 	}
 
