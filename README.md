@@ -168,6 +168,9 @@ List<T> list = ex5.asList();
 
 /* Transforming a store with a function */
 Store<Integer> store = ex6.asTransformedBy(i -> 2*i);
+
+/* A 'slice' of a store */
+ex7.range(from, to);
 ```
 
 

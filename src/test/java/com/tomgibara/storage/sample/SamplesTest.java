@@ -21,6 +21,8 @@ public class SamplesTest {
 	int j = 1;
 	T value = new T();
 	Object obj = new Object();
+	int from = 1;
+	int to = 3;
 
 	@SuppressWarnings("unused")
 	@Test
@@ -102,6 +104,8 @@ public class SamplesTest {
 		/* Transforming a store with a function */
 		Store<Integer> store = ex6.asTransformedBy(i -> 2*i);
 
+		/* A 'slice' of a store */
+		ex7.range(from, to);
 
 		// IDIOMATIC USAGE
 
