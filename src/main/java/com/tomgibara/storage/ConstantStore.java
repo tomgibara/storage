@@ -80,7 +80,16 @@ final class ConstantStore<V> implements Store<V> {
 	public Store<V> resizedCopy(int newSize) {
 		if (newSize == size) return this;
 		if (newSize < 0) throw new IllegalArgumentException("negative newSize");
-		return new ConstantStore<>(type, value, newSize);
+		Storage<V> storage = type.storage().mutable();
+		if (newSize < size || value.equals(type.nullValue)) {
+			return storage.newStore(newSize, value);
+		}
+		if (!type.nullSettable) {
+			throw new IllegalArgumentException("null not settable");
+		}
+		Store<V> store = storage.newStore(newSize, type.nullValue);
+		store.range(0, size).fill(value);
+		return store;
 	}
 
 	@Override
@@ -98,7 +107,7 @@ final class ConstantStore<V> implements Store<V> {
 		if (from < 0) throw new IllegalArgumentException("negative from");
 		if (from > to) throw new IllegalArgumentException("from exceeds to");
 		if (to > size()) throw new IllegalArgumentException("to exceeds size");
-		int size = from - to;
+		int size = to - from;
 		if (size == size()) return this;
 		if (size == 0) return new EmptyStore<>(type, isMutable());
 		return new ConstantStore<>(type, value, size);
@@ -129,7 +138,7 @@ final class ConstantStore<V> implements Store<V> {
 	@Override
 	public Store<V> copiedBy(Storage<V> storage) {
 		if (storage == null) throw new IllegalArgumentException("null storage");
-		return storage.isStorageMutable() ? storage.newStore(size, value) : storage.newCopyOf(this);
+		return storage.newStore(size, value);
 	}
 
 	// iterable methods
@@ -205,9 +214,9 @@ final class ConstantStore<V> implements Store<V> {
 		default:
 			String str = value.toString();
 			StringBuilder sb = new StringBuilder(1 + (str.length() + 1) * size);
-			sb.append('[').append(str).append(',');
+			sb.append('[').append(str);
 			for (int i = 1; i < size; i++) {
-				sb.append(',').append(str);
+				sb.append(", ").append(str);
 			}
 			return sb.append(']').toString();
 		}
