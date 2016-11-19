@@ -189,18 +189,33 @@ class NullArrayStore<V> extends AbstractStore<V> {
 		if (thatSize == 0) {
 			/* no op */
 		} else if (store instanceof ConstantStore<?>) {
+			count -= count(index, thatSize);
 			Arrays.fill(this.values, index, index + thatSize, store.get(0));
+			count += thatSize;
 		} else if (store instanceof NullConstantStore<?>) {
+			count -= count(index, thatSize);
 			Arrays.fill(this.values, index, index + thatSize, null);
 		} else if (store instanceof ArrayStore<?>) {
+			count -= count(index, thatSize);
 			ArrayStore<W> that = (ArrayStore<W>) store;
 			System.arraycopy(that.values, 0, this.values, index, thatSize);
+			count += thatSize;
 		} else if (store instanceof NullArrayStore<?>) {
+			count -= count(index, thatSize);
 			NullArrayStore<W> that = (NullArrayStore<W>) store;
 			System.arraycopy(that.values, 0, this.values, index, thatSize);
+			count += that.count();
 		} else {
 			for (int i = 0; i < thatSize; i++) {
-				values[index + i] = store.get(i);
+				W w = store.get(i);
+				V v = values[index + i];
+				if (v == w) continue;
+				if (w == null) {
+					count--;
+				} else if (v == null) {
+					count++;
+				}
+				values[index + i] = w;
 			}
 		}
 	}
@@ -216,4 +231,12 @@ class NullArrayStore<V> extends AbstractStore<V> {
 	@Override
 	public Store<V> immutableCopy() { return new ImmutableArrayStore<>(values.clone(), count, type()); }
 
+	private int count(int index, int length) {
+		int limit = index + length;
+		int count = 0;
+		for (int i = index; i < limit; i++) {
+			if (values[i] != null) count++;
+		}
+		return count;
+	}
 }

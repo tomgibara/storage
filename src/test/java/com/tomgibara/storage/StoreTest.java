@@ -482,6 +482,10 @@ public class StoreTest {
 		Store<V> t2 = dst.mutableCopy();
 		t2.setStore(position, new DefaultStore<>(src));
 		assertEquals(t0, t1);
+		assertEquals(t0, t2);
+		assertEquals(new DefaultStore<>(t0).size(), t0.size());
+		assertEquals(new DefaultStore<>(t1).size(), t1.size());
+		assertEquals(new DefaultStore<>(t2).size(), t2.size());
 	}
 
 	@Test
