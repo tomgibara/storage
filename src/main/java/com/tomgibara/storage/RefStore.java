@@ -54,7 +54,7 @@ abstract class RefStore<V> extends AbstractStore<V> {
 	public StoreType<V> type() {
 		return StoreType.generic();
 	}
-	
+
 	@Override
 	public int size() {
 		return refs.length;

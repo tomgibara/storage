@@ -59,7 +59,7 @@ public class StoreTypeTest {
 
 	@Test
 	public void testPrimitiveNullability() {
-		
+
 		{ // not supporting null
 			Store<Integer> ints = StoreType.of(int.class).settingNullToValue(0).arrayAsStore(new int[] {0,1,2,3});
 			ints.set(0, null);

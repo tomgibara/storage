@@ -21,7 +21,7 @@ import java.util.Arrays;
 final class StoreArrays {
 
  	// package statics
-	 
+
 	static final ByteStoreArray    bytes    = new ByteStoreArray();
 	static final ShortStoreArray   shorts   = new ShortStoreArray();
 	static final IntStoreArray     ints     = new IntStoreArray();

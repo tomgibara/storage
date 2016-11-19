@@ -76,11 +76,11 @@ import com.tomgibara.fundament.Transposable;
  *            the type of the values stored
  */
 /* Implementation note:
- * 
+ *
  * Default implementations exist that can wrap a store to provide ranging,
  * immutability and transformation. These implementations are designed to be
  * generally layered in the following order (outer-to-inner):
- * 
+ *
  * Transformation
  * Range
  * Mutability
@@ -130,7 +130,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * <p>
 	 * Specifies the type of values stored by this store and how null values are
 	 * supported.
-	 * 
+	 *
 	 * <p>
 	 * The default implementation of this method returns
 	 * {@link StoreType#generic()}
@@ -166,12 +166,12 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	/**
 	 * <p>
 	 * Indicates whether the supplied value can be set as a value on this store.
-	 * 
+	 *
 	 * <p>
 	 * The default implementation checks that the value satisfies the value-type
 	 * and null constraints of the store type. Some stores may have further
 	 * restrictions on the values they may contain.
-	 * 
+	 *
 	 * @param value
 	 *            some value
 	 * @return true if and only if the value is valid for the
@@ -325,7 +325,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * <p>
 	 * The returned store is a live view of this store. The mutability of the
 	 * returned store matches the mutability of this store.
-	 * 
+	 *
 	 * @param from
 	 *            the first indexed value in the store (inclusive)
 	 * @param to
@@ -518,15 +518,15 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * position. An <code>IllegalArgumentException</code> will be raised if not
 	 * all of the supplied store values can be accommodated from the given
 	 * position.
-	 * 
+	 *
 	 * <p>
 	 * Client code can expect that setting a store with the same type will be
 	 * faster than an iterative set/get over the positioned span.
-	 * 
+	 *
 	 * <p>
 	 * Note that setting a store that is backed by the same data as this store
 	 * is not supported, but cannot be detected.
-	 * 
+	 *
 	 * @param position
 	 *            the position at which the first store values should be set
 	 * @param store

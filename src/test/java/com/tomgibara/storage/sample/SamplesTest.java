@@ -61,7 +61,7 @@ public class SamplesTest {
 		/* Wrapping varargs as an immutable store. */
 		Store<String> ex9 = StoreType.of(String.class)
 				.objectsAsStore("A", "B", "C");
-		
+
 		/* Wrapping a primitive array as a store allowing nulls. */
 		Store<Double> exa = StoreType.of(double.class)
 				.arrayAsStore(new double[] {1.0,2.0,3.0});

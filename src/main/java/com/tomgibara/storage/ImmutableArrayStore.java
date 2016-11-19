@@ -91,10 +91,10 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 	}
 
 	// private utility methods
-	
+
 	// we are cautious here because this store may wrap a more specifically typed array
 	private V[] copiedValues() {
 		return Stores.typedArrayCopy(type.valueType, values);
 	}
-	
+
 }

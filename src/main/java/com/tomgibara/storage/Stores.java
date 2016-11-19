@@ -25,7 +25,7 @@ import com.tomgibara.storage.StoreArrays.StoreArray;
 /**
  * <p>
  * Static methods for creating new stores that wrap existing arrays.
- * 
+ *
  * <p>
  * The methods on this class allow
  *

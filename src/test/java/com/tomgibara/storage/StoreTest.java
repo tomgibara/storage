@@ -623,7 +623,7 @@ public class StoreTest {
 		@Override public int size() { return store.size(); }
 		@Override public V get(int index) { return store.get(index); }
 	}
-	
+
 	private void testRandom(RandomTest rt) {
 		Random r = new Random(0L);
 		int tests = 100;
@@ -645,7 +645,7 @@ public class StoreTest {
 	}
 
 	private interface RandomTest {
-		
+
 		<V> void perform(Random r, Store<V> store);
 	}
 }

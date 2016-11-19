@@ -29,7 +29,7 @@ import com.tomgibara.fundament.Mapping;
  * and control how null values are handled by stores. They serve as the primary
  * means by which {@link Storage} implementations are obtained; typically via
  * the {@link #storage()} method.
- * 
+ *
  * <p>
  * Creating a {@link StoreType} instance begins by calling {@link #of(Class)}
  * with an explicit storage type, or {@link #generic()} if the type is not known
@@ -37,7 +37,7 @@ import com.tomgibara.fundament.Mapping;
  * value type, alternative instances can be obtained that control how nulls are
  * to be supported by the storage. Unless otherwise specified, a
  * {@link StoreType} will allow setting and getting null values.
- * 
+ *
  * <p>
  * A {@link StoreType} also provides a number of convenient methods for creating
  * stores directly, without the use of an intervening {@link Storage} object.
@@ -131,7 +131,7 @@ public final class StoreType<V> {
 	 * The type returned by this method supports getting and setting null values.
 	 * Using {@link #of(Class)} with a precise type is to be preferred where
 	 * possible.
-	 * 
+	 *
 	 * @param <V>
 	 *            the ostensible value type
 	 * @return a generic type
@@ -147,7 +147,7 @@ public final class StoreType<V> {
 	 * Specifies that values are to be stored using the supplied type. Where the
 	 * precise type of the stored values is unknown (typically due to type
 	 * erasure) the {@link #generic()} method can be used.
-	 * 
+	 *
 	 * @param <V>
 	 *            the value type
 	 * @param valueType
@@ -235,25 +235,25 @@ public final class StoreType<V> {
 	 * <dl>
 	 * <dt>primitive numeric types
 	 * <dd><code>0</code>
-	 * 
+	 *
 	 * <dt><code>boolean</code>
 	 * <dd><code>false</code>
-	 * 
+	 *
 	 * <dt><code>char</code>
 	 * <dd><code>'\0'</code>
-	 * 
+	 *
 	 * <dt>primitive wrapper types
 	 * <dd><em>as per primitive types</em></dd>
-	 * 
+	 *
 	 * <dt>enumerations
 	 * <dd>the enum constant with ordinal 0 (if it exists)
-	 * 
+	 *
 	 * <dt><code>java.lang.String</code>
 	 * <dd>the empty string <code>""</code>
-	 * 
+	 *
 	 * <dt><code>java.math.BigInteger</code>
 	 * <dd><code>BigInteger.ZERO</code>
-	 * 
+	 *
 	 * <dt><code>java.math.BigDecimal</code>
 	 * <dd><code>BigDecimal.ZERO</code>
 	 * </dl>
@@ -287,7 +287,7 @@ public final class StoreType<V> {
 			case "java.lang.Short"      : return (StoreType<V>) SHORT_DEF;
 			case "java.lang.Integer"    : return (StoreType<V>) INT_DEF;
 			case "java.lang.Long"       : return (StoreType<V>) LONG_DEF;
-	
+
 			case "java.lang.String"     : return (StoreType<V>) STRING_DEF;
 			case "java.math.BigInteger" : return (StoreType<V>) BIGINT_DEF;
 			case "java.math.BigDecimal" : return (StoreType<V>) DECIMAL_DEF;
@@ -365,13 +365,13 @@ public final class StoreType<V> {
 	 * of primitives. Such stores provide greater type safety than those created
 	 * by genericized storage. In many contexts they will also provide a very
 	 * significant reduction in the memory required to store values.
-	 * 
+	 *
 	 * <p>
 	 * Specific support is also provided for enumeration types. These are stored
 	 * as small value integers yielding a commensurate reduction in memory usage
 	 * at the possible expense of slower operation times. To bypass this, use a
 	 * {@link #generic()} type.
-	 * 
+	 *
 	 * <p>
 	 * Note that storage returned by this method is always mutable. To obtain
 	 * storage that directly constructs immutable stores, make a further call
@@ -403,7 +403,7 @@ public final class StoreType<V> {
 	 * performance of ternary and quinary storage may degraded in some
 	 * applications. In any such case, it is possible to use a larger range to
 	 * switch to a regular linear bit-packing strategy.
-	 * 
+	 *
 	 * <p>
 	 * This method may only be called on a type for which the
 	 * {@link #valueType()} is <code>int.class</code>. In all other cases an
@@ -429,11 +429,11 @@ public final class StoreType<V> {
 	/**
 	 * <p>
 	 * An immutable empty store.
-	 * 
+	 *
 	 * <p>
 	 * This method provides a convenient way to fabricate an empty store as
 	 * needed.
-	 * 
+	 *
 	 * @return an immutable empty store
 	 */
 	public Store<V> emptyStore() {
@@ -445,11 +445,11 @@ public final class StoreType<V> {
 	 * Exposes the supplied objects as an immutable store. No copy of the
 	 * supplied array is made, but the returned store cannot be modified by the
 	 * caller, and thus the caller cannot modify it.
-	 * 
+	 *
 	 * <p>
 	 * If {@link #nullGettable()} on this type returns false, the supplied array
 	 * is not permitted to contain nulls.
-	 * 
+	 *
 	 * @param objects
 	 *            the objects from which a store should be fabricated.
 	 * @return the objects as a store
@@ -467,15 +467,15 @@ public final class StoreType<V> {
 	 * mutable and backed by the supplied array so that changes in the store
 	 * will be reflected in the array. The component type of the supplied array
 	 * must equal (ie. precisely match) {@link #valueType()}.
-	 * 
+	 *
 	 * <p>
 	 * Note that the array is supplied as an object since primitive arrays are
 	 * also supported.
-	 * 
+	 *
 	 * <p>
 	 * This method provides a means by which arrays can be operated on as stores
 	 * and entails no duplication of the array values.
-	 * 
+	 *
 	 * @param array
 	 *            an array consistent with this type
 	 * @return a mutable store backed the supplied array

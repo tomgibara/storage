@@ -23,7 +23,7 @@ import org.junit.Test;
 public class StoreArraysTest {
 
 	private static int[] ints(int... ints) { return ints; }
-	 
+
 	@Test
 	public void testCopyOfRange() {
 		int[] src = {0,1,2,3,4};

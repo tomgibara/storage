@@ -101,7 +101,7 @@ public interface Storage<V> {
 
 	/**
 	 * The type of stores created with this storage.
-	 * 
+	 *
 	 * @return the type assigned to new stores
 	 */
 
@@ -132,7 +132,7 @@ public interface Storage<V> {
 	 * assigned to every index of the store, unless the value is null, in which
 	 * case every index either remains unassigned or is assigned the value
 	 * supplied by {@link StoreType#nullValue()}.
-	 * 
+	 *
 	 * <p>
 	 * The returned store is mutable precisely when {@link #isStorageMutable()}
 	 * returns true.
