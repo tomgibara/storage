@@ -271,7 +271,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			values = new byte[size];
 			nullValue = nullSettable ? type.nullValue : (byte) 0;
 			if (initialValue == null) initialValue = nullValue;
-			if (nullValue != (byte) 0) Arrays.fill(values, initialValue);
+			if (initialValue != (byte) 0) Arrays.fill(values, initialValue);
 		}
 
 		ByteStore(byte[] values, StoreType<Byte> type) {
@@ -360,7 +360,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			values = new float[size];
 			nullValue = nullSettable ? type.nullValue : 0.0f;
 			if (initialValue == null) initialValue = nullValue;
-			if (nullValue != (float) 0) Arrays.fill(values, nullValue);
+			if (initialValue != (float) 0) Arrays.fill(values, initialValue);
 		}
 
 		FloatStore(float[] values, StoreType<Float> type) {
@@ -449,7 +449,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			values = new char[size];
 			nullValue = nullSettable ? type.nullValue : '\0';
 			if (initialValue == null) initialValue = nullValue;
-			if (nullValue != (char) 0) Arrays.fill(values, nullValue);
+			if (initialValue != (char) 0) Arrays.fill(values, initialValue);
 		}
 
 		CharacterStore(char[] values, StoreType<Character> type) {
@@ -538,7 +538,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			values = new short[size];
 			nullValue = nullSettable ? type.nullValue : (short) 0;
 			if (initialValue == null) initialValue = nullValue;
-			if (nullValue != (short) 0) Arrays.fill(values, nullValue);
+			if (initialValue != (short) 0) Arrays.fill(values, initialValue);
 		}
 
 		ShortStore(short[] values, StoreType<Short> type) {
@@ -627,7 +627,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			values = new long[size];
 			nullValue = nullSettable ? type.nullValue : 0L;
 			if (initialValue == null) initialValue = nullValue;
-			if (nullValue != (long) 0) Arrays.fill(values, nullValue);
+			if (initialValue != (long) 0) Arrays.fill(values, initialValue);
 		}
 
 		LongStore(long[] values, StoreType<Long> type) {
@@ -720,7 +720,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			values = new int[size];
 			nullValue = nullSettable ? type.nullValue : 0;
 			if (initialValue == null) initialValue = nullValue;
-			if (nullValue != (int) 0) Arrays.fill(values, nullValue);
+			if (initialValue != (int) 0) Arrays.fill(values, initialValue);
 		}
 
 		IntegerStore(int[] values, StoreType<Integer> type) {
@@ -813,7 +813,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			values = new double[size];
 			nullValue = nullSettable ? type.nullValue : 0.0;
 			if (initialValue == null) initialValue = nullValue;
-			if (nullValue != (double) 0) Arrays.fill(values, nullValue);
+			if (initialValue != (double) 0) Arrays.fill(values, initialValue);
 		}
 
 		DoubleStore(double[] values, StoreType<Double> type) {
@@ -906,7 +906,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			values = new boolean[size];
 			nullValue = nullSettable && type.nullValue;
 			if (initialValue == null) initialValue = nullValue;
-			if (nullValue) Arrays.fill(values, nullValue);
+			if (initialValue) Arrays.fill(values, initialValue);
 		}
 
 		BooleanStore(boolean[] values, StoreType<Boolean> type) {
