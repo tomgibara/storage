@@ -95,6 +95,8 @@ final class RangeStore<V> extends AbstractStore<V> {
 
 	@Override
 	public <W extends V> void setStore(int position, Store<W> store) {
+		if (position < 0) throw new IllegalArgumentException("negative position");
+		if (position + store.size() > size()) throw new IllegalArgumentException("position too large");
 		this.store.setStore(from + position, store);
 	}
 

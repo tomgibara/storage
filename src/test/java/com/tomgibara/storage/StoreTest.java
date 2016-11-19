@@ -574,6 +574,31 @@ public class StoreTest {
 		}
 	}
 
+	@Test
+	public void testBadSetStore() {
+		testRandom(this::testBadSetStore);
+	}
+
+	private <V> void testBadSetStore(Random r, Store<V> store) {
+		int pos = r.nextInt((3 * store.size() >> 1) + 1) - store.size();
+		int siz = r.nextInt(pos > store.size() ? 5 : ((store.size() - pos) << 1) + 1);
+		V value = store.type().settingNullToDefault().nullValue;
+		Store<V> str;
+		try {
+			str = store.type().constantStore(value, siz);
+		} catch (IllegalArgumentException e) {
+			return; // have no default value to test with
+		}
+		boolean failed;
+		try {
+			store.setStore(pos, str);
+			failed = false;
+		} catch (IllegalArgumentException e) {
+			failed = true;
+		}
+		assertEquals("mismatched setStore: " + pos + " " + siz + " " + store.size(), pos < 0 || pos > store.size() || siz > store.size() - pos, failed);
+	}
+
 	private void checkIAE(Runnable r) {
 		try {
 			r.run();
