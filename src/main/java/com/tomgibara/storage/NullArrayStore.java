@@ -231,6 +231,24 @@ class NullArrayStore<V> extends AbstractStore<V> {
 	@Override
 	public Store<V> immutableCopy() { return new ImmutableArrayStore<>(values.clone(), count, type()); }
 
+	// abstract store methods
+
+	@Override
+	boolean fastFill(int from, int to, V value) {
+		if (from == 0 && to == values.length) {
+			Arrays.fill(values, value);
+			count = value == null ? 0 : values.length;
+		} else {
+			int length = to - from;
+			count -= count(from, length);
+			Arrays.fill(values, from, to, value);
+			if (value != null) count += length;
+		}
+		return true;
+	}
+
+	// private helper methods
+
 	private int count(int index, int length) {
 		int limit = index + length;
 		int count = 0;

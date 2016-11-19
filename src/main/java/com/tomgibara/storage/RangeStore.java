@@ -63,6 +63,22 @@ final class RangeStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
+	public void clear() throws IllegalStateException {
+		if (store instanceof AbstractStore<?>) {
+			if (store.isMutable() && store.type().nullSettable && ((AbstractStore<V>)store).fastFill(from, to, null)) return;
+		}
+		super.clear();
+	}
+
+	@Override
+	public void fill(V value) {
+		if (store instanceof AbstractStore<?>) {
+			if (store.isMutable() && store.isSettable(value) && ((AbstractStore<V>)store).fastFill(from, to, value)) return;
+		}
+		super.fill(value);
+	}
+
+	@Override
 	public BitStore population() {
 		return store.population().range(from, to);
 	}

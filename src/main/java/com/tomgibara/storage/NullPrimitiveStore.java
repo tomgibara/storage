@@ -235,6 +235,31 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		return populated.immutableView();
 	}
 
+	// abstract store methods
+
+	@Override
+	boolean fastFill(int from, int to, V value) {
+		if (from == 0 && to == size()) {
+			if (value == null) {
+				populated.clear();
+				count = 0;
+			} else {
+				fillImpl(value);
+				populated.fill();
+				count = to;
+			}
+		} else {
+			if (value == null) {
+				populated.range(from, to).clear();
+			} else {
+				fillImpl(from, to, value);
+				populated.range(from, to).fill();
+			}
+			count = populated.ones().count();
+		}
+		return true;
+	}
+
 	// for extension
 
 	abstract protected V getImpl(int index);
@@ -242,6 +267,8 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 	abstract protected void setImpl(int index, V value);
 
 	abstract protected void fillImpl(V value);
+
+	abstract protected void fillImpl(int from, int to, V value);
 
 	abstract protected Store<V> duplicate(BitStore populated, boolean copy);
 
@@ -314,6 +341,11 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
+		protected void fillImpl(int from, int to, Byte value) {
+			Arrays.fill(values, from, to, value);
+		}
+
+		@Override
 		protected ByteStore duplicate(BitStore populated, boolean copy) {
 			if (!copy) return new ByteStore(populated, count, values);
 			int size = populated.size();
@@ -369,6 +401,11 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		@Override
 		protected void fillImpl(Float value) {
 			Arrays.fill(values, value);
+		}
+
+		@Override
+		protected void fillImpl(int from, int to, Float value) {
+			Arrays.fill(values, from, to, value);
 		}
 
 		@Override
@@ -431,6 +468,11 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
+		protected void fillImpl(int from, int to, Character value) {
+			Arrays.fill(values, from, to, value);
+		}
+
+		@Override
 		protected CharacterStore duplicate(BitStore populated, boolean copy) {
 			if (!copy) return new CharacterStore(populated, count, values);
 			int size = populated.size();
@@ -487,6 +529,11 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		@Override
 		protected void fillImpl(Short value) {
 			Arrays.fill(values, value);
+		}
+
+		@Override
+		protected void fillImpl(int from, int to, Short value) {
+			Arrays.fill(values, from, to, value);
 		}
 
 		@Override
@@ -549,6 +596,11 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
+		protected void fillImpl(int from, int to, Long value) {
+			Arrays.fill(values, from, to, value);
+		}
+
+		@Override
 		protected LongStore duplicate(BitStore populated, boolean copy) {
 			if (!copy) return new LongStore(populated, count, values);
 			int size = populated.size();
@@ -605,6 +657,11 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		@Override
 		protected void fillImpl(Integer value) {
 			Arrays.fill(values, value);
+		}
+
+		@Override
+		protected void fillImpl(int from, int to, Integer value) {
+			Arrays.fill(values, from, to, value);
 		}
 
 		@Override
@@ -667,6 +724,11 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
+		protected void fillImpl(int from, int to, Double value) {
+			Arrays.fill(values, from, to, value);
+		}
+
+		@Override
 		protected DoubleStore duplicate(BitStore populated, boolean copy) {
 			if (!copy) return new DoubleStore(populated, count, values);
 			int size = populated.size();
@@ -723,6 +785,11 @@ abstract class NullPrimitiveStore<V> extends AbstractStore<V> {
 		@Override
 		protected void fillImpl(Boolean value) {
 			Arrays.fill(values, value);
+		}
+
+		@Override
+		protected void fillImpl(int from, int to, Boolean value) {
+			Arrays.fill(values, from, to, value);
 		}
 
 		@Override

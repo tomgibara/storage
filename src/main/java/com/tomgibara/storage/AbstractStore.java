@@ -71,4 +71,10 @@ public abstract class AbstractStore<V> implements Store<V> {
 			}
 		}
 	}
+
+	// returns true if fast fill was available
+	// implementation assumes that all checks have been performed
+	boolean fastFill(int from, int to, V value) {
+		return false;
+	}
 }

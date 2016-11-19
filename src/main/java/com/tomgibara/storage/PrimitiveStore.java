@@ -217,6 +217,18 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 	}
 
+	// abstract store methods
+
+	@Override
+	boolean fastFill(int from, int to, V value) {
+		if (from == 0 && to == size()) {
+			fillImpl(value);
+		} else {
+			fillImpl(from, to, value);
+		}
+		return true;
+	}
+
 	// for extension
 
 	abstract protected Class<?> primitiveType();
@@ -230,6 +242,8 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 	abstract protected void setImpl(int index, V value);
 
 	abstract protected void fillImpl(V value);
+
+	abstract protected void fillImpl(int from, int to, V value);
 
 	abstract protected PrimitiveStore<V> duplicate(boolean copy, boolean mutable);
 
@@ -328,6 +342,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
+		protected void fillImpl(int from, int to, Byte value) {
+			Arrays.fill(values, from, to, value == null ? nullValue : value.byteValue());
+		}
+
+		@Override
 		protected ByteStore duplicate(boolean copy, boolean mutable) {
 			return new ByteStore(copy ? values.clone() : values, nullValue, mutable, nullSettable);
 		}
@@ -414,6 +433,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		@Override
 		protected void fillImpl(Float value) {
 			Arrays.fill(values, value == null ? nullValue : value.floatValue());
+		}
+
+		@Override
+		protected void fillImpl(int from, int to, Float value) {
+			Arrays.fill(values, from, to, value == null ? nullValue : value.floatValue());
 		}
 
 		@Override
@@ -506,6 +530,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
+		protected void fillImpl(int from, int to, Character value) {
+			Arrays.fill(values, from, to, value == null ? nullValue : value.charValue());
+		}
+
+		@Override
 		protected CharacterStore duplicate(boolean copy, boolean mutable) {
 			return new CharacterStore(copy ? values.clone() : values, nullValue, mutable, nullSettable);
 		}
@@ -592,6 +621,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		@Override
 		protected void fillImpl(Short value) {
 			Arrays.fill(values, value == null ? nullValue : value.shortValue());
+		}
+
+		@Override
+		protected void fillImpl(int from, int to, Short value) {
+			Arrays.fill(values, from, to, value == null ? nullValue : value.shortValue());
 		}
 
 		@Override
@@ -689,6 +723,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
+		protected void fillImpl(int from, int to, Long value) {
+			Arrays.fill(values, from, to, value == null ? nullValue : value.longValue());
+		}
+
+		@Override
 		protected LongStore resize(int newSize) {
 			int oldSize = values.length;
 			boolean growing = newSize > oldSize;
@@ -774,6 +813,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		@Override
 		protected void fillImpl(Integer value) {
 			Arrays.fill(values, value == null ? nullValue : value.intValue());
+		}
+
+		@Override
+		protected void fillImpl(int from, int to, Integer value) {
+			Arrays.fill(values, from, to, value == null ? nullValue : value.intValue());
 		}
 
 		@Override
@@ -870,6 +914,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		}
 
 		@Override
+		protected void fillImpl(int from, int to, Double value) {
+			Arrays.fill(values, from, to, value == null ? nullValue : value.doubleValue());
+		}
+
+		@Override
 		protected DoubleStore duplicate(boolean copy, boolean mutable) {
 			return new DoubleStore(copy ? values.clone() : values, nullValue, mutable, nullSettable);
 		}
@@ -960,6 +1009,11 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		@Override
 		protected void fillImpl(Boolean value) {
 			Arrays.fill(values, value == null ? nullValue : value.booleanValue());
+		}
+
+		@Override
+		protected void fillImpl(int from, int to, Boolean value) {
+			Arrays.fill(values, from, to, value == null ? nullValue : value.booleanValue());
 		}
 
 		@Override

@@ -188,6 +188,19 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		setInt(j, setInt(i, getInt(j)));
 	}
 
+	@Override
+	boolean fastFill(int from, int to, Integer value) {
+		if (from == 0 && to == size) {
+			fillInt(value);
+		} else {
+			fillInt(from, to, value);
+		}
+		return true;
+	}
+
+
+	// for extension
+
 	abstract int range();
 
 	// note: caller responsible for checking value is valid
@@ -198,6 +211,11 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 	// note: caller responsible for checking value is valid
 	abstract void fillInt(int value);
+
+	// note: caller responsible for checking value is valid
+	abstract void fillInt(int from, int to, int value);
+
+	// helper methods
 
 	void checkIndex(int index) {
 		if (index < 0) throw new IllegalArgumentException("negative index");
@@ -292,6 +310,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		public void fill(Integer value) {
 			checkValue(value);
 			checkMutable();
+			fillInt(value);
 		}
 
 		@Override
@@ -359,6 +378,9 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		@Override
 		void fillInt(int value) { }
+
+		@Override
+		void fillInt(int from, int to, int value) { }
 	}
 
 	private final static class BinaryStore extends SmallValueStore {
@@ -459,6 +481,11 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		@Override
 		void fillInt(int value) {
 			bits.setAll(value != 0);
+		}
+
+		@Override
+		void fillInt(int from, int to, int value) {
+			bits.range(from, to).setAll(value != 0);
 		}
 
 		private boolean checkedValue(Integer value) {
@@ -588,6 +615,13 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		@Override
 		void fillInt(int value) {
 			Arrays.fill(data, fiveCopies(value));
+		}
+
+		@Override
+		void fillInt(int from, int to, int value) {
+			for (int i = from; i < to; i++) {
+				setInt(i, value);
+			}
 		}
 
 		private int checkedValue(Integer value) {
@@ -733,6 +767,13 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			}
 		}
 
+		@Override
+		void fillInt(int from, int to, int value) {
+			for (int i = from; i < to; i++) {
+				setInt(i, value);
+			}
+		}
+
 		private int checkedValue(Integer value) {
 			if (value == null) {
 				if (nullValue < 0) StoreType.failNull();
@@ -870,15 +911,12 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		@Override
 		void fillInt(int value) {
-			if (value == 0) {
-				bits.clear();
-			} else {
-				BitWriter w = bits.openWriter();
-				for (int i = 0; i < size; i++) {
-					w.write(value, count);
-				}
-				w.flush();
-			}
+			writeFill(bits, value);
+		}
+
+		@Override
+		void fillInt(int from, int to, int value) {
+			writeFill(bits.range(from * count, to * count), value);
 		}
 
 		private int checkedValue(Integer value) {
@@ -891,6 +929,20 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			return value;
 		}
 
+		private void writeFill(BitStore bits, int value) {
+			if (value == 0) {
+				bits.clear();
+			} else if (value == (1 << count) - 1) {
+				bits.fill();
+			} else {
+				int length = bits.size() / count;
+				BitWriter w = bits.openWriter();
+				for (int i = 0; i < length; i++) {
+					w.write(value, count);
+				}
+				w.flush();
+			}
+		}
 	}
 
 	// nullable stores

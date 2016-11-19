@@ -231,4 +231,12 @@ class ArrayStore<V> extends AbstractStore<V> {
 	@Override
 	public Store<V> immutableCopy() { return new ImmutableArrayStore<>(values.clone(), type); }
 
+	// abstract store methods
+
+	@Override
+	boolean fastFill(int from, int to, V value) {
+		Arrays.fill(values, from, to, value);
+		return true;
+	}
+
 }

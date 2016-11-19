@@ -35,7 +35,7 @@ final class BitsStore extends AbstractStore<Boolean> {
 
 	@Override
 	public StoreType<Boolean> type() {
-		return StoreType.BOOLEAN;
+		return StoreType.BOOLEAN_NN;
 	}
 
 	@Override
@@ -56,11 +56,8 @@ final class BitsStore extends AbstractStore<Boolean> {
 
 	@Override
 	public void fill(Boolean value) {
-		if (value == null) {
-			clear();
-		} else {
-			bits.setAll(value);
-		}
+		if (value == null) throw new IllegalArgumentException("null value");
+		bits.setAll(value);
 	}
 
 	@Override
@@ -157,4 +154,11 @@ final class BitsStore extends AbstractStore<Boolean> {
 		return isMutable() ? new BitsStore(bits.immutableView()) : this;
 	}
 
+	// abstract store methods
+
+	@Override
+	boolean fastFill(int from, int to, Boolean value) {
+		bits.range(from, to).setAll(value);
+		return true;
+	}
 }

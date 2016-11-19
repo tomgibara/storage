@@ -88,6 +88,11 @@ public class StorageTestUtil {
 				store.set(i, p.produce());
 			}
 			nullify(store, r);
+			if (r.nextBoolean()) {
+				int to = r.nextInt(store.size() + 1);
+				int from = r.nextInt(to + 1);
+				store = store.range(from, to);
+			}
 			return store;
 		};
 	}

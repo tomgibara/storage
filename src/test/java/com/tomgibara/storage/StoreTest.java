@@ -557,6 +557,23 @@ public class StoreTest {
 		assertEquals(type, store.toString(), def.toString());
 	}
 
+	@Test
+	public void testFillAndClear() {
+		testRandom(this::testFillAndClear);
+	}
+
+	private <V> void testFillAndClear(Random r, Store<V> store) {
+		V value = store.type().settingNullToDefault().nullValue;
+		if (value != null || store.type().nullSettable()) {
+			store.fill(value);
+			assertEquals(store.type().constantStore(value, store.size()), store);
+		}
+		if (store.type().nullSettable()) {
+			store.fill(null);
+			assertEquals(store.type().constantStore(null, store.size()), store);
+		}
+	}
+
 	private void checkIAE(Runnable r) {
 		try {
 			r.run();

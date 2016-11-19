@@ -191,8 +191,9 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @see #type()
 	 */
 	default void clear() throws IllegalStateException {
+		if (!isMutable()) throw immutableException();
+		int size = size();
 		try {
-			int size = size();
 			for (int i = 0; i < size; i++) {
 				set(i, null);
 			}
