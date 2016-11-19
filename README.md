@@ -177,13 +177,13 @@ ex7.range(from, to);
 Usage
 -----
 
-The storage library will be available from the Maven central repository:
+The storage library is available from the Maven central repository:
 
 > Group ID:    `com.tomgibara.storage`
 > Artifact ID: `storage`
 > Version:     `1.0.0`
 
-The Maven dependency to be:
+The Maven dependency being:
 
     <dependency>
       <groupId>com.tomgibara.storage</groupId>
@@ -194,4 +194,6 @@ The Maven dependency to be:
 Release History
 ---------------
 
-*not yet released*
+**2016.11.19** Version 1.0.0
+
+ Initial release
