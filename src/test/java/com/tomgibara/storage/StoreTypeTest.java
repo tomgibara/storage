@@ -164,4 +164,16 @@ public class StoreTypeTest {
 		StoreType<Float> t = StoreType.of(float.class).settingNullDisallowed();
 		assertEquals(t, floats.type());
 	}
+
+	@Test
+	public void testIsAssignableTo() {
+		assertTrue(StoreType.of(String.class).isAssignableTo(Object.class));
+		assertFalse(StoreType.of(Object.class).isAssignableTo(String.class));
+		assertFalse(StoreType.of(int.class).isAssignableTo(long.class));
+		assertFalse(StoreType.of(int.class).isAssignableTo(Integer.class));
+		assertFalse(StoreType.of(int.class).isAssignableTo(int.class));
+		assertTrue(StoreType.of(int.class).settingNullToValue(0).isAssignableTo(int.class));
+		assertTrue(StoreType.of(int.class).settingNullDisallowed().isAssignableTo(int.class));
+		assertFalse(StoreType.of(int.class).settingNullDisallowed().isAssignableTo(long.class));
+	}
 }

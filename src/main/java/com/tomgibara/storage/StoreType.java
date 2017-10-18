@@ -360,6 +360,28 @@ public final class StoreType<V> {
 		return nullValue;
 	}
 
+	// methods
+
+	/**
+	 * Whether fields of the supplied class type are guaranteed to be able to
+	 * store values contained in stores of this store type. Note that in the
+	 * case of primitive store types, this method returns true only if the
+	 * supplied type is the same primitive type.
+	 *
+	 * @param clss
+	 *            the type that would store the value
+	 * @return true if and only if fields of the supplied class are certain to
+	 *         accommodate values of this type
+	 */
+
+	public <T> boolean isAssignableTo(Class<T> clss) {
+		if (clss == null) throw new IllegalArgumentException("null clss");
+		if (valueType.isPrimitive()) {
+			return nullGettable ? false : clss == valueType;
+		}
+		return clss == valueType || clss.isAssignableFrom(valueType);
+	}
+
 	// storage
 
 	/**
