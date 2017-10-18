@@ -258,6 +258,16 @@ public final class Stores {
 		return new PrimitiveStore.DoubleStore(values, StoreType.DOUBLE_NN);
 	}
 
+	/**
+	 * Creates a store that exposes the bits of a {@code BitStore} as a
+	 * {@code boolean} {@link Store}. The returned store will be mutable
+	 * precisely when the supplied bit store is mutable.
+	 *
+	 * @param bits
+	 *            a bit store
+	 * @return the bit store as a {@link Store}
+	 */
+
 	public static Store<Boolean> bits(BitStore bits) {
 		if (bits == null) throw new IllegalArgumentException("null bits");
 		return new BitsStore(bits);
