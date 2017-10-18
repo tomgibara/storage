@@ -351,43 +351,7 @@ public interface Store<V> extends Iterable<V>, Mutability<Store<V>>, Transposabl
 	 * @return a list backed by the values in the store.
 	 */
 	default List<V> asList() {
-		return new AbstractList<V>() {
-
-			@Override
-			public V get(int index) {
-				return Store.this.get(index);
-			}
-
-			@Override
-			public V set(int index, V element) {
-				if (!isMutable()) throw immutableException();
-				return Store.this.set(index, element);
-			}
-
-			@Override
-			public void clear() {
-				if (!isMutable()) throw immutableException();
-				Store.this.clear();
-			}
-
-			@Override
-			public boolean add(V e) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public int size() {
-				return Store.this.size();
-			}
-
-			@Override
-			public void forEach(Consumer<? super V> action) {
-				int size = size();
-				for (int i = 0; i < size; i++) {
-					action.accept(get(i));
-				}
-			}
-		};
+		return new StoreList<>(this);
 	}
 
 	/**

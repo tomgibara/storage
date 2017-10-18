@@ -89,13 +89,6 @@ final class NullConstantStore<V> implements Store<V> {
 	}
 
 	@Override
-	public Store<V> resizedCopy(int newSize) {
-		if (newSize == size) return this;
-		if (newSize < 0) throw new IllegalArgumentException("negative newSize");
-		return new NullConstantStore<>(type, newSize);
-	}
-
-	@Override
 	public int count() {
 		return 0;
 	}
@@ -112,7 +105,7 @@ final class NullConstantStore<V> implements Store<V> {
 		if (to > size()) throw new IllegalArgumentException("to exceeds size");
 		int size = to - from;
 		if (size == size()) return this;
-		if (size == 0) return new EmptyStore<>(type, isMutable());
+		if (size == 0) return new EmptyStore<>(type, false);
 		return new NullConstantStore<>(type, size);
 	}
 

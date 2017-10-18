@@ -16,8 +16,6 @@
  */
 package com.tomgibara.storage;
 
-import java.util.List;
-
 import com.tomgibara.bits.BitStore;
 
 final class RangeStore<V> extends AbstractStore<V> {
@@ -89,11 +87,6 @@ final class RangeStore<V> extends AbstractStore<V> {
 	}
 
 	@Override
-	public List<V> asList() {
-		return store.asList().subList(from, to);
-	}
-
-	@Override
 	public <W extends V> void setStore(int position, Store<W> store) {
 		if (position < 0) throw new IllegalArgumentException("negative position");
 		if (position + store.size() > size()) throw new IllegalArgumentException("position too large");
@@ -112,4 +105,15 @@ final class RangeStore<V> extends AbstractStore<V> {
 		return isMutable() ? store.immutableView().range(from, to) : this;
 	}
 
+	// package methods
+
+	@Override
+	boolean fastFill(int from, int to, V value) {
+		return store instanceof AbstractStore && ((AbstractStore<V>) store).fastFill(this.from + from, this.from + to, value);
+	}
+
+	@Override
+	boolean toArray(int from, int to, V[] vs) {
+		return store instanceof AbstractStore && ((AbstractStore<V>) store).toArray(this.from + from, this.from + to, vs);
+	}
 }

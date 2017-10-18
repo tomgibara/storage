@@ -239,4 +239,9 @@ class ArrayStore<V> extends AbstractStore<V> {
 		return true;
 	}
 
+	@Override
+	boolean toArray(int from, int to, V[] vs) {
+		System.arraycopy(values, from, vs, 0, to - from);
+		return true;
+	}
 }

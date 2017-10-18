@@ -90,6 +90,14 @@ final class ImmutableArrayStore<V> extends AbstractStore<V> {
 		return new ImmutableArrayStore<>(copiedValues(), count, type);
 	}
 
+	// package scoped methods
+
+	@Override
+	boolean toArray(int from, int to, V[] vs) {
+		System.arraycopy(values, from, vs, 0, to - from);
+		return true;
+	}
+
 	// private utility methods
 
 	// we are cautious here because this store may wrap a more specifically typed array

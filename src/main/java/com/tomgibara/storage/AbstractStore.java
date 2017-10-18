@@ -77,4 +77,11 @@ public abstract class AbstractStore<V> implements Store<V> {
 	boolean fastFill(int from, int to, V value) {
 		return false;
 	}
+
+	// returns true if toArray was available
+	// guaranteed to be called with an array that has a compatible type and sufficient length
+	boolean toArray(int from, int to, V[] vs) {
+		return false;
+	}
+
 }
