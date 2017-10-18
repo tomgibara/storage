@@ -27,6 +27,7 @@ import java.time.Month;
 import org.junit.Test;
 
 import com.tomgibara.fundament.Consumer;
+import com.tomgibara.fundament.Mapping;
 
 public class StoreTypeTest {
 
@@ -154,5 +155,13 @@ public class StoreTypeTest {
 		assertEquals("java.lang.Object (null allowed)", StoreType.generic().toString());
 		assertEquals("int (null set to 0)", StoreType.of(int.class).settingNullToValue(0).toString());
 		assertEquals("java.lang.String (null disallowed)", StoreType.of(String.class).settingNullDisallowed().toString());
+	}
+
+	@Test
+	public void testMapping() {
+		Store<Integer> ints = Stores.ints(1,2,3,4);
+		Store<Float> floats = ints.asTransformedBy(Mapping.fromFunction(int.class, float.class, i -> i * 0.5f));
+		StoreType<Float> t = StoreType.of(float.class).settingNullDisallowed();
+		assertEquals(t, floats.type());
 	}
 }

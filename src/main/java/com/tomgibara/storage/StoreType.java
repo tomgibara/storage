@@ -646,8 +646,10 @@ public final class StoreType<V> {
 
 	@SuppressWarnings("unchecked")
 	<W> StoreType<W> map(Mapping<V, W> fn) {
-		if (nullSettable == nullGettable) return (StoreType<W>) this;
-		return new StoreType<>(fn.rangeType(), nullSettable, nullGettable, nullValue == null ? null : fn.apply(nullValue));
+		Class<W> newValueType = fn.rangeType();
+		W newNullValue = nullValue == null ? null : fn.apply(nullValue);
+		if (newValueType == valueType && newNullValue == nullValue) return (StoreType<W>) this;
+		return new StoreType<>(newValueType, nullSettable, nullGettable, newNullValue);
 	}
 
 	// private helper methods
