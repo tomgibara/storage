@@ -32,7 +32,13 @@ public abstract class AbstractStore<V> implements Store<V> {
 
 	@Override
 	public int hashCode() {
-		return asList().hashCode();
+		int size = size();
+		int hashCode = 1;
+		for (int i = 0; i < size; i++) {
+			V v = get(i);
+			hashCode = 31 * hashCode + (v == null ? 0 : v.hashCode());
+		}
+		return hashCode;
 	}
 
 	@Override
@@ -40,12 +46,32 @@ public abstract class AbstractStore<V> implements Store<V> {
 		if (obj == this) return true;
 		if (!(obj instanceof Store)) return false;
 		Store<?> that = (Store<?>) obj;
-		return this.asList().equals(that.asList());
+		int size = size();
+		if (size != that.size()) return false;
+		for (int i = 0; i < size; i++) {
+			V v = this.get(i);
+			Object w = that.get(i);
+			if (v == w) continue;
+			if (v == null || w == null) return false;
+			if (!v.equals(w)) return false;
+		}
+		return true;
 	}
 
 	@Override
 	public String toString() {
-		return asList().toString();
+		int size = size();
+		switch (size) {
+		case 0 : return "[]";
+		case 1 : return '[' + toString(get(0)) + ']';
+		default:
+			StringBuilder sb = new StringBuilder();
+			sb.append('[').append(toString(get(0)));
+			for (int i = 1; i < size; i++) {
+				sb.append(',').append(' ').append(toString(get(i)));
+			}
+			return sb.append(']').toString();
+		}
 	}
 
 	// package scoped helpers
@@ -82,6 +108,14 @@ public abstract class AbstractStore<V> implements Store<V> {
 	// guaranteed to be called with an array that has a compatible type and sufficient length
 	boolean toArray(int from, int to, V[] vs) {
 		return false;
+	}
+
+	// private helper methods
+
+	private String toString(Object value) {
+		if (value == null) return "null";
+		if (value == this) return "(this store)";
+		return value.toString();
 	}
 
 }

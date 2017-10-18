@@ -63,7 +63,8 @@ import com.tomgibara.fundament.Transposable;
  * equal.
  * <li>The hashcode of a store is the hashcode of its list representation.
  * <li>The string representation of a store is equal to
- * <code>asList().toString()</code>.
+ * <code>asList().toString() with the exception that self-referencing stores
+ * are reported as "(this store)".</code>.
  * </ul>
  *
  * <p>
