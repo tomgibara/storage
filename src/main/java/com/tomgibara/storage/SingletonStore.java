@@ -10,7 +10,7 @@ import com.tomgibara.bits.BitStore;
 import com.tomgibara.bits.Bits;
 
 // efficient implementations for immutable, non-null singletons
-abstract class SingletonStore<V> extends AbstractStore<V> {
+abstract class SingletonStore<V> implements Store<V> {
 
 	// statics
 
@@ -83,8 +83,32 @@ abstract class SingletonStore<V> extends AbstractStore<V> {
 		if (j != 0) throw new IllegalArgumentException("invalid j");
 	}
 
+	// object methods
+
+	@Override
+	public int hashCode() {
+		return 31 + get().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) return true;
+		if (!(obj instanceof Store)) return false;
+		Store<?> that = (Store<?>) obj;
+		if (that.size() != 1) return false;
+		return this.get().equals(that.get(0));
+	}
+
+	@Override
+	public String toString() {
+		return '[' + get().toString() + ']';
+	}
+
+	// methods for implementation
 
 	abstract V get();
+
+	// inner classes
 
 	static class ObjectStore<V> extends SingletonStore<V> {
 
@@ -98,6 +122,7 @@ abstract class SingletonStore<V> extends AbstractStore<V> {
 		}
 
 		@Override V get() { return v; }
+
 	}
 
 	static class TypedStore<V> extends SingletonStore<V> {
