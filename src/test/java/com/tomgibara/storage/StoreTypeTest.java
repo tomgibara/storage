@@ -58,6 +58,34 @@ public class StoreTypeTest {
 	}
 
 	@Test
+	public void testObjectAsStore() {
+		{
+			StoreType<String> t = StoreType.of(String.class).settingNullDisallowed();
+			Store<String> s = t.objectAsStore("Test");
+			assertEquals("Test", s.get(0));
+			assertEquals(t, s.type());
+		}
+		{
+			StoreType<Integer> t = StoreType.of(Integer.class).settingNullDisallowed();
+			Store<Integer> s = t.objectAsStore(24);
+			assertEquals(24, s.get(0).intValue());
+			assertEquals(t, s.type());
+		}
+		{
+			StoreType<Integer> t = StoreType.of(Integer.class).settingNullAllowed();
+			Store<Integer> s = t.objectAsStore(24);
+			assertEquals(24, s.get(0).intValue());
+			assertEquals(t, s.type());
+		}
+		{
+			StoreType<Integer> t = StoreType.of(int.class).settingNullDisallowed();
+			Store<Integer> s = t.objectAsStore(24);
+			assertEquals(24, s.get(0).intValue());
+			assertEquals(t, s.type());
+		}
+	}
+
+	@Test
 	public void testPrimitiveNullability() {
 
 		{ // not supporting null

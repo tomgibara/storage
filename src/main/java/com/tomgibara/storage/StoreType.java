@@ -22,6 +22,14 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import com.tomgibara.fundament.Mapping;
+import com.tomgibara.storage.NullPrimitiveStore.BooleanStore;
+import com.tomgibara.storage.NullPrimitiveStore.ByteStore;
+import com.tomgibara.storage.NullPrimitiveStore.CharacterStore;
+import com.tomgibara.storage.NullPrimitiveStore.DoubleStore;
+import com.tomgibara.storage.NullPrimitiveStore.FloatStore;
+import com.tomgibara.storage.NullPrimitiveStore.IntegerStore;
+import com.tomgibara.storage.NullPrimitiveStore.LongStore;
+import com.tomgibara.storage.NullPrimitiveStore.ShortStore;
 
 /**
  * <p>
@@ -438,6 +446,42 @@ public final class StoreType<V> {
 	 */
 	public Store<V> emptyStore() {
 		return new EmptyStore<>(this, false);
+	}
+
+	/**
+	 * Wraps the supplied object as a singleton store, that is, a store of size
+	 * 1. A null object may only be supplied to this method if
+	 * {@link #nullSettable()} is true for this type.
+	 *
+	 * @param object
+	 *            the object to be wrapped in a store
+	 * @return a store containing the object
+	 */
+
+	@SuppressWarnings("unchecked")
+	public Store<V> objectAsStore(V object) {
+		// first deal with null value
+		if (object == null) {
+			if (nullGettable) return new NullSingletonStore<>(this);
+			if (nullSettable) return new SingletonStore.TypedStore<>(this, nullValue);
+			throw new IllegalArgumentException("null not supported for this type");
+		}
+
+		// if this type isn't a straightforward primitive type, we need the custom type reported
+		if (!valueType.isPrimitive() || nullSettable) return new SingletonStore.TypedStore<>(this, object);
+
+		// otherwise we can fallback on the very cheapest primitive wrappers
+		switch(Stores.hash(valueType)) {
+			case Stores.BYTE:    return (Store<V>) new SingletonStore.ByteStore    ((Byte)      object);
+			case Stores.FLOAT:   return (Store<V>) new SingletonStore.FloatStore   ((Float)     object);
+			case Stores.CHAR:    return (Store<V>) new SingletonStore.CharStore    ((Character) object);
+			case Stores.SHORT:   return (Store<V>) new SingletonStore.ShortStore   ((Short)     object);
+			case Stores.LONG:    return (Store<V>) new SingletonStore.LongStore    ((Long)      object);
+			case Stores.INT:     return (Store<V>) new SingletonStore.IntStore     ((Integer)   object);
+			case Stores.DOUBLE:  return (Store<V>) new SingletonStore.DoubleStore  ((Double)    object);
+			case Stores.BOOLEAN: return (Store<V>) new SingletonStore.BooleanStore ((Boolean)   object);
+			default: throw new IllegalArgumentException(valueType.getName());
+		}
 	}
 
 	/**

@@ -273,6 +273,123 @@ public final class Stores {
 		return new BitsStore(bits);
 	}
 
+	/**
+	 * Creates an immutable primitive {@code byte} store that contains the single
+	 * supplied value.
+	 *
+	 * @param v
+	 *            the value at index 0
+	 * @return a store of size 1
+	 */
+
+	public static Store<Byte> singleByte(byte v) {
+		return new SingletonStore.ByteStore(v);
+	}
+
+	/**
+	 * Creates an immutable primitive {@code short} store that contains the
+	 * single supplied value.
+	 *
+	 * @param v
+	 *            the value at index 0
+	 * @return a store of size 1
+	 */
+
+	public static Store<Short> singleShort(short v) {
+		return new SingletonStore.ShortStore(v);
+	}
+
+	/**
+	 * Creates an immutable primitive {@code int} store that contains the single
+	 * supplied value.
+	 *
+	 * @param v
+	 *            the value at index 0
+	 * @return a store of size 1
+	 */
+
+	public static Store<Integer> singleInt(int v) {
+		return new SingletonStore.IntStore(v);
+	}
+
+	/**
+	 * Creates an immutable primitive {@code long} store that contains the
+	 * single supplied value.
+	 *
+	 * @param v
+	 *            the value at index 0
+	 * @return a store of size 1
+	 */
+
+	public static Store<Long> singleLong(long v) {
+		return new SingletonStore.LongStore(v);
+	}
+
+	/**
+	 * Creates an immutable primitive {@code boolean} store that contains the
+	 * single supplied value.
+	 *
+	 * @param v
+	 *            the value at index 0
+	 * @return a store of size 1
+	 */
+
+	public static Store<Boolean> singleBoolean(boolean v) {
+		return new SingletonStore.BooleanStore(v);
+	}
+
+	/**
+	 * Creates an immutable primitive {@code char} store that contains the
+	 * single supplied value.
+	 *
+	 * @param v
+	 *            the value at index 0
+	 * @return a store of size 1
+	 */
+
+	public static Store<Character> singleChar(char v) {
+		return new SingletonStore.CharStore(v);
+	}
+
+	/**
+	 * Creates an immutable primitive {@code float} store that contains the
+	 * single supplied value.
+	 *
+	 * @param v
+	 *            the value at index 0
+	 * @return a store of size 1
+	 */
+
+	public static Store<Float> singleFloat(float v) {
+		return new SingletonStore.FloatStore(v);
+	}
+
+	/**
+	 * Creates an immutable primitive {@code double} store that contains the
+	 * single supplied value.
+	 *
+	 * @param v
+	 *            the value at index 0
+	 * @return a store of size 1
+	 */
+
+	public static Store<Double> singleDouble(double v) {
+		return new SingletonStore.DoubleStore(v);
+	}
+
+	/**
+	 * Creates an immutable store that contains the single supplied object
+	 * value.
+	 *
+	 * @param object
+	 *            the value at index 0
+	 * @return a store of size 1
+	 */
+
+	public static <V> Store<V> singleObject(V value) {
+		return value == null ? NullSingletonStore.generic() : new SingletonStore.ObjectStore<>(value);
+	}
+
 	// package scoped methods
 
 	static IllegalStateException immutableException() {

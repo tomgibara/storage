@@ -18,7 +18,9 @@ package com.tomgibara.storage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class StoresTest {
@@ -38,5 +40,27 @@ public class StoresTest {
 	public void testVarargs() {
 		Store<Object> store = Stores.objects("Me", "Myself", "I");
 		store.set(0, new Object());
+	}
+
+	@Test
+	public void testSingleton() {
+		Store<Integer> a = Stores.singleInt(4);
+		assertEquals(1, a.size());
+		assertEquals(4, a.get(0).intValue());
+		assertTrue(a.population().getBit(0));
+		assertFalse(a.isMutable());
+		assertEquals(1, a.asList().size());
+		assertEquals(4, a.asList().get(0).intValue());
+		Store<Integer> b = a.asTransformedBy(i -> i + 1);
+		assertEquals(1, b.size());
+		assertEquals(5, b.get(0).intValue());
+		Store<Object> c = Stores.singleObject(null);
+		assertEquals(1, c.size());
+		assertEquals(null, c.get(0));
+		assertTrue(c.isNull(0));
+		Store<String> d = Stores.singleObject("Hello");
+		assertEquals(1, d.size());
+		assertEquals("Hello", d.get(0));
+		assertFalse(d.isNull(0));
 	}
 }
