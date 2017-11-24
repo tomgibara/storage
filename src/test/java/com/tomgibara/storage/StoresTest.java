@@ -19,6 +19,7 @@ package com.tomgibara.storage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,6 +29,27 @@ public class StoresTest {
 	@Test
 	public void testPrimitiveIsNull() {
 		assertFalse( Stores.ints(1,2,3).isNull(0) );
+	}
+
+	@Test
+	public void testPrimitiveMutability() {
+		Store<Integer> store = Stores.ints(1,2,3).immutable();
+		assertFalse(store.isMutable());
+
+		try {
+			store.set(0, 999);
+			fail();
+		} catch (IllegalStateException e) {
+			/* expected */
+		}
+
+		try {
+			store.fill(999);
+			fail();
+		} catch (IllegalStateException e) {
+			/* expected */
+		}
+
 	}
 
 	@Test
