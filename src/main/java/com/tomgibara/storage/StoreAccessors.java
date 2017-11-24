@@ -66,49 +66,49 @@ public final class StoreAccessors {
 		return new CharAccessor(store);
 	}
 
-	interface StoreBytes {
+	public interface StoreBytes {
 		boolean isByte(int index);
 		byte getByte(int index);
 		void setByte(int index, byte value);
 	}
 
-	interface StoreShorts {
+	public interface StoreShorts {
 		boolean isShort(int index);
 		short getShort(int index);
 		void setShort(int index, short value);
 	}
 
-	interface StoreInts {
+	public interface StoreInts {
 		boolean isInt(int index);
 		int getInt(int index);
 		void setInt(int index, int value);
 	}
 
-	interface StoreLongs {
+	public interface StoreLongs {
 		boolean isLong(int index);
 		long getLong(int index);
 		void setLong(int index, long value);
 	}
 
-	interface StoreBooleans {
+	public interface StoreBooleans {
 		boolean isBoolean(int index);
 		boolean getBoolean(int index);
 		void setBoolean(int index, boolean value);
 	}
 
-	interface StoreChars {
+	public interface StoreChars {
 		boolean isChar(int index);
 		char getChar(int index);
 		void setChar(int index, char value);
 	}
 
-	interface StoreFloats {
+	public interface StoreFloats {
 		boolean isFloat(int index);
 		float getFloat(int index);
 		void setFloat(int index, float value);
 	}
 
-	interface StoreDoubles {
+	public interface StoreDoubles {
 		boolean isDouble(int index);
 		double getDouble(int index);
 		void setDouble(int index, double value);
