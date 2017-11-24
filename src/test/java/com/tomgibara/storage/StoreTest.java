@@ -345,6 +345,34 @@ public class StoreTest {
 	}
 
 	@Test
+	public void testSmallStoreRangeCheck() {
+		for (int range = 1; range < 6; range++) {
+			testSmallStoreRangeCheck(range, false);
+			testSmallStoreRangeCheck(range, true);
+		}
+	}
+
+	private void testSmallStoreRangeCheck(int range, boolean nullAllowed) {
+		StoreType<Integer> type = StoreType.of(int.class);
+		type = nullAllowed ? type.settingNullAllowed() : type.settingNullDisallowed();
+		Store<Integer> store = type.smallValueStorage(range).newStore(10, 0);
+
+		try {
+			store.set(0, -1);
+			fail();
+		} catch (IllegalArgumentException e) {
+			/* expected */
+		}
+
+		try {
+			store.set(0, range);
+			fail();
+		} catch (IllegalArgumentException e) {
+			/* expected */
+		}
+	}
+
+	@Test
 	public void testIsSettable() {
 		{
 			Store<Integer> store = StoreType.of(int.class).settingNullDisallowed().storage().newStore(1, 0);

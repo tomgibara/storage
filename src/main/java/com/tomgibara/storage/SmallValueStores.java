@@ -1255,11 +1255,9 @@ abstract class SmallValueStore extends AbstractStore<Integer> implements StoreIn
 
 		@Override
 		public void setInt(int index, int value) {
-			wrapped.checkIndex(index);
-			if (value < 0) throw new IllegalArgumentException("negative value");
-			if (++value >= wrapped.range()) throw new IllegalArgumentException("value too large");
 			if (!wrapped.isMutable()) throw new IllegalStateException("immutable");
-			wrapped.setImpl(index, value);
+			wrapped.checkIndex(index);
+			wrapped.setImpl(index, wrapImpl(value));
 		}
 
 		// private helper methods
@@ -1269,7 +1267,13 @@ abstract class SmallValueStore extends AbstractStore<Integer> implements StoreIn
 		}
 
 		private int wrap(Integer value) {
-			return value == null ? 0 : value.intValue() + 1;
+			return value == null ? 0 : wrapImpl(value);
+		}
+
+		private int wrapImpl(int value) {
+			if (value < 0) throw new IllegalArgumentException("negative value");
+			if (++value >= wrapped.range()) throw new IllegalArgumentException("value too large");
+			return value;
 		}
 	}
 }
