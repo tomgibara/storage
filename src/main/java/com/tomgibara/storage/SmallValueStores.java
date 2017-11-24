@@ -23,8 +23,9 @@ import java.util.Arrays;
 import com.tomgibara.bits.BitStore;
 import com.tomgibara.bits.BitWriter;
 import com.tomgibara.bits.Bits;
+import com.tomgibara.storage.StoreAccessors.StoreInts;
 
-abstract class SmallValueStore extends AbstractStore<Integer> {
+abstract class SmallValueStore extends AbstractStore<Integer> implements StoreInts {
 
 	// statics - ternary packing
 
@@ -185,35 +186,57 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		checkIndex(i);
 		checkIndex(j);
 		if (i == j) return;
-		setInt(j, setInt(i, getInt(j)));
+		setImpl(j, setImpl(i, getImpl(j)));
 	}
 
 	@Override
 	boolean fastFill(int from, int to, Integer value) {
 		if (from == 0 && to == size) {
-			fillInt(value);
+			fillImpl(value);
 		} else {
-			fillInt(from, to, value);
+			fillImpl(from, to, value);
 		}
 		return true;
 	}
 
+	// store ints methods
+
+	@Override
+	public boolean isInt(int index) {
+		return true;
+	}
+
+	@Override
+	public int getInt(int index) {
+		checkIndex(index);
+		return getImpl(index);
+	}
+
+	@Override
+	public void setInt(int index, int value) {
+		checkIndex(index);
+		checkImpl(value);
+		if (!isMutable()) throw new IllegalStateException("immutable");
+		setImpl(index, value);
+	}
 
 	// for extension
 
 	abstract int range();
 
 	// note: caller responsible for checking value is valid
-	abstract int setInt(int index, int value);
+	abstract int setImpl(int index, int value);
 
 	// note: caller responsible for checking value is valid
-	abstract int getInt(int index);
+	abstract int getImpl(int index);
 
 	// note: caller responsible for checking value is valid
-	abstract void fillInt(int value);
+	abstract void fillImpl(int value);
 
 	// note: caller responsible for checking value is valid
-	abstract void fillInt(int from, int to, int value);
+	abstract void fillImpl(int from, int to, int value);
+
+	abstract void checkImpl(int value);
 
 	// helper methods
 
@@ -234,7 +257,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 	// assumes initCheck has already been performed
 	void initFill(Integer initialValue) {
 		int i = initialValue == null ? nullValue : initialValue.intValue();
-		if (i > 0) fillInt(i);
+		if (i > 0) fillImpl(i);
 	}
 
 	int settableValue(Object value) {
@@ -310,7 +333,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		public void fill(Integer value) {
 			checkValue(value);
 			checkMutable();
-			fillInt(value);
+			fillImpl(value);
 		}
 
 		@Override
@@ -359,7 +382,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			if (value == null) {
 				if (nullValue < 0) StoreType.failNull();
 			} else {
-				if (value.intValue() != 0) throw new IllegalArgumentException("non-zero value");
+				checkImpl(value);
 			}
 		}
 
@@ -371,16 +394,22 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		int range() { return 1; }
 
 		@Override
-		int getInt(int index) { return 0; }
+		int getImpl(int index) { return 0; }
 
 		@Override
-		int setInt(int index, int value) { return 0; }
+		int setImpl(int index, int value) { return 0; }
 
 		@Override
-		void fillInt(int value) { }
+		void fillImpl(int value) { }
 
 		@Override
-		void fillInt(int from, int to, int value) { }
+		void fillImpl(int from, int to, int value) { }
+
+		@Override
+		void checkImpl(int value) {
+			if (value != 0) throw new IllegalArgumentException("non-zero value");
+		}
+
 	}
 
 	private final static class BinaryStore extends SmallValueStore {
@@ -469,23 +498,28 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		int range() { return 2; }
 
 		@Override
-		int getInt(int index) {
+		int getImpl(int index) {
 			return valueOf( bits.getBit(index) );
 		}
 
 		@Override
-		int setInt(int index, int value) {
+		int setImpl(int index, int value) {
 			return valueOf( bits.getThenSetBit(index, value != 0) );
 		}
 
 		@Override
-		void fillInt(int value) {
+		void fillImpl(int value) {
 			bits.setAll(value != 0);
 		}
 
 		@Override
-		void fillInt(int from, int to, int value) {
+		void fillImpl(int from, int to, int value) {
 			bits.range(from, to).setAll(value != 0);
+		}
+
+		@Override
+		void checkImpl(int value) {
+			if (value != 0 && value != 1) throw new IllegalArgumentException("value not 0 or 1");
 		}
 
 		private boolean checkedValue(Integer value) {
@@ -529,13 +563,13 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		@Override
 		public Integer get(int index) {
 			checkIndex(index);
-			return getInt(index);
+			return getImpl(index);
 		}
 
 		@Override
 		public Integer set(int index, Integer value) {
 			checkIndex(index);
-			return setInt(index, checkedValue(value));
+			return setImpl(index, checkedValue(value));
 		}
 
 		@Override
@@ -546,7 +580,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		@Override
 		public void fill(Integer value) {
-			fillInt(checkedValue(value));
+			fillImpl(checkedValue(value));
 		}
 
 		@Override
@@ -577,7 +611,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			TernaryStore store = new TernaryStore(newSize, nullValue, newData, true);
 			if (newSize > size) {
 				int limit = Math.min(size / 5 * 5 + 5, newSize);
-				for (int i = size; i < limit; i++) store.setInt(i, nullValue);
+				for (int i = size; i < limit; i++) store.setImpl(i, nullValue);
 				if (newLength > data.length) {
 					Arrays.fill(newData, data.length, newLength, fiveCopies(nullValue));
 				}
@@ -589,7 +623,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		int range() { return 3; }
 
 		@Override
-		int getInt(int index) {
+		int getImpl(int index) {
 			int i = index / 5;
 			int j = index % 5;
 			byte p = data[i];
@@ -599,7 +633,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
-		int setInt(int index, int value) {
+		int setImpl(int index, int value) {
 			int i = index / 5;
 			int j = index % 5;
 			byte p = data[i];
@@ -613,15 +647,21 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
-		void fillInt(int value) {
+		void fillImpl(int value) {
 			Arrays.fill(data, fiveCopies(value));
 		}
 
 		@Override
-		void fillInt(int from, int to, int value) {
+		void fillImpl(int from, int to, int value) {
 			for (int i = from; i < to; i++) {
-				setInt(i, value);
+				setImpl(i, value);
 			}
+		}
+
+		@Override
+		void checkImpl(int value) {
+			if (value < 0) throw new IllegalArgumentException("negative value");
+			if (value >= 3) throw new IllegalArgumentException("value too large");
 		}
 
 		private int checkedValue(Integer value) {
@@ -629,8 +669,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 				if (nullValue < 0) StoreType.failNull();
 				return nullValue;
 			}
-			if (value < 0) throw new IllegalArgumentException("negative value");
-			if (value >= 3) throw new IllegalArgumentException("value too large");
+			checkImpl(value);
 			return value;
 		}
 
@@ -663,13 +702,13 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		@Override
 		public Integer get(int index) {
 			checkIndex(index);
-			return getInt(index);
+			return getImpl(index);
 		}
 
 		@Override
 		public Integer set(int index, Integer value) {
 			checkIndex(index);
-			return setInt(index, checkedValue(value));
+			return setImpl(index, checkedValue(value));
 		}
 
 		@Override
@@ -680,7 +719,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		@Override
 		public void fill(Integer value) {
-			fillInt(checkedValue(value));
+			fillImpl(checkedValue(value));
 		}
 
 		@Override
@@ -711,7 +750,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			if (size < newSize) {
 				int limit = Math.min(size / 3 * 3 + 3, newSize);
 				for (int i = size; i < limit; i++) {
-					store.setInt(i, nullValue);
+					store.setImpl(i, nullValue);
 				}
 				int nbs = newBits.size();
 				int obs = bits.size();
@@ -729,7 +768,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		int range() { return 5; }
 
 		@Override
-		int getInt(int index) {
+		int getImpl(int index) {
 			int i = index / 3;
 			int j = index % 3;
 			int p = getBits(i);
@@ -739,7 +778,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
-		int setInt(int index, int value) {
+		int setImpl(int index, int value) {
 			int i = index / 3;
 			int j = index % 3;
 			int p = getBits(i);
@@ -753,7 +792,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
-		void fillInt(int value) {
+		void fillImpl(int value) {
 			if (value == 0) {
 				bits.clear();
 			} else {
@@ -768,10 +807,16 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
-		void fillInt(int from, int to, int value) {
+		void fillImpl(int from, int to, int value) {
 			for (int i = from; i < to; i++) {
-				setInt(i, value);
+				setImpl(i, value);
 			}
+		}
+
+		@Override
+		void checkImpl(int value) {
+			if (value < 0) throw new IllegalArgumentException("negative value");
+			if (value >= 5) throw new IllegalArgumentException("value too large");
 		}
 
 		private int checkedValue(Integer value) {
@@ -779,8 +824,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 				if (nullValue < 0) StoreType.failNull();
 				return nullValue;
 			}
-			if (value < 0) throw new IllegalArgumentException("negative value");
-			if (value >= 5) throw new IllegalArgumentException("value too large");
+			checkImpl(value);
 			return value;
 		}
 
@@ -802,7 +846,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 	}
 
-	private final static class ArbitraryStore extends SmallValueStore {
+	private final static class ArbitraryStore extends SmallValueStore /* implements StoreInts */ {
 
 		private final int range;
 		private final int count;
@@ -827,13 +871,13 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		@Override
 		public Integer get(int index) {
 			checkIndex(index);
-			return getInt(index);
+			return getImpl(index);
 		}
 
 		@Override
 		public Integer set(int index, Integer value) {
 			checkIndex(index);
-			return setInt(index, checkedValue(value));
+			return setImpl(index, checkedValue(value));
 		}
 
 		@Override
@@ -844,7 +888,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		@Override
 		public void fill(Integer value) {
-			fillInt(checkedValue(value));
+			fillImpl(checkedValue(value));
 		}
 
 		@Override
@@ -897,7 +941,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
-		int setInt(int index, int value) {
+		int setImpl(int index, int value) {
 			int position = index * count;
 			int v = (int) bits.getBits(position, count);
 			bits.setBits(position, value, count);
@@ -905,18 +949,24 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 
 		@Override
-		int getInt(int index) {
+		int getImpl(int index) {
 			return (int) bits.getBits(index * count, count);
 		}
 
 		@Override
-		void fillInt(int value) {
+		void fillImpl(int value) {
 			writeFill(bits, value);
 		}
 
 		@Override
-		void fillInt(int from, int to, int value) {
+		void fillImpl(int from, int to, int value) {
 			writeFill(bits.range(from * count, to * count), value);
+		}
+
+		@Override
+		void checkImpl(int value) {
+			if (value < 0) throw new IllegalArgumentException("negative value");
+			if (value >= range) throw new IllegalArgumentException("value too large");
 		}
 
 		private int checkedValue(Integer value) {
@@ -924,8 +974,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 				if (nullValue < 0) StoreType.failNull();
 				return nullValue;
 			}
-			if (value < 0) throw new IllegalArgumentException("negative value");
-			if (value >= range) throw new IllegalArgumentException("value too large");
+			checkImpl(value);
 			return value;
 		}
 
@@ -951,7 +1000,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		@Override default public StoreType<Integer> type() { return StoreType.INT; }
 	}
 
-	static class ZeroOrNullStore extends AbstractStore<Integer> {
+	static class ZeroOrNullStore extends AbstractStore<Integer> implements StoreInts {
 
 		private static final Integer ZERO = 0;
 		private final int size;
@@ -1061,6 +1110,29 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			bits.permute().transpose(i, j);
 		}
 
+		// store ints
+
+		@Override
+		public boolean isInt(int index) {
+			return !isNull(index);
+		}
+
+		@Override
+		public int getInt(int index) {
+			checkIndex(index);
+			if (!bits.getBit(index)) throw new RuntimeException("null, not an int");
+			return 0;
+		}
+
+		@Override
+		public void setInt(int index, int value) {
+			checkIndex(index);
+			if (value != 0) throw new IllegalArgumentException("value not zero");
+			bits.setBit(index, true);
+		}
+
+		// private helper methods
+
 		private void checkIndex(int index) {
 			if (index < 0) throw new IllegalArgumentException("negative index");
 			if (index >= size) throw new IllegalArgumentException("index too large");
@@ -1073,7 +1145,7 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		}
 	}
 
-	private static class NullableStore extends AbstractStore<Integer> {
+	private static class NullableStore extends AbstractStore<Integer> implements StoreInts {
 
 		private final SmallValueStore wrapped;
 
@@ -1094,19 +1166,19 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 		@Override
 		public Integer get(int index) {
 			wrapped.checkIndex(index);
-			return unwrap(wrapped.getInt(index));
+			return unwrap(wrapped.getImpl(index));
 		}
 
 		@Override
 		public boolean isNull(int index) {
 			wrapped.checkIndex(index);
-			return wrapped.getInt(index) == 0;
+			return wrapped.getImpl(index) == 0;
 		}
 
 		@Override
 		public Integer set(int index, Integer value) {
 			wrapped.checkIndex(index);
-			return unwrap( wrapped.setInt(index, wrap(value)) );
+			return unwrap( wrapped.setImpl(index, wrap(value)) );
 		}
 
 		@Override
@@ -1119,12 +1191,12 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 
 		@Override
 		public void clear() {
-			wrapped.fillInt(0);
+			wrapped.fillImpl(0);
 		}
 
 		@Override
 		public void fill(Integer value) {
-			wrapped.fillInt(wrap(value));
+			wrapped.fillImpl(wrap(value));
 		}
 
 		@Override
@@ -1166,11 +1238,37 @@ abstract class SmallValueStore extends AbstractStore<Integer> {
 			wrapped.transpose(i, j);
 		}
 
-		Integer unwrap(int value) {
+		// store ints
+
+		@Override
+		public boolean isInt(int index) {
+			return !isNull(index);
+		}
+
+		@Override
+		public int getInt(int index) {
+			wrapped.checkIndex(index);
+			int value = wrapped.getImpl(index);
+			if (value == 0) throw new RuntimeException("null, not an int");
+			return value - 1;
+		}
+
+		@Override
+		public void setInt(int index, int value) {
+			wrapped.checkIndex(index);
+			if (value < 0) throw new IllegalArgumentException("negative value");
+			if (++value >= wrapped.range()) throw new IllegalArgumentException("value too large");
+			if (!wrapped.isMutable()) throw new IllegalStateException("immutable");
+			wrapped.setImpl(index, value);
+		}
+
+		// private helper methods
+
+		private Integer unwrap(int value) {
 			return value == 0 ? null : value - 1;
 		}
 
-		int wrap(Integer value) {
+		private int wrap(Integer value) {
 			return value == null ? 0 : value.intValue() + 1;
 		}
 	}

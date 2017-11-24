@@ -22,6 +22,14 @@ import java.util.Arrays;
 import java.util.Spliterator;
 import java.util.Spliterators;
 
+import com.tomgibara.storage.StoreAccessors.StoreBytes;
+import com.tomgibara.storage.StoreAccessors.StoreChars;
+import com.tomgibara.storage.StoreAccessors.StoreDoubles;
+import com.tomgibara.storage.StoreAccessors.StoreFloats;
+import com.tomgibara.storage.StoreAccessors.StoreInts;
+import com.tomgibara.storage.StoreAccessors.StoreLongs;
+import com.tomgibara.storage.StoreAccessors.StoreShorts;
+
 abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 	private static void failGrowCopy() {
@@ -159,7 +167,7 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 
 	@Override
 	public void fill(V value) {
-		if (!mutable) throw immutableException();
+		checkMutable();
 		if (value == null) {
 			clear();
 		} else {
@@ -272,9 +280,13 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		if (!nullSettable && size > 0) throw new IllegalArgumentException("no null value with which to populate store");
 	}
 
+	void checkMutable() {
+		if (!mutable) throw immutableException();
+	}
+
 	// inner classes
 
-	final static class ByteStore extends PrimitiveStore<Byte> {
+	final static class ByteStore extends PrimitiveStore<Byte> implements StoreBytes {
 
 		private final byte[] values;
 		private final byte nullValue;
@@ -366,9 +378,17 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			return newType(byte.class, nullSettable, nullValue);
 		}
 
+		// store bytes
+
+		@Override public boolean isByte(int index) { return true; }
+		@Override public byte getByte(int index) { return values[index]; }
+		@Override public void setByte(int index, byte value) {
+			checkMutable();
+			values[index] = value;
+		}
 	}
 
-	final static class FloatStore extends PrimitiveStore<Float> {
+	final static class FloatStore extends PrimitiveStore<Float> implements StoreFloats {
 
 		private final float[] values;
 		private final float nullValue;
@@ -460,9 +480,17 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			return newType(float.class, nullSettable, nullValue);
 		}
 
+		// store floats
+
+		@Override public boolean isFloat(int index) { return true; }
+		@Override public float getFloat(int index) { return values[index]; }
+		@Override public void setFloat(int index, float value) {
+			checkMutable();
+			values[index] = value;
+		}
 	}
 
-	final static class CharacterStore extends PrimitiveStore<Character> {
+	final static class CharacterStore extends PrimitiveStore<Character> implements StoreChars {
 
 		private final char[] values;
 		private final char nullValue;
@@ -554,9 +582,17 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			return newType(char.class, nullSettable, nullValue);
 		}
 
+		// store chars
+
+		@Override public boolean isChar(int index) { return true; }
+		@Override public char getChar(int index) { return values[index]; }
+		@Override public void setChar(int index, char value) {
+			checkMutable();
+			values[index] = value;
+		}
 	}
 
-	final static class ShortStore extends PrimitiveStore<Short> {
+	final static class ShortStore extends PrimitiveStore<Short> implements StoreShorts {
 
 		private final short[] values;
 		private final short nullValue;
@@ -648,9 +684,17 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 			return newType(short.class, nullSettable, nullValue);
 		}
 
+		// store shorts
+
+		@Override public boolean isShort(int index) { return true; }
+		@Override public short getShort(int index) { return values[index]; }
+		@Override public void setShort(int index, short value) {
+			checkMutable();
+			values[index] = value;
+		}
 	}
 
-	final static class LongStore extends PrimitiveStore<Long> {
+	final static class LongStore extends PrimitiveStore<Long> implements StoreLongs {
 
 		private final long[] values;
 		private final long nullValue;
@@ -746,9 +790,18 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		public Spliterator.OfLong spliterator() {
 			return Spliterators.spliterator(values, Spliterator.ORDERED | Spliterator.NONNULL);
 		}
+
+		// store longs
+
+		@Override public boolean isLong(int index) { return true; }
+		@Override public long getLong(int index) { return values[index]; }
+		@Override public void setLong(int index, long value) {
+			checkMutable();
+			values[index] = value;
+		}
 	}
 
-	final static class IntegerStore extends PrimitiveStore<Integer> {
+	final static class IntegerStore extends PrimitiveStore<Integer> implements StoreInts {
 
 		private final int[] values;
 		private final int nullValue;
@@ -844,9 +897,18 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		public Spliterator.OfInt spliterator() {
 			return Spliterators.spliterator(values, Spliterator.ORDERED | Spliterator.NONNULL);
 		}
+
+		// store ints
+
+		@Override public boolean isInt(int index) { return true; }
+		@Override public int getInt(int index) { return values[index]; }
+		@Override public void setInt(int index, int value) {
+			checkMutable();
+			values[index] = value;
+		}
 	}
 
-	final static class DoubleStore extends PrimitiveStore<Double> {
+	final static class DoubleStore extends PrimitiveStore<Double> implements StoreDoubles {
 
 		private final double[] values;
 		private final double nullValue;
@@ -941,6 +1003,15 @@ abstract class PrimitiveStore<V> extends AbstractStore<V> {
 		@Override
 		public Spliterator.OfDouble spliterator() {
 			return Spliterators.spliterator(values, Spliterator.ORDERED | Spliterator.NONNULL);
+		}
+
+		// store doubles
+
+		@Override public boolean isDouble(int index) { return true; }
+		@Override public double getDouble(int index) { return values[index]; }
+		@Override public void setDouble(int index, double value) {
+			checkMutable();
+			values[index] = value;
 		}
 	}
 
