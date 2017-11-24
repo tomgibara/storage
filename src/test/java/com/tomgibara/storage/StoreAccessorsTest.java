@@ -193,4 +193,48 @@ public class StoreAccessorsTest {
 			}
 		}
 	}
+
+	/* Note: this unit test has possibility for flakiness */
+	@Test
+	public void testSpeed() {
+		int size = 100000;
+		Store<Integer> store = StoreType.of(int.class).settingNullDisallowed().storage().newStore(100000, 0);
+		StoreInts ints = StoreAccessors.intsFor(store);
+
+		long timeA = 0L;
+		long timeB = 0L;
+		int tests = 5;
+
+		for (int test = 0; test < tests; test++) {
+			int sumA = 0;
+			int sumB = 0;
+			int reps = 100;
+
+			store.fill(0);
+			long startA = System.currentTimeMillis();
+			for (int i = 0; i < reps; i++) {
+				for (int j = 0; j < size; j++) {
+					sumA += store.get(j);
+					store.set(j, sumA + 1);
+				}
+			}
+			long finishA = System.currentTimeMillis();
+
+			store.fill(0);
+			long startB = System.currentTimeMillis();
+			for (int i = 0; i < reps; i++) {
+				for (int j = 0; j < size; j++) {
+					sumB += ints.getInt(j);
+					ints.setInt(j, sumB + 1);
+				}
+			}
+			long finishB = System.currentTimeMillis();
+
+			assertEquals(sumA, sumB);
+			timeA += finishA - startA;
+			timeB += finishB - startB;
+		}
+
+		assertTrue(timeA > timeB);
+	}
 }
