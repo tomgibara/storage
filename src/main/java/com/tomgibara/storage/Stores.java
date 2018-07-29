@@ -82,6 +82,29 @@ public final class Stores {
 	// public scoped methods
 
 	/**
+	 * Creates a store that wraps an existing array. Changes to the store are
+	 * reflected in the supplied array. Stores over non-primitive arrays permit
+	 * the setting and getting of null values, stores over primitive arrays do
+	 * not.
+	 *
+	 * On some occasions, it can be useful to treat an array as a store,
+	 * irrespective of its type, but in general, the type-specific equivalent
+	 * methods should be preferred to this.
+	 *
+	 * @param values
+	 *            any array
+	 * @return a store over the array
+	 */
+	public static Store<?> values(Object values) {
+		checkValuesNotNull(values);
+		Class<?> valueType = values.getClass().getComponentType();
+		if (valueType == null) throw new IllegalArgumentException("not array");
+		StoreType<?> type = StoreType.of(valueType);
+		if (valueType.isPrimitive()) type = type.settingNullDisallowed();
+		return type.safeArrayAsStore(valueType, values);
+	}
+
+	/**
 	 * Creates a mutable store that wraps an existing array. The returned store
 	 * supports setting and getting null values.
 	 *

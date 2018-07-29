@@ -552,11 +552,7 @@ public final class StoreType<V> {
 		Class<?> clss = array.getClass().getComponentType();
 		if (clss == null) throw new IllegalArgumentException("not an array");
 		if (clss != valueType) throw new IllegalArgumentException("array component type does not equal " + valueType.getName());
-		if (clss.isPrimitive()) {
-			return nullGettable ? NullPrimitiveStore.newStore((Class<V>)clss, array) : PrimitiveStore.newStore(this, array);
-		} else {
-			return nullGettable ? new NullArrayStore<>((V[]) array) : new ArrayStore<>((V[]) array, this);
-		}
+		return safeArrayAsStore(clss, array);
 	}
 
 	/**
@@ -672,6 +668,14 @@ public final class StoreType<V> {
 		W newNullValue = nullValue == null ? null : fn.apply(nullValue);
 		if (newValueType == valueType && newNullValue == nullValue) return (StoreType<W>) this;
 		return new StoreType<>(newValueType, nullSettable, nullGettable, newNullValue);
+	}
+
+	Store<V> safeArrayAsStore(Class<?> clss, Object array) {
+		if (clss.isPrimitive()) {
+			return nullGettable ? NullPrimitiveStore.newStore((Class<V>)clss, array) : PrimitiveStore.newStore(this, array);
+		} else {
+			return nullGettable ? new NullArrayStore<>((V[]) array) : new ArrayStore<>((V[]) array, this);
+		}
 	}
 
 	// private helper methods

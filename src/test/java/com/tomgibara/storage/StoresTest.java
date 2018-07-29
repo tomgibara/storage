@@ -18,6 +18,7 @@ package com.tomgibara.storage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -84,5 +85,29 @@ public class StoresTest {
 		assertEquals(1, d.size());
 		assertEquals("Hello", d.get(0));
 		assertFalse(d.isNull(0));
+	}
+
+	@Test
+	public void testValues() {
+		{
+			String[] objs = {"A", null, "C"};
+			Store<?> store = Stores.values(objs);
+			assertEquals(String.class, store.type().valueType());
+			assertEquals(2, store.count());
+			assertEquals("A", store.get(0));
+			assertNull(store.get(1));
+			store.set(0, null);
+			assertNull(store.get(0));
+			assertEquals(1, store.count());
+		}
+
+		{
+			int[] ints = {1,2,3};
+			Store<?> store = Stores.values(ints);
+			assertEquals(int.class, store.type().valueType());
+			assertEquals(3, store.count());
+			assertFalse(store.type().nullGettable());
+			assertFalse(store.type().nullSettable());
+		}
 	}
 }
